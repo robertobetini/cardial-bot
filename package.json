@@ -1,0 +1,17 @@
+{
+  "name": "progression-discord-bot",
+  "version": "1.0.0",
+  "description": "Bot do discord que faz controle de experiência e economia de usuários.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "author": "Roberto Betini Junior",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.3.1",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.6.5"
+  }
+}

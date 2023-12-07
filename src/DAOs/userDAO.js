@@ -1,28 +1,11 @@
-const mysql = require('mysql2/promise');
+const MySQLDAO = require("./mySQLDAO");
 const User = require("../models/user");
 
-class UserDAO {
-    connection = null;
-
-    async getConnection() {
-        if (this.connection) {
-            return this.connection;
-        }
-
-        this.connection = await mysql.createConnection({
-            host     : 'localhost',
-            user     : 'root',
-            password : '123456',
-            database : 'DISCORD_USERS_DB'
-        });
-
-        return this.connection;
-    }
-
+class UserDAO extends MySQLDAO {
     async getAll(guildId, orderby) {
         const conn = await this.getConnection();
-        const query = "SELECT * FROM USERS WHERE guildId = ? ORDER BY ? DESC LIMIT 50";
-        const res = await conn.execute(query, [ guildId, orderby ]);
+        const query = "SELECT * FROM USERS WHERE guildId = " + guildId + " ORDER BY " + orderby + " DESC";
+        const res = await conn.execute(query);
 
         const users = [];
         for (let userDTO of res[0]) {

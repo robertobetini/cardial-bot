@@ -1,6 +1,6 @@
 const Discord = require("discord.js");
-const userDAO = require("./../../DAOs/userDAO");
-const User = require("../../models/user");
+const AdmService = require("./../../services/admService");
+const EconomyService = require("../../services/economyService");
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -18,23 +18,16 @@ module.exports = {
                 .setMinValue(1)
                 .setRequired(true)),
     async execute(interaction) {
-        const target = interaction.options.getUser("user");
-		const amount = interaction.options.getInteger("quantidade");
-
-        let user = await userDAO.get(target.id, interaction.guild.id);
-
-        if (!user) {
-            user = new User(
-                target.id,
-                interaction.guild.id,
-                target.username
-            );
-        }
-
         try {
-            user.tryUpdateGold(-amount);
-    
-            await userDAO.upsert(user);
+            if (!await AdmService.isMemberAdm(interaction.guild, interaction.member)) {
+                interaction.reply("Você não possui cargo de ADM para executar o comando.");
+            }
+
+            const target = interaction.options.getUser("user");
+            const amount = interaction.options.getInteger("quantidade");
+
+            await EconomyService.addGold(interaction.guild.id, target, -amount);
+
             await interaction.reply(`$${amount} removido de ${Discord.userMention(target.id)}.`);
         } catch(err) {
             await interaction.reply(err.message);

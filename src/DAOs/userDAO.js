@@ -67,6 +67,12 @@ class UserDAO extends MySQLDAO {
             conn.rollback()
         }
     }
+
+    async clearGoldFromAll() {
+        const conn = await this.getConnection();
+        const query = "UPDATE USERS SET gold = 0";
+        const _res =  await conn.execute(query);
+    }
 }
 
 module.exports = new UserDAO();

@@ -42,6 +42,10 @@ class EconomyService {
 
         await userDAO.batchUpsert([ party, counterparty ]);
     }
+
+    static async clearGoldFromAllUsers(guildId) {
+        await userDAO.clearGoldFromAll();
+    }
 }
 
 module.exports = EconomyService;

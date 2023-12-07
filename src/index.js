@@ -10,6 +10,10 @@ commandLoader.deployAllCommands()
     .then()
     .catch(err => console.log(err));
 
+client.on("ready", () => {
+	console.log("Bot is ready.");
+});
+
 client.on(Discord.Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) {
         return;

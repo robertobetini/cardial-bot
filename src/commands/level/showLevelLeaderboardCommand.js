@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const AdmService = require("./../../services/admService");
+const RoleService = require("./../../services/roleService");
 const StatusService = require("./../../services/statusService");
 
 module.exports = {
@@ -8,7 +8,7 @@ module.exports = {
         .setDescription("Mostra o placar atual de níveis dos usuários"),
     async execute(interaction) {
         try {
-            if (!await AdmService.isMemberAdm(interaction.guild, interaction.member)) {
+            if (!await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
                 interaction.reply("Você não possui cargo de ADM para executar o comando.");
                 return;
             };

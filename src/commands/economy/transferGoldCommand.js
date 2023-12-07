@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const AdmService = require("./../../services/admService");
+const RoleService = require("./../../services/roleService");
 const EconomyService = require("../../services/economyService");
 
 module.exports = {

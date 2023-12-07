@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
-const AdmService = require("./../../services/admService");
+const RoleService = require("./../../services/roleService");
 const ProgressionService = require("./../../services/progressionService");
+const StatusService = require("./../../services/statusService");
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -19,7 +20,7 @@ module.exports = {
                 .setRequired(true)),
     async execute(interaction) {
         try {
-            if (!await AdmService.isMemberAdm(interaction.guild, interaction.member)) {
+            if (!await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
                 interaction.reply("Você não possui cargo de ADM para executar o comando.");
                 return;
             };
@@ -29,7 +30,10 @@ module.exports = {
 
             await ProgressionService.addExp(interaction.guild.id, target, amount);
 
-            await interaction.reply(`${amount} EXP concedido a ${Discord.userMention(target.id)}.`);
+            var message = `${amount} EXP concedido a ${Discord.userMention(target.id)}.\n` +
+                await StatusService.getUserStatus(interaction.guild.id, target);
+
+            await interaction.reply(message);
         } catch(err) {
             await interaction.reply(err.message);
         }

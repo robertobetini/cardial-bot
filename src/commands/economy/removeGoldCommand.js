@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const AdmService = require("./../../services/admService");
+const RoleService = require("./../../services/roleService");
 const EconomyService = require("../../services/economyService");
 
 module.exports = {
@@ -19,7 +19,7 @@ module.exports = {
                 .setRequired(true)),
     async execute(interaction) {
         try {
-            if (!await AdmService.isMemberAdm(interaction.guild, interaction.member)) {
+            if (!await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
                 interaction.reply("Você não possui cargo de ADM para executar o comando.");
             }
 

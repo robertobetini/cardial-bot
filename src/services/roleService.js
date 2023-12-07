@@ -1,13 +1,12 @@
-const admRoleDAO = require("./../DAOs/admRoleDAO");
+const roleDAO = require("../DAOs/roleDAO");
 
-class AdmService {
+class RoleService {
     static async isMemberAdm(guild, discordMember) {
-        console.log(discordMember);
         if (guild.ownerId === discordMember.user.id) {
             return true;
         }
 
-        const admRole = await admRoleDAO.get(guild.id);
+        const admRole = await roleDAO.get(guild.id, Role.ADM_TYPE);
 
         if (!admRole) {
             throw new Error("O cargo de ADM ainda não foi definido, o dono do servidor deve defini-lo através do comando `/cargoadm`.");
@@ -19,6 +18,10 @@ class AdmService {
 
         return false;
     }
+
+    static async upsert(admRole) {
+        await roleDAO.upsert(admRole);
+    }
 }
 
-module.exports = AdmService;
+module.exports = RoleService;

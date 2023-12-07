@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const AdmService = require("./../../services/admService");
+const RoleService = require("./../../services/roleService");
 const StatusService = require("../../services/statusService");
 
 module.exports = {
@@ -14,7 +14,7 @@ module.exports = {
     async execute(interaction) {
         const target = interaction.options.getUser("user");
 
-        if (target.id !== interaction.user.id && !await AdmService.isMemberAdm(interaction.guild, interaction.member)) {
+        if (target.id !== interaction.user.id && !await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
             await interaction.reply("É necessário cargo de ADM para consultar o status de outros usuários.");
         }
 

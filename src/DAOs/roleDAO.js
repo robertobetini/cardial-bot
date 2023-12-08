@@ -2,6 +2,24 @@ const MySQLDAO = require("./mySQLDAO");
 const Role = require("../models/role");
 
 class RoleDAO extends MySQLDAO {
+    async getAll() {
+        const conn = await this.getConnection();
+        const query = "SELECT * FROM ROLES";
+        const res = await conn.execute(query);
+
+        if (res[0].length === 0) {
+            return null;
+        }
+
+        const roles = [];
+        for (let item of res[0]) {
+            const role = Role.fromDTO(item);
+            roles.push(role);
+        }
+
+        return roles; 
+    }
+
     async get(guildId, type) {
         const conn = await this.getConnection();
         const query = "SELECT * FROM ROLES WHERE guildId = ? AND `type` = ?";

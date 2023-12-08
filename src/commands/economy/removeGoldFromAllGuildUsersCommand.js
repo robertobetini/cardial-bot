@@ -4,12 +4,12 @@ const EconomyService = require("../../services/economyService");
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
-        .setName("limpargold")
+        .setName("retirargoldtodos")
         .setDescription("Remove todo o GOLD de todos os usuários"),
     async execute(interaction) {
         try {
             if (!await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
-                interaction.reply("Você não possui cargo de ADM para executar o comando.");
+                await interaction.reply("Você não possui cargo de ADM para executar o comando.");
             }
 
             await EconomyService.clearGoldFromAllUsers(interaction.guild.id);

@@ -9,7 +9,7 @@ module.exports = {
     async execute(interaction) {
         try {
             if (!await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
-                interaction.reply("Você não possui cargo de ADM para executar o comando.");
+                await interaction.reply("Você não possui cargo de ADM para executar o comando.");
                 return;
             };
             

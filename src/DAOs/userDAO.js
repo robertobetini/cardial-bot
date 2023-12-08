@@ -2,7 +2,20 @@ const MySQLDAO = require("./mySQLDAO");
 const User = require("../models/user");
 
 class UserDAO extends MySQLDAO {
-    async getAll(guildId, orderby) {
+    async getAllSilent() {
+        const conn = await this.getConnection();
+        const query = "SELECT * FROM USERS WHERE silenceEndTime > 0";
+        const res = await conn.execute(query);
+
+        const users = [];
+        for (let userDTO of res[0]) {
+            users.push(User.fromDTO(userDTO));
+        }
+
+        return users;
+    }
+
+    async getAllFromGuild(guildId, orderby) {
         const conn = await this.getConnection();
         const query = "SELECT * FROM USERS WHERE guildId = " + guildId + " ORDER BY " + orderby + " DESC";
         const res = await conn.execute(query);
@@ -29,14 +42,14 @@ class UserDAO extends MySQLDAO {
 
     async insert(user) {
         const conn = await this.getConnection();
-        const query = "INSERT INTO USERS (userId, guildId, username, gold, totalExp) VALUES (?, ?, ?, ?, ?)";
-        const _res =  await conn.execute(query, [ user.userId, user.guildId, user.username, user.gold, user.totalExp, ]);
+        const query = "INSERT INTO USERS (userId, guildId, username, gold, totalExp, silenceEndTime) VALUES (?, ?, ?, ?, ?, ?)";
+        const _res =  await conn.execute(query, [ user.userId, user.guildId, user.username, user.gold, user.totalExp, user.silenceEndTime ]);
     }
 
     async update(user) {
         const conn = await this.getConnection();
-        const query = "UPDATE USERS SET gold = ?, totalExp = ? WHERE userId = ? and guildId = ?";
-        const res =  await conn.execute(query, [ user.gold, user.totalExp, user.userId, user.guildId ]);
+        const query = "UPDATE USERS SET gold = ?, totalExp = ?, silenceEndTime = ? WHERE userId = ? and guildId = ?";
+        const res =  await conn.execute(query, [ user.gold, user.totalExp, user.silenceEndTime, user.userId, user.guildId ]);
 
         return res[0].affectedRows > 0;
     }

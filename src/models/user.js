@@ -3,12 +3,13 @@ const expCalculator = require("../expCalculator");
 class User {
     static maxLvl = 20;
 
-    constructor(userId, guildId, name, gold = 0, exp = 0) {
+    constructor(userId, guildId, name, gold = 0, exp = 0, silenceEndTime = null) {
         this.userId = userId;
         this.guildId = guildId;
         this.username = name;
         this.gold = gold;
         this.totalExp = exp;
+        this.silenceEndTime = silenceEndTime;
 
         this.updateExpAndLevel();
     }
@@ -48,7 +49,8 @@ class User {
             userDTO.guildId,
             userDTO.username,
             userDTO.gold,
-            userDTO.totalExp);
+            userDTO.totalExp,
+            userDTO.silenceEndTime);
     }
 }
 

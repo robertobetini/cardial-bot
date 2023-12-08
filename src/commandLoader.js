@@ -34,7 +34,7 @@ module.exports = {
             console.log(`Started refreshing ${commands.length} application (/) commands.`);
     
             const data = await rest.put(
-                Discord.Routes.applicationCommands(process.env.APPLICATION_ID, process.env.GUILD_ID),
+                Discord.Routes.applicationCommands(process.env.APPLICATION_ID),
                 { body: commands },
             );
     

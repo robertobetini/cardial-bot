@@ -47,7 +47,7 @@ class User {
         return new User(
             userDTO.userId, 
             userDTO.guildId,
-            userDTO.username,
+            userDTO.user,
             userDTO.gold,
             userDTO.totalExp,
             userDTO.silenceEndTime);

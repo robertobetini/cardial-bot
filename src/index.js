@@ -37,9 +37,9 @@ client.on(Discord.Events.InteractionCreate, async interaction => {
 	} catch (error) {
 		console.error(error);
 		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+			await interaction.followUp("There was an error while executing this command!");
 		} else {
-			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+			await interaction.reply("There was an error while executing this command!");
 		}
 	}
 });

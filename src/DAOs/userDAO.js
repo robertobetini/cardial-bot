@@ -42,7 +42,7 @@ class UserDAO extends MySQLDAO {
 
     async insert(user) {
         const conn = await this.getConnection();
-        const query = "INSERT INTO USERS (userId, guildId, username, gold, totalExp, silenceEndTime) VALUES (?, ?, ?, ?, ?, ?)";
+        const query = "INSERT INTO USERS (userId, guildId, user, gold, totalExp, silenceEndTime) VALUES (?, ?, ?, ?, ?, ?)";
         const _res =  await conn.execute(query, [ user.userId, user.guildId, user.username, user.gold, user.totalExp, user.silenceEndTime ]);
     }
 

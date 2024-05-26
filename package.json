@@ -4,7 +4,8 @@
   "description": "Bot de controle de fichas, rolagem de dados, etc. para o sistema de RPG Aincrad.",
   "main": "src/index.js",
   "scripts": {
-    "start": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
   },
   "author": "Roberto Betini Junior",
   "license": "ISC",

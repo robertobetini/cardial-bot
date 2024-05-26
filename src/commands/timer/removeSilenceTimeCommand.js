@@ -32,7 +32,7 @@ module.exports = {
     async execute(interaction) {
         try {
             if (!await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
-                interaction.reply("Você não possui cargo de ADM para executar o comando.");
+                interaction.editReply("Você não possui cargo de ADM para executar o comando.");
                 return;
             };
             
@@ -42,7 +42,7 @@ module.exports = {
             const minutes = interaction.options.getInteger("minutos");
 
             if (days < 1 && hours < 1 && minutes < 1) {
-                await interaction.reply("Insira um período de tempo válido.");
+                await interaction.editReply("Insira um período de tempo válido.");
                 return;
             }
 
@@ -51,9 +51,9 @@ module.exports = {
             var message = `Tempo de silenciamento atualizado para ${Discord.userMention(target.id)}.\n` +
                 await StatusService.getUserStatus(interaction.guild.id, target);
 
-            await interaction.reply(message);
+            await interaction.editReply(message);
         } catch(err) {
-            await interaction.reply(err.message);
+            await interaction.editReply(err.message);
         }
     }
 }

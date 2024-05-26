@@ -16,14 +16,14 @@ module.exports = {
             const role = interaction.options.getRole("cargo");
     
             if (interaction.user.id !== interaction.guild.ownerId) {
-                await interaction.reply("Apenas usuários com o cargo de ADM podem alterar o cargo de SILENT.");
+                await interaction.editReply("Apenas usuários com o cargo de ADM podem alterar o cargo de SILENT.");
             }
             
             const silentRole = new Role(interaction.guild.id, role.id, Role.SILENT_TYPE);
             await RoleService.upsert(silentRole);
-            await interaction.reply("Cargo de SILENT alterado com sucesso.");
+            await interaction.editReply("Cargo de SILENT alterado com sucesso.");
         } catch(err) {
-            await interaction.reply(err.message);
+            await interaction.editReply(err.message);
         }
     }
 }

@@ -9,14 +9,14 @@ module.exports = {
     async execute(interaction) {
         try {
             if (!await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
-                await interaction.reply("Você não possui cargo de ADM para executar o comando.");
+                await interaction.editReply("Você não possui cargo de ADM para executar o comando.");
             }
 
             await EconomyService.clearGoldFromAllUsers(interaction.guild.id);
 
-            await interaction.reply(`Todo o GOLD foi removido dos usuários.`);
+            await interaction.editReply(`Todo o GOLD foi removido dos usuários.`);
         } catch(err) {
-            await interaction.reply(err.message);
+            await interaction.editReply(err.message);
         }
     }
 }

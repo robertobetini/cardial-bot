@@ -9,10 +9,10 @@ class MySQLDAO {
         }
 
         this.connection = await mysql.createConnection({
-            host     : 'us-02.bed.ovh',
-            user     : 'u3962_LoIOMfrNtf',
-            password : '!QR.p+TiJjr6lVoBRK0faMai',
-            database : 's3962_DISCORD_USERS_DB'
+            host     : process.env.DB_HOST,
+            user     : process.env.DB_USER,
+            password : process.env.DB_PASSWORD,
+            database : process.env.DB_NAME
         });
 
         return this.connection;

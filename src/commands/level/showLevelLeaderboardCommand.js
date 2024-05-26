@@ -9,15 +9,15 @@ module.exports = {
     async execute(interaction) {
         try {
             if (!await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
-                await interaction.reply("Você não possui cargo de ADM para executar o comando.");
+                await interaction.editReply("Você não possui cargo de ADM para executar o comando.");
                 return;
             };
             
             const leaderboard = await StatusService.getExpLeaderboard(interaction.guild.id, "totalExp");
     
-            await interaction.reply(leaderboard);
+            await interaction.editReply(leaderboard);
         } catch(err) {
-            await interaction.reply(err.message);
+            await interaction.editReply(err.message);
         }
     }
 }

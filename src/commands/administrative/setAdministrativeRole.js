@@ -16,14 +16,14 @@ module.exports = {
             const role = interaction.options.getRole("cargo");
     
             if (interaction.user.id !== interaction.guild.ownerId) {
-                await interaction.reply("Apenas o dono do servidor pode alterar o cargo de ADM.");
+                await interaction.editReply("Apenas o dono do servidor pode alterar o cargo de ADM.");
             }
             
             const admRole = new Role(interaction.guild.id, role.id, Role.ADM_TYPE);
             await RoleService.upsert(admRole);
-            await interaction.reply("Cargo de ADM alterado com sucesso.");
+            await interaction.editReply("Cargo de ADM alterado com sucesso.");
         } catch(err) {
-            await interaction.reply(err.message);
+            await interaction.editReply(err.message);
         }
     }
 }

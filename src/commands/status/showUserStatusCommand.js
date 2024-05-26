@@ -15,11 +15,11 @@ module.exports = {
         const target = interaction.options.getUser("user");
 
         if (target.id !== interaction.user.id && !await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
-            await interaction.reply("É necessário cargo de ADM para consultar o status de outros usuários.");
+            await interaction.editReply("É necessário cargo de ADM para consultar o status de outros usuários.");
         }
 
         const status = await StatusService.getUserStatus(interaction.guild.id, target);
 
-        await interaction.reply(status);
+        await interaction.editReply(status);
     }
 }

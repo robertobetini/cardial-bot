@@ -25,6 +25,8 @@ client.on(Discord.Events.InteractionCreate, async interaction => {
         return;
     }
 
+	await interaction.reply(".");
+
     const command = interaction.client.commands.get(interaction.commandName);
 
 	if (!command) {
@@ -39,7 +41,7 @@ client.on(Discord.Events.InteractionCreate, async interaction => {
 		if (interaction.replied || interaction.deferred) {
 			await interaction.followUp("There was an error while executing this command!");
 		} else {
-			await interaction.reply("There was an error while executing this command!");
+			await interaction.editReply("There was an error while executing this command!");
 		}
 	}
 });

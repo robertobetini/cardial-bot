@@ -24,9 +24,9 @@ module.exports = {
 
             await EconomyService.transferGold(interaction.guild.id, interaction.user, target, amount);
 
-            await interaction.reply(`$${amount} transferido de ${Discord.userMention(interaction.user.id)} para ${Discord.userMention(target.id)}.`);
+            await interaction.editReply(`$${amount} transferido de ${Discord.userMention(interaction.user.id)} para ${Discord.userMention(target.id)}.`);
         } catch(err) {
-            await interaction.reply(err.message);
+            await interaction.editReply(err.message);
         }
     }
 }

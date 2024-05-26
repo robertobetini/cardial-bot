@@ -20,7 +20,7 @@ module.exports = {
     async execute(interaction) {
         try {
             if (!await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
-                interaction.reply("Você não possui cargo de ADM para executar o comando.");
+                interaction.editReply("Você não possui cargo de ADM para executar o comando.");
             }
 
             const target = interaction.options.getUser("user");
@@ -28,9 +28,9 @@ module.exports = {
 
             await EconomyService.addGold(interaction.guild.id, target, amount);
 
-            await interaction.reply(`$${amount} concedido a ${Discord.userMention(target.id)}.`);
+            await interaction.editReply(`$${amount} concedido a ${Discord.userMention(target.id)}.`);
         } catch(err) {
-            await interaction.reply(err.message);
+            await interaction.editReply(err.message);
         }
     }
 }

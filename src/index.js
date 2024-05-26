@@ -25,14 +25,15 @@ client.on(Discord.Events.InteractionCreate, async interaction => {
         return;
     }
 
-	await interaction.reply(".");
-
     const command = interaction.client.commands.get(interaction.commandName);
-
+	
 	if (!command) {
 		console.error(`No command matching ${interaction.commandName} was found.`);
 		return;
 	}
+
+	// reply at command acknowledgement and later edit to avoid losing interaction
+	await interaction.reply(".");
 
 	try {
 		await command.execute(interaction);

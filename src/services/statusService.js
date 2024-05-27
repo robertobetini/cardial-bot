@@ -8,10 +8,11 @@ const User = require("../models/user");
 const Role = require("../models/role");
 
 const COLUMN_SIZE = 20;
+const PAGE_SIZE = 20;
 
 class StatusService {
-    static async getExpLeaderboard(guildId) {
-        const users =  await userDAO.getAllFromGuild(guildId, "totalExp");
+    static async getExpLeaderboard(guildId, page) {
+        const users =  await userDAO.getAllFromGuild(guildId, "totalExp", page * PAGE_SIZE, PAGE_SIZE);
 
         let leaderboard = this.createTable(
             [ "User", "Level", "EXP" ], 
@@ -20,8 +21,8 @@ class StatusService {
         return leaderboard;
     }
 
-    static async getGoldLeaderboard(guildId) {
-        const users = await userDAO.getAllFromGuild(guildId, "gold");
+    static async getGoldLeaderboard(guildId, page) {
+        const users = await userDAO.getAllFromGuild(guildId, "gold", page * PAGE_SIZE, PAGE_SIZE);
 
         let leaderboard = this.createTable(
             [ "User", "GOLD" ], 

@@ -1,7 +1,10 @@
 const Discord = require("discord.js");
 
-const commandLoader =  require("./commandLoader");
+const commandLoader = require("./commandLoader");
 const StatusService = require("./services/statusService");
+
+const commandHandler = require("./interactions/commandInteractionHandler");
+const buttonHandler = require("./interactions/buttonInteractionHandler");
 
 require('dotenv').config();
 
@@ -21,30 +24,12 @@ client.on("ready", () => {
 });
 
 client.on(Discord.Events.InteractionCreate, async interaction => {
-	if (!interaction.isChatInputCommand()) {
-        return;
+	if (interaction.isButton()) {
+		await buttonHandler.handleAsync(interaction);
+	}
+	if (interaction.isChatInputCommand()) {
+		await commandHandler.handleAsync(interaction);
     }
-
-    const command = interaction.client.commands.get(interaction.commandName);
-	
-	if (!command) {
-		console.error(`No command matching ${interaction.commandName} was found.`);
-		return;
-	}
-
-	// reply at command acknowledgement and later edit to avoid losing interaction
-	await interaction.reply(".");
-
-	try {
-		await command.execute(interaction);
-	} catch (error) {
-		console.error(error);
-		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp("There was an error while executing this command!");
-		} else {
-			await interaction.editReply("There was an error while executing this command!");
-		}
-	}
 });
 
 client.login(process.env.TOKEN);

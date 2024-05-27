@@ -15,9 +15,12 @@ class UserDAO extends MySQLDAO {
         return users;
     }
 
-    async getAllFromGuild(guildId, orderby) {
+    async getAllFromGuild(guildId, orderby, skip, limit) {
         const conn = await this.getConnection();
-        const query = "SELECT * FROM USERS WHERE guildId = " + guildId + " ORDER BY " + orderby + " DESC";
+        const query = "SELECT * FROM USERS WHERE guildId = " + guildId 
+            + " ORDER BY " + orderby + " DESC"
+            + " LIMIT " + limit.toString()
+            + " OFFSET " + skip.toString();
         const res = await conn.execute(query);
 
         const users = [];

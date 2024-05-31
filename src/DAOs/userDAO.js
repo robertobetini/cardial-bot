@@ -1,4 +1,7 @@
 const MySQLDAO = require("./mySQLDAO");
+const statsDAO = require("./statsDAO");
+const attributesDAO = require("./attributesDAO");
+const skillsDAO = require("./skillsDAO");
 const User = require("../models/user");
 
 class UserDAO extends MySQLDAO {
@@ -15,10 +18,17 @@ class UserDAO extends MySQLDAO {
         return users;
     }
 
-    async getAllFromGuild(guildId, orderby, skip, limit) {
+    async getAllFromGuild(guildId, orderby, skip, limit, fullUser = true) {
         const conn = await this.getConnection();
-        const query = "SELECT * FROM USERS WHERE guildId = " + guildId 
-            + " ORDER BY " + orderby + " DESC"
+        const query = "SELECT * FROM USERS AS u WHERE guildId = " + guildId;
+
+        if (fullUser) {
+            query += " LEFT JOIN STATS as st ON u.userId = st.userId AND u.guildId = st.guildId"
+            + " LEFT JOIN ATTRIBUTES as a ON u.userId = a.userId AND u.guildId = a.guildId"
+            + " LEFT JOIN SKILLS as sk ON u.userId = sk.userId AND u.guildId = sk.guildId";
+        }
+
+        query += " ORDER BY u." + orderby + " DESC"
             + " LIMIT " + limit.toString()
             + " OFFSET " + skip.toString();
         const res = await conn.execute(query);
@@ -31,9 +41,14 @@ class UserDAO extends MySQLDAO {
         return users;
     }
 
-    async get(userId, guildId) {
+    async get(userId, guildId, fullUser = true) {
         const conn = await this.getConnection();
-        const query = "SELECT * FROM USERS WHERE userId = ? and guildId = ?";
+        const query = "SELECT * FROM USERS as u WHERE userId = ? AND guildId = ?";
+        if (fullUser) {
+            query += " LEFT JOIN STATS as st ON u.userId = st.userId AND u.guildId = st.guildId"
+            + " LEFT JOIN ATTRIBUTES as a ON u.userId = a.userId AND u.guildId = a.guildId"
+            + " LEFT JOIN SKILLS as sk ON u.userId = sk.userId AND u.guildId = sk.guildId";
+        }
         const res = await conn.execute(query, [userId, guildId]);
 
         if (res[0].length === 0) {
@@ -43,39 +58,47 @@ class UserDAO extends MySQLDAO {
         return User.fromDTO(res[0][0]);
     }
 
-    async insert(user) {
+    async insert(user, deepInsert = false) {
         const conn = await this.getConnection();
-        const query = "INSERT INTO USERS (userId, guildId, user, gold, totalExp, silenceEndTime) VALUES (?, ?, ?, ?, ?, ?)";
-        const _res =  await conn.execute(query, [ user.userId, user.guildId, user.username, user.gold, user.totalExp, user.silenceEndTime ]);
+        const query = "INSERT INTO USERS (userId, guildId, user, silenceEndTime, playerName, job) VALUES (?, ?, ?, ?, ?, ?)";
+        const _res =  await conn.execute(query, [ user.userId, user.guildId, user.username, user.silenceEndTime, user.playerName, user.job ]);
+
+        if (deepInsert) {
+            await statsDAO.insert(user.userId, user.guildId, user.stats);
+            await attributesDAO.insert(user.userId, user.guildId, user.attributes);
+            await skillsDAO.insert(user.userId, user.guildId, user.skills);
+        }
     }
 
-    async update(user) {
+    async update(user, deepUpdate = false) {
         const conn = await this.getConnection();
-        const query = "UPDATE USERS SET gold = ?, totalExp = ?, silenceEndTime = ? WHERE userId = ? and guildId = ?";
-        const res =  await conn.execute(query, [ user.gold, user.totalExp, user.silenceEndTime, user.userId, user.guildId ]);
+        const query = "UPDATE USERS SET silenceEndTime = ?, playerName = ?, job = ? WHERE userId = ? and guildId = ?";
+        const res =  await conn.execute(query, [ user.silenceEndTime, user.playerName, user.job, user.userId, user.guildId ]);
+
+        if (deepUpdate) {
+            await statsDAO.update(user.userId, user.guildId, user.stats);
+            await attributesDAO.update(user.userId, user.guildId, user.attributes);
+            await skillsDAO.update(user.userId, user.guildId, user.skills);
+        }
 
         return res[0].affectedRows > 0;
     }
 
-    async upsert(user) {
-        const updated = await this.update(user);
+    async upsert(user, deepUpsert = false) {
+        const updated = await this.update(user, deepUpsert);
 
         if (!updated) {
-            await this.insert(user);
+            await this.insert(user, deepUpsert);
         }
     }
 
-    async batchUpsert(users) {
+    async batchUpsert(users, deepUpsert = false) {
         const conn = await this.getConnection();
         await conn.beginTransaction();
 
         try {
             for (let user of users) {
-                const updated = await this.update(user);
-        
-                if (!updated) {
-                    await this.insert(user);
-                }
+                this.upsert(user, deepUpsert);
             }
 
             conn.commit();
@@ -84,10 +107,10 @@ class UserDAO extends MySQLDAO {
         }
     }
 
-    async clearGoldFromAll() {
+    async clearGoldFromAll(guildId) {
         const conn = await this.getConnection();
-        const query = "UPDATE USERS SET gold = 0";
-        const _res =  await conn.execute(query);
+        const query = "UPDATE USERS SET gold = 0 WHERE guildId = ?";
+        const _res =  await conn.execute(query, [guildId]);
     }
 }
 

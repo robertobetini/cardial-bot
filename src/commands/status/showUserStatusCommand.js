@@ -4,8 +4,8 @@ const StatusService = require("../../services/statusService");
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
-        .setName("status")
-        .setDescription("Mostra o nível do usuário selecionado")
+        .setName("ficha")
+        .setDescription("Mostra informações de status, atributos, perícias, etc do usuário selecionado")
         .addUserOption(option =>
 			option
 				.setName("user")

@@ -8,7 +8,7 @@ const User = require("../models/user");
 const Role = require("../models/role");
 
 const COLUMN_SIZE = 20;
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 2;
 
 class StatusService {
     static async getExpLeaderboard(guildId, page) {
@@ -16,7 +16,7 @@ class StatusService {
 
         let leaderboard = this.createTable(
             [ "User", "Level", "EXP" ], 
-            users.map(user => [ user.username, user.lvl.toString(), user.exp.toString() ]));
+            users.map(user => [ user.username, user.stats?.lvl.toString(), user.stats?.exp.toString() ]));
 
         return leaderboard;
     }
@@ -26,7 +26,7 @@ class StatusService {
 
         let leaderboard = this.createTable(
             [ "User", "GOLD" ], 
-            users.map(user => [ user.username, `$${user.gold}` ]));
+            users.map(user => [ user.username, `$${user.stats?.gold}` ]));
 
         return leaderboard;
     }
@@ -44,7 +44,7 @@ class StatusService {
             await userDAO.upsert(user);
         }
         
-        const maxLvlExp = expCalculator.getLevelExp(user.lvl)
+        const maxLvlExp = expCalculator.getLevelExp(user.stats.lvl)
         const progression = Math.floor(user.exp / maxLvlExp * expBarSize);
 
         let expBar = "";
@@ -54,15 +54,14 @@ class StatusService {
 
         let silenceTimespan = "-";
         if (user.silenceEndTime) {
-            const silenceTime = user.silenceEndTime - new Date().getTime();
             silenceTimespan = moment(user.silenceEndTime).toNow(true);
         }
 
         return "```r\n" +
         `User:    ${user.username}\n` +
-        `Level:   ${user.lvl}\n` +
-        `EXP:     ${user.exp}/${maxLvlExp} [${expBar}]\n` +
-        `Banco:   $${user.gold}\n\n` +
+        `Level:   ${user.stats?.lvl}\n` +
+        `EXP:     ${user.stats?.exp}/${maxLvlExp} [${expBar}]\n` +
+        `Banco:   $${user.stats?.gold}\n\n` +
         `Ocupado: ${silenceTimespan}` + 
         "```";
     }

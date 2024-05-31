@@ -62,7 +62,6 @@ module.exports = {
     },
     nextPage: async (interaction, guildId, memberId) => {
         const messageId = interaction.message.id;
-        console.log(pages, messageId);
         
         const currentPage = pages[messageId] || 0;
         const newPage = currentPage + 1;

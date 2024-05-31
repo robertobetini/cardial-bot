@@ -1,4 +1,5 @@
 const userDAO = require("./../DAOs/userDAO");
+const statsDAO = require("./../DAOs/statsDAO");
 const User = require("../models/user");
 
 class EconomyService {
@@ -44,7 +45,7 @@ class EconomyService {
     }
 
     static async clearGoldFromAllUsers(guildId) {
-        await userDAO.clearGoldFromAll();
+        await statsDAO.clearGoldFromAll(guildId);
     }
 }
 

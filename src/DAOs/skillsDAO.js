@@ -1,10 +1,10 @@
 const MySQLDAO = require("./mySQLDAO");
 
 class SkillsDAO extends MySQLDAO {
-    async insert(userId, guildId, skills) {
-        const conn = await this.getConnection();
-        const query = "INSERT INTO ATTRIBUTES (userId, guildId, athletics, acrobatics, jugglery, stealth, animalTraining, intuition, investigation, nature, perception, suvivability, deception, intimidation, performance, persuasion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        
+    async insert(userId, guildId, skills, transactionConn = null) {
+        const conn = transactionConn || await this.getConnection();
+        const query = "INSERT INTO SKILLS (userId, guildId, athletics, acrobatics, jugglery, stealth, animalTraining, intuition, investigation, nature, perception, suvivability, deception, intimidation, performance, persuasion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
         const _res = await conn.execute(query, [
             userId, guildId, 
             skills.athletics, 
@@ -24,8 +24,8 @@ class SkillsDAO extends MySQLDAO {
         ]);
     }
 
-    async update(userId, guildId, skills) {
-        const conn = await this.getConnection();
+    async update(userId, guildId, skills, transactionConn = null) {
+        const conn = transactionConn || await this.getConnection();
         const query = "UPDATE SKILLS SET athletics = ?, acrobatics = ?, jugglery = ?, stealth = ?, animalTraining = ?, intuition = ?, investigation = ?, nature = ?, perception = ?, suvivability = ?, deception = ?, intimidation = ?, performance = ?, persuasion = ?"
             + " WHERE userId = ? AND guildId = ?";
 
@@ -48,6 +48,14 @@ class SkillsDAO extends MySQLDAO {
         ]);
 
         return res[0].affectedRows > 0;
+    }
+
+    async upsert(userId, guildId, skills, transactionConn = null) {
+        const updated = await this.update(userId, guildId, skills, transactionConn);
+
+        if (!updated) {
+            await this.insert(userId, guildId, skills, transactionConn);
+        }
     }
 
     async updateSingleSkill(userId, guildId, skill, value) {

@@ -1,5 +1,7 @@
 const MySQLDAO = require("./mySQLDAO");
 
+const Stats = require("../models/stats");
+
 class StatsDAO extends MySQLDAO {
     async clearGoldFromAll(guildId) {
         const conn = await this.getConnection();
@@ -7,9 +9,21 @@ class StatsDAO extends MySQLDAO {
         const _res =  await conn.execute(query, [guildId]);
     }
 
-    async insert(userId, guildId, stats) {
+    async get(userId, guildId) {
         const conn = await this.getConnection();
-        const query = "INSERT INTO STATS (userId, guildId, totalExp, gold, currentHP, maxHP, tempHP, currentFP, maxFP, tempFP, currentSP, maxSP, tempSP, baseDEF) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        const query = "SELECT * FROM STATS WHERE userId = ? AND guildId = ?";
+        const res = await conn.execute(query, [userId, guildId]);
+
+        if (res[0].length === 0) {
+            return null;
+        }
+
+        return Stats.fromDTO(res[0][0]);
+    }
+
+    async insert(userId, guildId, stats, transactionConn = null) {
+        const conn = transactionConn || await this.getConnection();
+        const query = "INSERT INTO STATS (userId, guildId, totalExp, gold, currentHP, maxHP, tempHP, currentFP, maxFP, tempFP, currentSP, maxSP, tempSP, baseDEF) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         const _res = await conn.execute(query, [
             userId, guildId, 
@@ -21,8 +35,8 @@ class StatsDAO extends MySQLDAO {
         ]);
     }
 
-    async update(userId, guildId, stats) {
-        const conn = await this.getConnection();
+    async update(userId, guildId, stats, transactionConn = null) {
+        const conn = transactionConn || await this.getConnection();
         const query = "UPDATE STATS SET totalExp = ?, gold = ?," 
             + " currentHP = ?, maxHP = ?, tempHP = ?," 
             + " currentFP = ?, maxFP = ?, tempFP = ?," 
@@ -40,6 +54,14 @@ class StatsDAO extends MySQLDAO {
         ]);
 
         return res[0].affectedRows > 0;
+    }
+
+    async upsert(userId, guildId, stats, transactionConn = null) {
+        const updated = await this.update(userId, guildId, stats, transactionConn);
+
+        if (!updated) {
+            await this.insert(userId, guildId, stats, transactionConn);
+        }
     }
 }
 

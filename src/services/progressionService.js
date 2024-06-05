@@ -15,7 +15,7 @@ class ProgressionService {
 
         user.addExp(expAmount);
 
-        await userDAO.upsert(user);
+        await userDAO.upsert(user, true);
     }
 }
 

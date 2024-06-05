@@ -5,6 +5,7 @@ const StatusService = require("./services/statusService");
 
 const commandHandler = require("./interactions/commandInteractionHandler");
 const buttonHandler = require("./interactions/buttonInteractionHandler");
+const modalHandler = require("./interactions/modalInteractionHandler");
 
 require('dotenv').config();
 
@@ -25,9 +26,15 @@ client.on("ready", () => {
 
 client.on(Discord.Events.InteractionCreate, async interaction => {
 	if (interaction.isButton()) {
+		console.log(`Processing button interaction (${interaction.customId})`);
 		await buttonHandler.handleAsync(interaction);
 	}
+	if (interaction.isModalSubmit()) {
+		console.log(`Processing modal submit interaction (${interaction.customId})`);
+		await modalHandler.handleAsync(interaction);
+	}
 	if (interaction.isChatInputCommand()) {
+		console.log(`Processing chat interaction (${interaction.commandName})`);
 		await commandHandler.handleAsync(interaction);
     }
 });

@@ -31,9 +31,9 @@ class StatusService {
         return leaderboard;
     }
 
-    static async getUserStatus(guildId, discordUser, expBarSize = 16) {
-        let user = await userDAO.get(discordUser.id, guildId);
-
+    static async getUserStatus(guildId, discordUser, statusBarSize = 16) {
+        let user = await userDAO.get(discordUser.id, guildId, true);
+        
         if (!user) {
             user = new User(
                 discordUser.id,
@@ -41,16 +41,15 @@ class StatusService {
                 discordUser.username
             );
 
-            await userDAO.upsert(user);
+            await userDAO.upsert(user, true);
         }
         
-        const maxLvlExp = expCalculator.getLevelExp(user.stats.lvl)
-        const progression = Math.floor(user.exp / maxLvlExp * expBarSize);
-
-        let expBar = "";
-        for (let i = 1; i <= expBarSize; i++) {
-            expBar += progression >= i ? "/" : "-";
-        }
+        const maxLvlExp = expCalculator.getLevelExp(user.stats.lvl);
+        console.log(user.stats);
+        const expBar = StatusService.createStatusBar("EXP", user.stats.exp, maxLvlExp, 0, statusBarSize);
+        const hpBar = StatusService.createStatusBar("HP", user.stats.currentHP, user.stats.maxHP, user.stats.tempHP, statusBarSize);
+        const fpBar = StatusService.createStatusBar("FP", user.stats.currentFP, user.stats.maxFP, user.stats.tempFP, statusBarSize);
+        const spBar = StatusService.createStatusBar("SP", user.stats.currentSP, user.stats.maxSP, user.stats.tempSP, statusBarSize);
 
         let silenceTimespan = "-";
         if (user.silenceEndTime) {
@@ -58,11 +57,27 @@ class StatusService {
         }
 
         return "```r\n" +
-        `User:    ${user.username}\n` +
-        `Level:   ${user.stats?.lvl}\n` +
-        `EXP:     ${user.stats?.exp}/${maxLvlExp} [${expBar}]\n` +
-        `Banco:   $${user.stats?.gold}\n\n` +
-        `Ocupado: ${silenceTimespan}` + 
+        `User: ${user.username}\n\n` +
+
+        `┌|  STATUS   |──►\n` +
+        `| ${expBar}\n` +
+        `| ${hpBar}\n` +
+        `| ${fpBar}\n` +
+        `| ${spBar}\n` +
+        `| \n` +
+        `| Personagem: ${user.playerName}\n` +
+        `| Profissão:  ${user.job}\n` +
+        `| Level:      ${user.stats?.lvl}\n` +
+        `| Gold:       $ ${user.stats?.gold}\n\n` +
+
+        `┌| ATRIBUTOS |──►\n` +
+        `| FOR:        ${user.attributes.FOR}\n` +
+        `| DEX:        ${user.attributes.DEX}\n` +
+        `| CON:        ${user.attributes.CON}\n` +
+        `| WIS:        ${user.attributes.WIS}\n` +
+        `| CHA:        ${user.attributes.CHA}\n\n` +
+
+        `Ocupado:      ${silenceTimespan}` + 
         "```";
     }
 
@@ -133,6 +148,20 @@ class StatusService {
         }
 
         return whiteSpaces;
+    }
+
+    static createStatusBar(statusName, currentValue, maxValue, tempValue, barSize) {
+        const progression = Math.floor((currentValue + tempValue) / (maxValue + tempValue) * barSize);
+
+        let bar = "[";
+        for (let i = 1; i <= barSize; i++) {
+            bar += progression >= i ? "▬" : " ";
+        }
+        bar += `] ${currentValue + tempValue} / ${maxValue + tempValue} `;
+        bar += tempValue > 0 ? `(+${tempValue}) ` : "";
+        bar += statusName;
+
+        return bar;
     }
 }
 

@@ -32,12 +32,18 @@ module.exports = {
         try {
             const rest = new Discord.REST().setToken(process.env.TOKEN);
             console.log(`Started refreshing ${commands.length} application (/) commands.`);
-    
+            
+            const applicationId = process.env.APPLICATION_ID;
+            const debugGuildId = process.env.DEBUG_GUILD_ID;
+            const commandDeployRoute = process.env.DEBUG 
+                ? Discord.Routes.applicationGuildCommands(applicationId, debugGuildId) 
+                : Discord.Routes.applicationCommands(applicationId);
+
             const data = await rest.put(
-                Discord.Routes.applicationCommands(process.env.APPLICATION_ID),
+                commandDeployRoute,
                 { body: commands },
             );
-    
+
             console.log(`Successfully reloaded ${data.length} application (/) commands.`);
         } catch (error) {
             console.error(error);

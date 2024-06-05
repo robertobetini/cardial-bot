@@ -3,7 +3,7 @@ class Skills {
         this.userId = userId;
         this.guildId = guildId;
 
-        this.athletism = "NoProficiency";
+        this.athletics = "NoProficiency";
         this.acrobatics = "NoProficiency";
         this.jugglery = "NoProficiency";
         this.stealth = "NoProficiency";
@@ -13,11 +13,32 @@ class Skills {
         this.nature = "NoProficiency";
         this.perception = "NoProficiency";
         this.suvivability = "NoProficiency";
-        this.deceiving = "NoProficiency";
+        this.deception = "NoProficiency";
         this.intimidation = "NoProficiency";
         this.performance = "NoProficiency";
         this.persuasion = "NoProficiency";
     }
+
+    static fromDTO(fullUserDTO) {
+        const skills = new Skills(fullUserDTO.userId, fullUserDTO.guildId);
+
+        skills.athletics = fullUserDTO.athletics;
+        skills.acrobatics = fullUserDTO.acrobatics;
+        skills.jugglery = fullUserDTO.jugglery;
+        skills.stealth = fullUserDTO.stealth;
+        skills.animalTraining = fullUserDTO.animalTraining;
+        skills.intuition = fullUserDTO.intuition;
+        skills.investigation = fullUserDTO.investigation;
+        skills.nature = fullUserDTO.nature;
+        skills.perception = fullUserDTO.perception;
+        skills.suvivability = fullUserDTO.suvivability;
+        skills.deception = fullUserDTO.deception;
+        skills.intimidation = fullUserDTO.intimidation;
+        skills.performance = fullUserDTO.performance;
+        skills.persuasion = fullUserDTO.persuasion;
+
+        return skills;
+    }
 }
 
-module.exports = Skills
+module.exports = Skills;

@@ -5,7 +5,7 @@ const User = require("../models/user");
 class EconomyService {
     static async addGold(guildId, targetUser, goldAmount) {
         let user = await userDAO.get(targetUser.id, guildId);
-
+        
         if (!user) {
             user = new User(
                 targetUser.id,
@@ -16,7 +16,7 @@ class EconomyService {
 
         user.tryUpdateGold(goldAmount);
 
-        await userDAO.upsert(user);
+        await userDAO.upsert(user, true);
     }
 
     static async transferGold(guildId, partyUser, counterpartyUser, goldAmount) {
@@ -41,7 +41,7 @@ class EconomyService {
         party.tryUpdateGold(-goldAmount);
         counterparty.tryUpdateGold(goldAmount);
 
-        await userDAO.batchUpsert([ party, counterparty ]);
+        await userDAO.batchUpsert([ party, counterparty ], true);
     }
 
     static async clearGoldFromAllUsers(guildId) {

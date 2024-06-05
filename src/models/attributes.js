@@ -8,6 +8,18 @@ class Attributes {
         this.WIS = wis;
         this.CHA = cha;
     }
+
+    static fromDTO(fullUserDTO) {
+        return new Attributes(
+            fullUserDTO.userId,
+            fullUserDTO.guildId,
+            fullUserDTO.FOR,
+            fullUserDTO.DEX,
+            fullUserDTO.CON,
+            fullUserDTO.WIS,
+            fullUserDTO.CHA
+        );
+    }
 }
 
 module.exports = Attributes;

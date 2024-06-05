@@ -4,7 +4,7 @@ const Stats = require("./stats");
 const Skills = require("./skills");
 
 class User {
-    constructor(userId, guildId, name, silenceEndTime = null, playerName = null, job = null, attributes = null, stats = null, skills = null) {
+    constructor(userId, guildId, name, silenceEndTime = null, playerName = "", job = "", attributes = null, stats = null, skills = null) {
         this.userId = userId;
         this.guildId = guildId;
         this.username = name;
@@ -17,8 +17,13 @@ class User {
         this.skills = skills || new Skills(userId, guildId);
     }
 
-    addExp = (exp) => this.stats?.addExp(exp);
-    tryUpdateGold = (amount) => this.stats?.tryUpdateGold(amount);
+    addExp(exp) { 
+        this.stats?.addExp(exp); 
+    }
+
+    tryUpdateGold(amount) {
+        this.stats?.tryUpdateGold(amount);
+    } 
 
     static fromDTO(userDTO) {
         return new User(
@@ -28,9 +33,9 @@ class User {
             userDTO.silenceEndTime,
             userDTO.playerName,
             userDTO.job,
-            userDTO.attributes,
-            userDTO.stats,
-            userDTO.skills
+            Attributes.fromDTO(userDTO),
+            Stats.fromDTO(userDTO),
+            Skills.fromDTO(userDTO)
         );
     }
 }

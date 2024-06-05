@@ -12,19 +12,19 @@ class Stats {
         this.gold = gold;
         this.lvl = 0;
 
-        this.currentHP = null;
-        this.maxHP = null;
-        this.tempHP = null;
+        this.currentHP = 0;
+        this.maxHP = 1;
+        this.tempHP = 0;
 
-        this.currentFP = null;
-        this.maxFP = null;
-        this.tempFP = null;
+        this.currentFP = 0;
+        this.maxFP = 1;
+        this.tempFP = 0;
 
-        this.currentSP = null;
-        this.maxSP = null;
-        this.tempSP = null;
+        this.currentSP = 0;
+        this.maxSP = 1;
+        this.tempSP = 0;
 
-        this.baseDEF = null;
+        this.baseDEF = 0;
 
         this.updateExpAndLevel();
     }
@@ -56,6 +56,31 @@ class Stats {
         }
 
         this.gold = newAmount;
+    }
+
+    static fromDTO(fullUserDTO) {
+        const stats = new Stats(
+            fullUserDTO.userId,
+            fullUserDTO.guildId,
+            fullUserDTO.totalExp,
+            fullUserDTO.gold
+        );
+
+        stats.currentHP = fullUserDTO.currentHP;
+        stats.maxHP = fullUserDTO.maxHP;
+        stats.tempHP = fullUserDTO.tempHP;
+
+        stats.currentFP = fullUserDTO.currentFP;
+        stats.maxFP = fullUserDTO.maxFP;
+        stats.tempFP = fullUserDTO.tempFP;
+
+        stats.currentSP = fullUserDTO.currentSP;
+        stats.maxSP = fullUserDTO.maxSP;
+        stats.tempSP = fullUserDTO.tempSP;
+
+        stats.baseDEF = fullUserDTO.baseDEF;
+
+        return stats;
     }
 }
 

@@ -6,6 +6,7 @@ const EmbededResponseService = require("./services/embededResponseService");
 const commandHandler = require("./interactions/commandInteractionHandler");
 const buttonHandler = require("./interactions/buttonInteractionHandler");
 const modalHandler = require("./interactions/modalInteractionHandler");
+const stringSelectMenuHandler = require("./interactions/stringSelectMenuHandler");
 
 require('dotenv').config();
 
@@ -32,6 +33,10 @@ client.on(Discord.Events.InteractionCreate, async interaction => {
 	if (interaction.isModalSubmit()) {
 		console.log(`Processing modal submit interaction (${interaction.customId})`);
 		await modalHandler.handleAsync(interaction);
+	}
+	if (interaction.isStringSelectMenu()) {
+		console.log(`Processing string select menu interaction (${interaction.customId})`);
+		await stringSelectMenuHandler.handleAsync(interaction);
 	}
 	if (interaction.isChatInputCommand()) {
 		console.log(`Processing chat interaction (${interaction.commandName})`);

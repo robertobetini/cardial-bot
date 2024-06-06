@@ -8,11 +8,10 @@ module.exports = {
     handleAsync: async (interaction) => {
         const customId = interaction.customId;
 
-        const buttonInfo = customId.split(":");
-
-        const [ guildId, memberId, command, actionHandler ] = buttonInfo;
+        const info = customId.split(":");
+        const [ guildId, memberId, command, actionHandler, customArg ] = info;
 
         console.log(`Processing button handler: ${command}.${actionHandler}`);
-        await commands[command][actionHandler](interaction, guildId, memberId);
+        await commands[command][actionHandler](interaction, guildId, memberId, customArg);
     }
 }

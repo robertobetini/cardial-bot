@@ -9,6 +9,10 @@ class StatsService {
     static async get(userId, guildId) {
         return await statsDAO.get(userId, guildId);
     }
+
+    static async updateSingleStat(userId, guildId, stat, newValue) {
+        return await statsDAO.updateSingleStat(userId, guildId, stat, newValue);
+    }
 }
 
 module.exports = StatsService;

@@ -8,41 +8,94 @@ const AttributesService = require("../../services/attributesService");
 const StatsService = require("../../services/statsService");
 
 const Attributes = require("../../models/attributes");
+const SkillsService = require("../../services/skillService");
+
+const Constants = require("../../constants");
 
 const buildHomeActionRow = (guildId, memberId) => {
     const statusButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:showUserStatusCommand:showStatsRow`)
         .setLabel("Status")
-        .setStyle(Discord.ButtonStyle.Secondary);
+        .setStyle(Discord.ButtonStyle.Primary);
 
     const attributesButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:showUserStatusCommand:showAttributesModal`)
         .setLabel("Atributos")
-        .setStyle(Discord.ButtonStyle.Secondary);
+        .setStyle(Discord.ButtonStyle.Primary);
 
     const skillsButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:showUserStatusCommand:showSkillsRow`)
         .setLabel("Perícias")
-        .setStyle(Discord.ButtonStyle.Secondary);
+        .setStyle(Discord.ButtonStyle.Primary);
 
     const characterButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:showUserStatusCommand:showCharacterModal`)
         .setLabel("Personagem")
-        .setStyle(Discord.ButtonStyle.Secondary);
+        .setStyle(Discord.ButtonStyle.Primary);
 
     return new Discord.ActionRowBuilder().addComponents(statusButton, attributesButton, skillsButton, characterButton);
 }
 
-const buildStatsActionRow = (guildId, userId, stats) => {
+const buildStatsActionRows = (guildId, userId, selected) => {
+    const statsSelect = new Discord.StringSelectMenuBuilder()
+        .setCustomId(`${guildId}:${userId}:showUserStatusCommand:selectStat`)
+        .setPlaceholder("Selecione um status")
+        .setOptions(createSelectOptions(Constants.stats, selected));
+
     const gotoHomeButton = createGotoHomeButton(guildId, userId);
 
-    return new Discord.ActionRowBuilder().addComponents(gotoHomeButton);
+    return [
+        new Discord.ActionRowBuilder().addComponents(statsSelect),
+        new Discord.ActionRowBuilder().addComponents(gotoHomeButton)
+    ];
 }
 
-const buildSkillsActionRow = (guildId, userId, skills) => {
+const buildSelectedStatActionRows = (guildId, userId, selected) => {
+    let actionRows = buildStatsActionRows(guildId, userId, selected);
+
+    const updateButton = new Discord.ButtonBuilder()
+        .setCustomId(`${guildId}:${userId}:showUserStatusCommand:showUpdateStatModal:${selected}`)
+        .setLabel("Atualizar")
+        .setStyle(Discord.ButtonStyle.Success);
+
+    actionRows[1] = actionRows[1].addComponents(updateButton);
+
+    return actionRows;
+}
+
+const buildSkillsActionRow = async (guildId, userId, selected) => {
+    const skillsSelect = new Discord.StringSelectMenuBuilder()
+        .setCustomId(`${guildId}:${userId}:showUserStatusCommand:selectSkill`)
+        .setPlaceholder("Selecione uma perícia")
+        .setOptions(createSelectOptions(Constants.skills, selected));
+
+    const skills = await SkillsService.get(userId, guildId);
+
+    const skillValuesSelect = new Discord.StringSelectMenuBuilder()
+        .setCustomId(`${guildId}:${userId}:showUserStatusCommand:updateSkillLevel`)
+        .setPlaceholder("Selecione um nível de proficiência")
+        .setOptions(createSelectOptions(Constants.possibleSkillValues, skills[selected]));
+
     const gotoHomeButton = createGotoHomeButton(guildId, userId);
 
-    return new Discord.ActionRowBuilder().addComponents(gotoHomeButton);
+    return [
+        new Discord.ActionRowBuilder().addComponents(skillsSelect),
+        new Discord.ActionRowBuilder().addComponents(skillValuesSelect),
+        new Discord.ActionRowBuilder().addComponents(gotoHomeButton)
+    ];
+}
+
+const buildSelectedSkillActionRows = async (guildId, userId, selected) => {
+    let actionRows = await buildSkillsActionRow(guildId, userId, selected);
+
+    const updateButton = new Discord.ButtonBuilder()
+        .setCustomId(`${guildId}:${userId}:showUserStatusCommand:updateSkill:${selected}`)
+        .setLabel("Atualizar")
+        .setStyle(Discord.ButtonStyle.Success);
+
+    actionRows[2] = actionRows[2].addComponents(updateButton);
+
+    return actionRows;
 }
 
 const createAttributeInput = (attribute, defaultValue) => {
@@ -70,6 +123,23 @@ const createTextInput = (customId, label, style, required = false, defaultValue 
     input = maxLength    ? input.setMaxLength(maxLength)     : input;
     
     return input;
+}
+
+const createSelectOptions = (optionList, selected) => {
+    const options = [];
+    for (let item of optionList) {
+        let option = new Discord.StringSelectMenuOptionBuilder()
+            .setLabel(item.label)
+            .setValue(item.value);
+        
+        if (item.value == selected) {
+            option.setDefault(true);
+        }
+
+        options.push(option);
+    }
+
+    return options;
 }
 
 const createGotoHomeButton = (guildId, userId) => {
@@ -181,7 +251,7 @@ module.exports = {
                 Discord.TextInputStyle.Short, 
                 required = true,
                 defaultValue = user.playerName,
-                placeholder = "Ex: Geralt of Rivia, Andrezitos, x-ae-12",
+                placeholder = "Ex: Geralt of Rivia, Andrezitos, x-ae-a-12",
                 minLength = 1,
                 maxLength = 32
             ),
@@ -244,22 +314,126 @@ module.exports = {
             return;
         }
 
-        const stats = await StatsService.get(memberId, guildId);
-
-        const actionRow = buildStatsActionRow(guildId, memberId, stats);
-        interaction.message.edit({ components: [actionRow] });
+        const actionRows = buildStatsActionRows(guildId, memberId);
+        interaction.message.edit({ components: actionRows });
 
         await interaction.deferUpdate();
     },
-
     showSkillsRow: async (interaction, guildId, memberId) => {
         if (interaction.user.id != memberId) {
             await interaction.deferUpdate();
             return;
         }
 
-        const actionRow = buildSkillsActionRow(guildId, memberId);
-        interaction.message.edit({ components: [actionRow] });
+        const actionRows = await buildSkillsActionRow(guildId, memberId);
+        interaction.message.edit({ components: actionRows });
+
+        await interaction.deferUpdate();
+    },
+    selectStat: async (interaction, guildId, memberId) => {
+        if (interaction.user.id != memberId) {
+            await interaction.deferUpdate();
+            return;
+        }
+
+        const selectedStat = interaction.values[0];
+        const actionRows = buildSelectedStatActionRows(guildId, memberId, selectedStat);
+        
+        interaction.message.edit({ components: actionRows });
+
+        await interaction.deferUpdate();
+    },
+    showUpdateStatModal: async (interaction, guildId, memberId, selectedStat) => {
+        if (interaction.user.id != memberId) {
+            await interaction.deferUpdate();
+            return;
+        }
+
+        const stats = await StatsService.get(memberId, guildId);
+        
+        const modal = new Discord.ModalBuilder()
+			.setCustomId(`${guildId}:${memberId}:showUserStatusCommand:updateStats:${selectedStat}`)
+			.setTitle("Atualização de status");
+
+        const input = createTextInput(
+            "newValue", 
+            "Novo Valor", 
+            Discord.TextInputStyle.Short, 
+            required = true,
+            defaultValue = stats[selectedStat].toString(),
+            placeholder = "Min: 0, Max: 999",
+            minLength = 1,
+            maxLength = 3
+        );
+        const actionRow = new Discord.ActionRowBuilder().addComponents(input);
+
+        modal.addComponents(actionRow);
+
+        await interaction.showModal(modal);
+    },
+    updateStats: async (interaction, guildId, memberId, selectedStat) => {
+        const newValue = Number(interaction.fields.getTextInputValue("newValue"));
+        
+        if (isNaN(newValue) || newValue < 0) {
+            await interaction.deferUpdate();
+            return;
+        }
+
+        await StatsService.updateSingleStat(memberId, guildId, selectedStat, newValue);
+
+        const embed = await EmbededResponseService.getUserStatus(guildId, interaction.user);
+        interaction.message.edit({ embeds: [embed] });
+
+        await interaction.deferUpdate();
+    },
+    selectSkill: async (interaction, guildId, memberId) => {
+        if (interaction.user.id != memberId) {
+            await interaction.deferUpdate();
+            return;
+        }
+
+        console.log(interaction.values);
+        const selectedSkill = interaction.values[0];
+        const actionRows = await buildSelectedSkillActionRows(guildId, memberId, selectedSkill);
+
+        interaction.message.edit({ components: actionRows });
+
+        await interaction.deferUpdate();
+    },
+    updateSkill: async (interaction, guildId, memberId, selectedSkill) => {
+        if (interaction.user.id != memberId) {
+            await interaction.deferUpdate();
+            return;
+        }
+
+        const skillValueOptions = interaction.message.components[1].components[0].data.options;
+        const newSkillLevel = skillValueOptions.find(opt => opt.default).value;
+        console.log(selectedSkill, newSkillLevel);
+        console.log(skillValueOptions);
+
+        await SkillsService.updateSingleSkill(memberId, guildId, selectedSkill, newSkillLevel);
+
+        await interaction.deferUpdate();
+    },
+    updateSkillLevel: async (interaction, guildId, memberId, selectedSkill) => {
+        if (interaction.user.id != memberId) {
+            await interaction.deferUpdate();
+            return;
+        }
+
+        const skillLevel = interaction.values[0];
+
+        const defaultOption = interaction.message.components[1].components[0].data.options.find(opt => opt.default);
+        if (defaultOption) {
+            defaultOption.default = false;
+        }
+
+        const selectedOption = interaction.message.components[1].components[0].data.options.find(opt => opt.value == skillLevel);
+        if (selectedOption) {
+            selectedOption.default = true;
+        }
+        
+        interaction.message.edit({ components: interaction.message.components });
 
         await interaction.deferUpdate();
     },

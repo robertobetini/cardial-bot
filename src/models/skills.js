@@ -12,7 +12,7 @@ class Skills {
         this.investigation = "NoProficiency";
         this.nature = "NoProficiency";
         this.perception = "NoProficiency";
-        this.suvivability = "NoProficiency";
+        this.survivability = "NoProficiency";
         this.deception = "NoProficiency";
         this.intimidation = "NoProficiency";
         this.performance = "NoProficiency";
@@ -31,7 +31,7 @@ class Skills {
         skills.investigation = fullUserDTO.investigation;
         skills.nature = fullUserDTO.nature;
         skills.perception = fullUserDTO.perception;
-        skills.suvivability = fullUserDTO.suvivability;
+        skills.survivability = fullUserDTO.survivability;
         skills.deception = fullUserDTO.deception;
         skills.intimidation = fullUserDTO.intimidation;
         skills.performance = fullUserDTO.performance;

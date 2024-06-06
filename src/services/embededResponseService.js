@@ -9,7 +9,7 @@ const User = require("../models/user");
 const Role = require("../models/role");
 
 const COLUMN_SIZE = 20;
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 20;
 
 class EmbededResponseService {
     static async getExpLeaderboard(guildId, page) {
@@ -56,17 +56,6 @@ class EmbededResponseService {
         const fpView = EmbededResponseService.createStatusSummarizedView(user.stats.currentFP, user.stats.maxFP, user.stats.tempFP);
         const spView = EmbededResponseService.createStatusSummarizedView(user.stats.currentSP, user.stats.maxSP, user.stats.tempSP);
         const expView = EmbededResponseService.createStatusSummarizedView(user.stats.exp, maxLvlExp, 0);
-
-        // { 
-        //     name: "> Status <",
-        //     inline: true,
-        //     value: 
-        //         `**🔴 HP:** ${hpView}ㅤㅤㅤㅤㅤ|   **⭐️ Nível:** 2 (${expView}\n` +
-        //         `**🔵 FP:** ${fpView}ㅤㅤㅤㅤㅤㅤ| **⚔️ R.Arma:** TODO\n` +
-        //         `**🟣 SP:** ${spView}ㅤㅤㅤㅤㅤㅤ| **💼 R.Profissão:** TODO\n` +
-        //         `**🛡️ DEF:** ${user.stats.baseDEF}ㅤ   ㅤㅤㅤㅤ|  **💰 Gold:** ${user.stats.gold}\n` +
-        //         `**🎯 B.Proficiencia:** TODOㅤ| **Buff/Debuff:** TODO\n`   
-        // },
 
         const embedFields = [
             { 

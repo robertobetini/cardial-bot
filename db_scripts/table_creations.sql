@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS SKILLS (
     investigation VARCHAR(64),
     nature VARCHAR(64),
     perception VARCHAR(64),
-    suvivability VARCHAR(64),
+    survivability VARCHAR(64),
     deception VARCHAR(64),
     intimidation VARCHAR(64),
     performance VARCHAR(64),

@@ -89,8 +89,8 @@ class UserDAO extends MySQLDAO {
         await conn.beginTransaction();
 
         try {
-            const query = "UPDATE USERS SET silenceEndTime = ?, playerName = ?, job = ? WHERE userId = ? and guildId = ?";
-            const res =  await conn.execute(query, [ user.silenceEndTime, user.playerName, user.job, user.userId, user.guildId ]);
+            const query = "UPDATE USERS SET silenceEndTime = ?, playerName = ?, job = ?, notes = ? WHERE userId = ? and guildId = ?";
+            const res =  await conn.execute(query, [ user.silenceEndTime, user.playerName, user.job, user.notes, user.userId, user.guildId ]);
     
             if (deepUpdate) {
                 await statsDAO.update(user.userId, user.guildId, user.stats, conn);

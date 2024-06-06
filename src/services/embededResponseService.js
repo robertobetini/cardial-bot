@@ -1,16 +1,17 @@
 const Discord = require("discord.js");
 const moment = require("moment");
 
-const userDAO = require("./../DAOs/userDAO");
+const userDAO = require("../DAOs/userDAO");
 const expCalculator = require("../expCalculator");
 const RoleService = require("./roleService");
+
 const User = require("../models/user");
 const Role = require("../models/role");
 
 const COLUMN_SIZE = 20;
 const PAGE_SIZE = 2;
 
-class StatusService {
+class EmbededResponseService {
     static async getExpLeaderboard(guildId, page) {
         const users =  await userDAO.getAllFromGuild(guildId, "totalExp", page * PAGE_SIZE, PAGE_SIZE);
 
@@ -31,7 +32,7 @@ class StatusService {
         return leaderboard;
     }
 
-    static async getUserStatus(guildId, discordUser, statusBarSize = 16) {
+    static async getUserStatus(guildId, discordUser) {
         let user = await userDAO.get(discordUser.id, guildId, true);
         
         if (!user) {
@@ -45,40 +46,69 @@ class StatusService {
         }
         
         const maxLvlExp = expCalculator.getLevelExp(user.stats.lvl);
-        console.log(user.stats);
-        const expBar = StatusService.createStatusBar("EXP", user.stats.exp, maxLvlExp, 0, statusBarSize);
-        const hpBar = StatusService.createStatusBar("HP", user.stats.currentHP, user.stats.maxHP, user.stats.tempHP, statusBarSize);
-        const fpBar = StatusService.createStatusBar("FP", user.stats.currentFP, user.stats.maxFP, user.stats.tempFP, statusBarSize);
-        const spBar = StatusService.createStatusBar("SP", user.stats.currentSP, user.stats.maxSP, user.stats.tempSP, statusBarSize);
 
         let silenceTimespan = "-";
         if (user.silenceEndTime) {
             silenceTimespan = moment(user.silenceEndTime).toNow(true);
         }
 
-        return "```r\n" +
-        `User: ${user.username}\n\n` +
+        const hpView = EmbededResponseService.createStatusSummarizedView(user.stats.currentHP, user.stats.maxHP, user.stats.tempHP);
+        const fpView = EmbededResponseService.createStatusSummarizedView(user.stats.currentFP, user.stats.maxFP, user.stats.tempFP);
+        const spView = EmbededResponseService.createStatusSummarizedView(user.stats.currentSP, user.stats.maxSP, user.stats.tempSP);
+        const expView = EmbededResponseService.createStatusSummarizedView(user.stats.exp, maxLvlExp, 0);
 
-        `┌|  STATUS   |──►\n` +
-        `| ${expBar}\n` +
-        `| ${hpBar}\n` +
-        `| ${fpBar}\n` +
-        `| ${spBar}\n` +
-        `| \n` +
-        `| Personagem: ${user.playerName}\n` +
-        `| Profissão:  ${user.job}\n` +
-        `| Level:      ${user.stats?.lvl}\n` +
-        `| Gold:       $ ${user.stats?.gold}\n\n` +
+        // { 
+        //     name: "> Status <",
+        //     inline: true,
+        //     value: 
+        //         `**🔴 HP:** ${hpView}ㅤㅤㅤㅤㅤ|   **⭐️ Nível:** 2 (${expView}\n` +
+        //         `**🔵 FP:** ${fpView}ㅤㅤㅤㅤㅤㅤ| **⚔️ R.Arma:** TODO\n` +
+        //         `**🟣 SP:** ${spView}ㅤㅤㅤㅤㅤㅤ| **💼 R.Profissão:** TODO\n` +
+        //         `**🛡️ DEF:** ${user.stats.baseDEF}ㅤ   ㅤㅤㅤㅤ|  **💰 Gold:** ${user.stats.gold}\n` +
+        //         `**🎯 B.Proficiencia:** TODOㅤ| **Buff/Debuff:** TODO\n`   
+        // },
 
-        `┌| ATRIBUTOS |──►\n` +
-        `| FOR:        ${user.attributes.FOR}\n` +
-        `| DEX:        ${user.attributes.DEX}\n` +
-        `| CON:        ${user.attributes.CON}\n` +
-        `| WIS:        ${user.attributes.WIS}\n` +
-        `| CHA:        ${user.attributes.CHA}\n\n` +
+        const embedFields = [
+            { 
+                name: "> Status",
+                inline: true,
+                value: 
+                    `**🔴 HP:** ${hpView}\n` +
+                    `**🔵 FP:** ${fpView}\n` +
+                    `**🟣 SP:** ${spView}\n` +
+                    `**🛡️ DEF:** ${user.stats.baseDEF}\n` +
+                    `**🎯 B.Proficiencia:** TODO`   
+            },
+            { 
+                name: "> Status", 
+                inline: true,
+                value: 
+                    `**⭐️ Nível:** ${user.stats.lvl} (${expView} exp)\n` +
+                    `**⚔️ R.Arma:** TODO\n` +
+                    `**💼 R.Profissão:** TODO\n` +
+                    `**💰 Gold:** ${user.stats.gold}\n` +
+                    `**✨ Buff:** TODO\n` +
+                    `**☠️ Debuff:** TODO`
+            },
+            {
+                name: "> Atributos",
+                value:
+                    `Força: ${user.attributes.FOR}\n` +
+                    `Destreza: ${user.attributes.DEX}\n` +
+                    `Constituição: ${user.attributes.CON}\n` +
+                    `Conhecimento: ${user.attributes.WIS}\n` +
+                    `Carisma: ${user.attributes.CHA}` 
+            }
+        ];
 
-        `Ocupado:      ${silenceTimespan}` + 
-        "```";
+        return new Discord.EmbedBuilder()
+            .setColor(0xbbbbbb)
+            .setTitle(user.playerName || "<sem_nome>")
+            .setDescription(user.notes || " ")
+            .setAuthor({ name: `Personagem de ${user.username}` })
+            .addFields(embedFields)
+            .setTimestamp()
+            .setFooter({ text: "Cardial Bot" });
     }
 
     static async updateUserSilentRoles() {
@@ -150,6 +180,13 @@ class StatusService {
         return whiteSpaces;
     }
 
+    static createStatusSummarizedView(currentValue, maxValue, tempValue) {
+        let view = `${currentValue} / ${maxValue + tempValue}`;
+        view += tempValue > 0 ? ` (+${tempValue}) ` : "";
+
+        return view;
+    }
+
     static createStatusBar(statusName, currentValue, maxValue, tempValue, barSize) {
         const progression = Math.floor((currentValue + tempValue) / (maxValue + tempValue) * barSize);
 
@@ -157,12 +194,12 @@ class StatusService {
         for (let i = 1; i <= barSize; i++) {
             bar += progression >= i ? "▬" : " ";
         }
-        bar += `] ${currentValue + tempValue} / ${maxValue + tempValue} `;
-        bar += tempValue > 0 ? `(+${tempValue}) ` : "";
+        bar += `] ${currentValue} / ${maxValue + tempValue} `;
+        bar += tempValue > 0 ? ` (+${tempValue}) ` : "";
         bar += statusName;
 
         return bar;
     }
 }
 
-module.exports = StatusService;
+module.exports = EmbededResponseService;

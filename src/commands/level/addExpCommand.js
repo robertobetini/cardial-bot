@@ -1,7 +1,7 @@
 const Discord = require("discord.js");
 const RoleService = require("./../../services/roleService");
 const ProgressionService = require("./../../services/progressionService");
-const StatusService = require("./../../services/statusService");
+const EmbededResponseService = require("./../../services/embededResponseService");
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -31,7 +31,7 @@ module.exports = {
             await ProgressionService.addExp(interaction.guild.id, target, amount);
 
             var message = `${amount} EXP concedido a ${Discord.userMention(target.id)}.\n` +
-                await StatusService.getUserStatus(interaction.guild.id, target);
+                await EmbededResponseService.getUserStatus(interaction.guild.id, target);
 
             await interaction.editReply(message);
         } catch(err) {

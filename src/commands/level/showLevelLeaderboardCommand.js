@@ -1,6 +1,6 @@
 const Discord = require("discord.js");
 const RoleService = require("./../../services/roleService");
-const StatusService = require("./../../services/statusService");
+const EmbededResponseService = require("./../../services/embededResponseService");
 
 const buildActionRow = (guildId, memberId) => {
     const previousButton = new Discord.ButtonBuilder()
@@ -35,7 +35,7 @@ module.exports = {
             const guildId = interaction.guild.id;
             const memberId = interaction.member.id;
 
-            const leaderboard = await StatusService.getExpLeaderboard(guildId, 0);
+            const leaderboard = await EmbededResponseService.getExpLeaderboard(guildId, 0);
             const actionRow = buildActionRow(guildId, memberId);
     
             const message = await interaction.editReply({
@@ -56,7 +56,7 @@ module.exports = {
         const newPage = currentPage - 1;
 
         pages[messageId] = newPage;
-        const leaderboard = await StatusService.getExpLeaderboard(guildId, newPage);
+        const leaderboard = await EmbededResponseService.getExpLeaderboard(guildId, newPage);
         interaction.message.edit(leaderboard);
 
         await interaction.deferUpdate();
@@ -67,7 +67,7 @@ module.exports = {
         const currentPage = pages[messageId] || 0;
         const newPage = currentPage + 1;
         
-        const leaderboard = await StatusService.getExpLeaderboard(guildId, newPage);
+        const leaderboard = await EmbededResponseService.getExpLeaderboard(guildId, newPage);
         if (leaderboard.split("\n").length >= 5) {
             pages[interaction.message.id] = newPage;
             interaction.message.edit(leaderboard);

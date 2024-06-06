@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS USERS (
 
     playerName VARCHAR(64),
     job VARCHAR(128),
+    notes VARCHAR(1024),
 
     PRIMARY KEY (userId, guildId)
 );

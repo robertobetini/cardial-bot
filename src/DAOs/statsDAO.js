@@ -65,7 +65,6 @@ class StatsDAO extends MySQLDAO {
     }
 
     async updateSingleStat(userId, guildId, stat, newValue) {
-        console.log(userId, guildId, stat, newValue);
         const conn = await this.getConnection();
         const query = "UPDATE STATS SET " + stat +" = ? WHERE userId = ? AND guildId = ?";
         const _res = await conn.execute(query, [newValue, userId, guildId]);

@@ -23,7 +23,7 @@ module.exports = {
                     discordClient.commands.set(command.data.name, command);
                     commands.push(command.data.toJSON());
                 } else {
-                    console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+                    console.warn(`[WARN] The command at ${filePath} is missing a required "data" or "execute" property.`);
                 }
             }
         }
@@ -31,7 +31,7 @@ module.exports = {
     async deployAllCommands() {
         try {
             const rest = new Discord.REST().setToken(process.env.TOKEN);
-            console.log(`Started refreshing ${commands.length} application (/) commands.`);
+            console.log(`[INFO] Started refreshing ${commands.length} application (/) commands.`);
             
             const applicationId = process.env.APPLICATION_ID;
             const debugGuildId = process.env.DEBUG_GUILD_ID;
@@ -44,7 +44,7 @@ module.exports = {
                 { body: commands },
             );
 
-            console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+            console.log(`[INFO] Successfully reloaded ${data.length} application (/) commands.`);
         } catch (error) {
             console.error(error);
         }

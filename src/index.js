@@ -18,28 +18,28 @@ const client = new Discord.Client({ intents: [ Discord.GatewayIntentBits.Guilds 
 commandLoader.loadAllCommands(client);
 commandLoader.deployAllCommands()
     .then()
-    .catch(err => console.log(err));
+    .catch(err => console.error(err));
 
 client.on("ready", () => {
-	console.log("Bot is ready.");
+	console.log("[INFO] Bot is ready.");
 	setInterval(async () => await EmbededResponseService.updateUserSilentRoles(), UPDATE_SILENT_USERS_INTERVAL_TIME);
 });
 
 client.on(Discord.Events.InteractionCreate, async interaction => {
 	if (interaction.isButton()) {
-		console.log(`Processing button interaction (${interaction.customId})`);
+		console.log(`[INFO] Processing button interaction (${interaction.customId})`);
 		await buttonHandler.handleAsync(interaction);
 	}
 	if (interaction.isModalSubmit()) {
-		console.log(`Processing modal submit interaction (${interaction.customId})`);
+		console.log(`[INFO] Processing modal submit interaction (${interaction.customId})`);
 		await modalHandler.handleAsync(interaction);
 	}
 	if (interaction.isStringSelectMenu()) {
-		console.log(`Processing string select menu interaction (${interaction.customId})`);
+		console.log(`[INFO] Processing string select menu interaction (${interaction.customId})`);
 		await stringSelectMenuHandler.handleAsync(interaction);
 	}
 	if (interaction.isChatInputCommand()) {
-		console.log(`Processing chat interaction (${interaction.commandName})`);
+		console.log(`[INFO] Processing chat interaction (${interaction.commandName})`);
 		await commandHandler.handleAsync(interaction);
     }
 });

@@ -13,7 +13,7 @@ module.exports = {
             return;
         }
 
-        console.log(`Processing string select menu handler: ${command}.${actionHandler}`);
+        console.log(`[INFO] Processing string select menu handler: ${command}.${actionHandler}`);
         await commands[command][actionHandler](interaction, guildId, memberId, customArg);
     }
 }

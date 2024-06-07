@@ -101,7 +101,7 @@ class EmbededResponseService {
     }
 
     static async updateUserSilentRoles() {
-        console.log("Running update silent roles routine.");
+        console.log("[INFO] Running update silent roles routine.");
 
         const roles = await RoleService.getAllRoles();
         const users = await userDAO.getAllSilent();

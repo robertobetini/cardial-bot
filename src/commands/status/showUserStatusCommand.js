@@ -392,7 +392,6 @@ module.exports = {
             return;
         }
 
-        console.log(interaction.values);
         const selectedSkill = interaction.values[0];
         const actionRows = await buildSelectedSkillActionRows(guildId, memberId, selectedSkill);
 
@@ -408,8 +407,6 @@ module.exports = {
 
         const skillValueOptions = interaction.message.components[1].components[0].data.options;
         const newSkillLevel = skillValueOptions.find(opt => opt.default).value;
-        console.log(selectedSkill, newSkillLevel);
-        console.log(skillValueOptions);
 
         await SkillsService.updateSingleSkill(memberId, guildId, selectedSkill, newSkillLevel);
 

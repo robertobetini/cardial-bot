@@ -11,7 +11,7 @@ module.exports = {
         const info = customId.split(":");
         const [ guildId, memberId, command, actionHandler, customArg ] = info;
 
-        console.log(`Processing button handler: ${command}.${actionHandler}`);
+        console.log(`[INFO] Processing button handler: ${command}.${actionHandler}`);
         await commands[command][actionHandler](interaction, guildId, memberId, customArg);
     }
 }

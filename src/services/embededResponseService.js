@@ -2,9 +2,12 @@ const Discord = require("discord.js");
 const moment = require("moment");
 
 const userDAO = require("../DAOs/userDAO");
+const skillsDAO = require("../DAOs/skillsDAO");
 const expCalculator = require("../expCalculator");
 
 const User = require("../models/user");
+
+const constants = require("../constants");
 
 const PAGE_SIZE = 10;
 
@@ -38,7 +41,35 @@ class EmbededResponseService {
             .setTitle("Placar de gold")
             .setFields(fields)
             .setTimestamp()
-            .setFooter({ text: "Cardial Bot" }), isEmpty];;
+            .setFooter({ text: "Cardial Bot" }), isEmpty];
+    }
+
+    static async getUserSkills(guildId, userId) {
+        const user = await userDAO.get(userId, guildId, true);
+
+        const fields = [
+            { name: "> Perícia", value: "\n", inline: true },
+            { name: "> Proficiência", value: "\n", inline: true }
+        ];
+
+        const translation = {
+            "NoProficiency": "Sem proficiência",
+            "Proficient": "Proficiente",
+            "Specialist": "Especialista"
+        }
+        for (let skill of constants.skills) {
+            fields[0].value += `${skill.label}\n`;
+            fields[1].value += `${translation[user.skills[skill.value]]}\n`;
+        }
+
+        return new Discord.EmbedBuilder()
+            .setColor(0xbbbbbb)
+            .setTitle(user.playerName || "<sem_nome>")
+            .setDescription(user.notes || " ")
+            .setAuthor({ name: `Personagem de ${user.username}` })
+            .addFields(fields)
+            .setTimestamp()
+            .setFooter({ text: "Cardial Bot" });
     }
 
     static async getUserStatus(guildId, discordUser) {
@@ -84,9 +115,7 @@ class EmbededResponseService {
                     `**⭐️ Nível:** ${user.stats.lvl} (${expView} exp)\n` +
                     `**⚔️ R.Arma:** TODO\n` +
                     `**💼 R.Profissão:** TODO\n` +
-                    `**💰 Gold:** ${user.stats.gold}\n` +
-                    `**✨ Buff:** TODO\n` +
-                    `**☠️ Debuff:** TODO`
+                    `**💰 Gold:** ${user.stats.gold}\n`
             },
             {
                 name: `> Atributos (${user.attributes.availablePoints})`,

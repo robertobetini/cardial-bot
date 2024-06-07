@@ -168,7 +168,6 @@ module.exports = {
         }
 
         const embed = await EmbededResponseService.getUserStatus(guildId, target);
-
         const actionRow = buildHomeActionRow(guildId, target.id);
 
         await interaction.editReply({
@@ -256,16 +255,6 @@ module.exports = {
                 maxLength = 32
             ),
             createTextInput(
-                "job", 
-                "Profissão", 
-                Discord.TextInputStyle.Short, 
-                required = true,
-                defaultValue = user.job,
-                placeholder = "Ex: Lenhador, Cozinheiro, Armeiro",
-                minLength = 1,
-                maxLength = 32
-            ),
-            createTextInput(
                 "notes", 
                 "Notas", 
                 Discord.TextInputStyle.Paragraph,
@@ -289,13 +278,11 @@ module.exports = {
     },
     updateCharacter: async (interaction, guildId, memberId) => {
         const name = interaction.fields.getTextInputValue("name");
-        const job = interaction.fields.getTextInputValue("job");
         const notes = interaction.fields.getTextInputValue("notes");
 
         const user = await userDAO.get(memberId, guildId, false);
 
         user.playerName = name;
-        user.job = job;
         user.notes = notes;
 
         await userDAO.update(user, false);
@@ -325,8 +312,12 @@ module.exports = {
             return;
         }
 
+        const embed = await EmbededResponseService.getUserSkills(guildId, memberId);
         const actionRows = await buildSkillsActionRow(guildId, memberId);
-        interaction.message.edit({ components: actionRows });
+        interaction.message.edit({
+            embeds: [embed],
+            components: actionRows 
+        });
 
         await interaction.deferUpdate();
     },
@@ -409,6 +400,9 @@ module.exports = {
         const newSkillLevel = skillValueOptions.find(opt => opt.default).value;
 
         await SkillsService.updateSingleSkill(memberId, guildId, selectedSkill, newSkillLevel);
+        const embed = await EmbededResponseService.getUserSkills(guildId, memberId);
+
+        interaction.message.edit({ embeds: [embed] });
 
         await interaction.deferUpdate();
     },
@@ -440,8 +434,12 @@ module.exports = {
             return;
         }
 
+        const embed = await EmbededResponseService.getUserStatus(guildId, interaction.user);
         const actionRow = buildHomeActionRow(guildId, memberId);
-        interaction.message.edit({ components: [actionRow] });
+        interaction.message.edit({ 
+            embeds: [embed],
+            components: [actionRow] 
+        });
 
         await interaction.deferUpdate();
     }

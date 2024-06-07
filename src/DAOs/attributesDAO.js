@@ -16,8 +16,8 @@ class AttributesDAO extends MySQLDAO {
     }
     async insert(userId, guildId, attributes, transactionConn = null) {
         const conn = transactionConn || await this.getConnection();
-        const query = "INSERT INTO ATTRIBUTES (userId, guildId, `FOR`, DEX, CON, WIS, CHA) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        const _res = await conn.execute(query, [userId, guildId, attributes.FOR, attributes.DEX, attributes.CON, attributes.WIS, attributes.CHA]);
+        const query = "INSERT INTO ATTRIBUTES (userId, guildId, `FOR`, DEX, CON, WIS, CHA, availablePoints) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        const _res = await conn.execute(query, [userId, guildId, attributes.FOR, attributes.DEX, attributes.CON, attributes.WIS, attributes.CHA, attributes.availablePoints]);
     }
 
     async update(userId, guildId, attributes, transactionConn = null) {

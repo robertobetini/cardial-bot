@@ -1,5 +1,5 @@
 class Attributes {
-    constructor(userId, guildId, $for = 0, dex = 0, con = 0, wis = 0, cha = 0) {
+    constructor(userId, guildId, $for = 7, dex = 7, con = 7, wis = 7, cha = 7) {
         this.userId = userId;
         this.guildId = guildId;
         this.FOR = $for;

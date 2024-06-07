@@ -10,21 +10,21 @@ class Stats {
         this.totalExp = totalExp;
         this.exp = 0;
         this.gold = gold;
-        this.lvl = 0;
+        this.lvl = 1;
 
-        this.currentHP = 0;
-        this.maxHP = 1;
+        this.currentHP = 10;
+        this.maxHP = 10;
         this.tempHP = 0;
 
-        this.currentFP = 0;
-        this.maxFP = 1;
+        this.currentFP = 10;
+        this.maxFP = 10;
         this.tempFP = 0;
 
-        this.currentSP = 0;
-        this.maxSP = 1;
+        this.currentSP = 5;
+        this.maxSP = 5;
         this.tempSP = 0;
 
-        this.baseDEF = 0;
+        this.baseDEF = 10;
 
         this.updateExpAndLevel();
     }

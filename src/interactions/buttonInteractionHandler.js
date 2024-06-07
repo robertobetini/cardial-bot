@@ -1,3 +1,5 @@
+const Logger = require("../logger");
+
 const commands = {
     showLevelLeaderboardCommand: require("../commands/level/showLevelLeaderboardCommand"),
     showGoldLeaderboardCommand:  require("../commands/economy/showGoldLeaderboardCommand"),
@@ -11,7 +13,7 @@ module.exports = {
         const info = customId.split(":");
         const [ guildId, memberId, command, actionHandler, customArg ] = info;
 
-        console.log(`[INFO] Processing button handler: ${command}.${actionHandler}`);
+        Logger.info(`Processing button handler: ${command}.${actionHandler}`);
         await commands[command][actionHandler](interaction, guildId, memberId, customArg);
     }
 }

@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS ATTRIBUTES (
     CON INT, 
     WIS INT, 
     CHA INT,
+    availablePoints INT,
 
     PRIMARY KEY (attributesId),
     CONSTRAINT FK_UserAttributes FOREIGN KEY (userId, guildId) REFERENCES USERS(userId, guildId)

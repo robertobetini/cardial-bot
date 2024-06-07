@@ -1,3 +1,5 @@
+const Logger = require("../logger");
+
 const commands = {
     showUserStatusCommand: require("../commands/status/showUserStatusCommand")
 };
@@ -13,7 +15,7 @@ module.exports = {
             return;
         }
 
-        console.log(`[INFO] Processing string select menu handler: ${command}.${actionHandler}`);
+        Logger.info(`Processing string select menu handler: ${command}.${actionHandler}`);
         await commands[command][actionHandler](interaction, guildId, memberId, customArg);
     }
 }

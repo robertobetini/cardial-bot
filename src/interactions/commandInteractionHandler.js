@@ -1,9 +1,11 @@
+const Logger = require("../logger");
+
 module.exports = {
     handleAsync: async (interaction) => {
         const command = interaction.client.commands.get(interaction.commandName);
 	
         if (!command) {
-            console.error(`[ERROR] No command matching ${interaction.commandName} was found.`);
+            Logger.error(`No command matching ${interaction.commandName} was found.`);
             return;
         }
 
@@ -11,10 +13,10 @@ module.exports = {
         await interaction.reply(".");
 
         try {
-            console.log(`[INFO] Executing command: ${interaction.commandName}`);
+            Logger.info(`Executing command: ${interaction.commandName}`);
             await command.execute(interaction);
         } catch (error) {
-            console.error(error);
+            Logger.error(error);
             if (interaction.replied || interaction.deferred) {
                 await interaction.followUp("There was an error while executing this command!");
             } else {

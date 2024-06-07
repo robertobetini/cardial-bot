@@ -3,10 +3,8 @@ const moment = require("moment");
 
 const userDAO = require("../DAOs/userDAO");
 const expCalculator = require("../expCalculator");
-const RoleService = require("./roleService");
 
 const User = require("../models/user");
-const Role = require("../models/role");
 
 const COLUMN_SIZE = 20;
 const PAGE_SIZE = 20;
@@ -80,13 +78,13 @@ class EmbededResponseService {
                     `**☠️ Debuff:** TODO`
             },
             {
-                name: "> Atributos",
+                name: `> Atributos (${user.attributes.availablePoints})`,
                 value:
                     `Força: ${user.attributes.FOR}\n` +
                     `Destreza: ${user.attributes.DEX}\n` +
                     `Constituição: ${user.attributes.CON}\n` +
                     `Conhecimento: ${user.attributes.WIS}\n` +
-                    `Carisma: ${user.attributes.CHA}` 
+                    `Carisma: ${user.attributes.CHA}`
             }
         ];
 
@@ -98,25 +96,6 @@ class EmbededResponseService {
             .addFields(embedFields)
             .setTimestamp()
             .setFooter({ text: "Cardial Bot" });
-    }
-
-    static async updateUserSilentRoles() {
-        console.log("[INFO] Running update silent roles routine.");
-
-        const roles = await RoleService.getAllRoles();
-        const users = await userDAO.getAllSilent();
-
-        for (let user of users) {
-            const now = new Date().getTime();
-            if (user.silenceEndTime && now > user.silenceEndTime) {
-                const role = roles.find(role => role.type === Role.SILENT_TYPE && role.guildId === user.guildId);
-                const updateRoleEndpoint = Discord.Routes.guildMemberRole(user.guildId, user.userId, role.roleId);
-                const rest = new Discord.REST().setToken(process.env.TOKEN);
-                const _data = await rest.delete(updateRoleEndpoint);
-                user.silenceEndTime = null;
-                await userDAO.update(user);
-            }
-        }
     }
 
     static createTable(columnNames, rows) {

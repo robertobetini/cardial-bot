@@ -1,5 +1,5 @@
 class Attributes {
-    constructor(userId, guildId, $for = 7, dex = 7, con = 7, wis = 7, cha = 7) {
+    constructor(userId, guildId, $for = 7, dex = 7, con = 7, wis = 7, cha = 7, availablePoints = 25) {
         this.userId = userId;
         this.guildId = guildId;
         this.FOR = $for;
@@ -7,6 +7,7 @@ class Attributes {
         this.CON = con;
         this.WIS = wis;
         this.CHA = cha;
+        this.availablePoints = availablePoints;
     }
 
     static fromDTO(fullUserDTO) {
@@ -17,7 +18,8 @@ class Attributes {
             fullUserDTO.DEX,
             fullUserDTO.CON,
             fullUserDTO.WIS,
-            fullUserDTO.CHA
+            fullUserDTO.CHA,
+            fullUserDTO.availablePoints
         );
     }
 }

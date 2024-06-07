@@ -1,6 +1,8 @@
-const Discord = require("discord.js");
-const path = require('node:path');
 const fs = require("fs");
+const path = require('node:path');
+const Discord = require("discord.js");
+
+const Logger = require("./logger");
 
 const commands = [];
 
@@ -23,7 +25,7 @@ module.exports = {
                     discordClient.commands.set(command.data.name, command);
                     commands.push(command.data.toJSON());
                 } else {
-                    console.warn(`[WARN] The command at ${filePath} is missing a required "data" or "execute" property.`);
+                    Logger.warn(`The command at ${filePath} is missing a required "data" or "execute" property.`);
                 }
             }
         }
@@ -31,7 +33,7 @@ module.exports = {
     async deployAllCommands() {
         try {
             const rest = new Discord.REST().setToken(process.env.TOKEN);
-            console.log(`[INFO] Started refreshing ${commands.length} application (/) commands.`);
+            Logger.info(`Started refreshing ${commands.length} application (/) commands.`);
             
             const applicationId = process.env.APPLICATION_ID;
             const debugGuildId = process.env.DEBUG_GUILD_ID;
@@ -44,9 +46,9 @@ module.exports = {
                 { body: commands },
             );
 
-            console.log(`[INFO] Successfully reloaded ${data.length} application (/) commands.`);
+            Logger.info(`Successfully reloaded ${data.length} application (/) commands.`);
         } catch (error) {
-            console.error(error);
+            Logger.error(error);
         }
     }
 }

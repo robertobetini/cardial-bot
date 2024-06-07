@@ -30,10 +30,13 @@ module.exports = {
 
             await ProgressionService.addExp(interaction.guild.id, target, amount);
 
-            var message = `${amount} EXP concedido a ${Discord.userMention(target.id)}.\n` +
-                await EmbededResponseService.getUserStatus(interaction.guild.id, target);
+            const message = `${amount} EXP concedido a ${Discord.userMention(target.id)}.`;
+            const embed = await EmbededResponseService.getUserStatus(interaction.guild.id, target);
 
-            await interaction.editReply(message);
+            await interaction.editReply({
+                content: message,
+                embeds: [embed]
+            });
         } catch(err) {
             await interaction.editReply(err.message);
         }

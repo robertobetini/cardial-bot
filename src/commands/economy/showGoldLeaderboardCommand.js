@@ -35,11 +35,12 @@ module.exports = {
             const guildId = interaction.guild.id;
             const memberId = interaction.member.id;
 
-            const leaderboard = await EmbededResponseService.getGoldLeaderboard(guildId, 0);
+            const [leaderboard, _] = await EmbededResponseService.getGoldLeaderboard(guildId, 0);
             const actionRow = buildActionRow(guildId, memberId);
     
             const message = await interaction.editReply({
-                content: leaderboard,
+                content: "",
+                embeds: [leaderboard],
                 components: [actionRow]
             });
 
@@ -55,8 +56,8 @@ module.exports = {
         const newPage = currentPage - 1;
 
         pages[messageId] = newPage;
-        const leaderboard = await EmbededResponseService.getGoldLeaderboard(guildId, newPage);
-        interaction.message.edit(leaderboard);
+        const [leaderboard, _] = await EmbededResponseService.getGoldLeaderboard(guildId, newPage);
+        interaction.message.edit({ embeds: [leaderboard] });
 
         await interaction.deferUpdate();
     },
@@ -66,10 +67,10 @@ module.exports = {
         const currentPage = pages[messageId] || 0;
         const newPage = currentPage + 1;
         
-        const leaderboard = await EmbededResponseService.getGoldLeaderboard(guildId, newPage);
-        if (leaderboard.split("\n").length >= 5) {
+        const [leaderboard, isEmpty] = await EmbededResponseService.getGoldLeaderboard(guildId, newPage);
+        if (!isEmpty) {
             pages[interaction.message.id] = newPage;
-            interaction.message.edit(leaderboard);
+            interaction.message.edit({ embeds: [leaderboard] });
         }
         
         await interaction.deferUpdate();

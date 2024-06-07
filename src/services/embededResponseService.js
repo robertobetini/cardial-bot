@@ -6,28 +6,39 @@ const expCalculator = require("../expCalculator");
 
 const User = require("../models/user");
 
-const COLUMN_SIZE = 20;
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 class EmbededResponseService {
     static async getExpLeaderboard(guildId, page) {
         const users =  await userDAO.getAllFromGuild(guildId, "totalExp", page * PAGE_SIZE, PAGE_SIZE);
 
-        let leaderboard = this.createTable(
+        const fields = this.createTable(
             [ "User", "Level", "EXP" ], 
             users.map(user => [ user.username, user.stats?.lvl.toString(), user.stats?.exp.toString() ]));
 
-        return leaderboard;
+        const isEmpty = fields[0].value.trim().length < 1;
+        return [new Discord.EmbedBuilder()
+            .setColor(0xbbbbbb)
+            .setTitle("Placar de nível")
+            .setFields(fields)
+            .setTimestamp()
+            .setFooter({ text: "Cardial Bot" }), isEmpty];
     }
 
     static async getGoldLeaderboard(guildId, page) {
         const users = await userDAO.getAllFromGuild(guildId, "gold", page * PAGE_SIZE, PAGE_SIZE);
 
-        let leaderboard = this.createTable(
+        let fields = this.createTable(
             [ "User", "GOLD" ], 
             users.map(user => [ user.username, `$${user.stats?.gold}` ]));
 
-        return leaderboard;
+        const isEmpty = fields[0].value.trim().length < 1;
+        return [new Discord.EmbedBuilder()
+            .setColor(0xbbbbbb)
+            .setTitle("Placar de gold")
+            .setFields(fields)
+            .setTimestamp()
+            .setFooter({ text: "Cardial Bot" }), isEmpty];;
     }
 
     static async getUserStatus(guildId, discordUser) {
@@ -99,53 +110,18 @@ class EmbededResponseService {
     }
 
     static createTable(columnNames, rows) {
-        let table = "```\n";
-
-        let header = this.generateTableRow(columnNames);
-        table += header;
-        table += this.generateRepeatedSequenceOfText(columnNames.length * COLUMN_SIZE, "-") + "\n";
-
-        for (let row of rows) {
-            const line = this.generateTableRow(row);
-            table += line;
+        const fields = [];
+        for (let columnName of columnNames) {
+            fields.push({ name: `> ${columnName}`, value: "\n", inline: true });
         }
 
-        table += "```";
-
-        return table;
-    }
-
-    static generateTableRow(values) {
-        let line = "";
-
-        for (let value of values) {
-            const whiteSpaces = this.generateWhiteSpace(COLUMN_SIZE - value.length + 1);
-            let truncatedValue = value;
-
-            if (truncatedValue.length > 20) {
-                truncatedValue = truncatedValue.substring(0, COLUMN_SIZE);
+        for (let i = 0; i < fields.length; i++) {
+            for (let row of rows) {
+                fields[i].value += `${row[i]}   \n`;
             }
-
-            line += `${truncatedValue}${whiteSpaces}`;
         }
 
-        line.trimEnd();
-        line += "\n";
-
-        return line;
-    }
-
-    static generateWhiteSpace(num) {
-        return this.generateRepeatedSequenceOfText(num, " ");
-    }
-
-    static generateRepeatedSequenceOfText(num, str) {
-        let whiteSpaces = "";
-        for (let i = 0; i < num; i++) {
-            whiteSpaces += str;
-        }
-
-        return whiteSpaces;
+        return fields;
     }
 
     static createStatusSummarizedView(currentValue, maxValue, tempValue) {

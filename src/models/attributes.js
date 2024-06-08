@@ -1,5 +1,7 @@
+const Constants = require("../constants");
+
 class Attributes {
-    constructor(userId, guildId, $for = 7, dex = 7, con = 7, wis = 7, cha = 7, availablePoints = 25, firstAttributionDone = false) {
+    constructor(userId, guildId, $for = 7, dex = 7, con = 7, wis = 7, cha = 7, availablePoints = Constants.INITIAL_AVAILABLE_ATTRIBUTES, firstAttributionDone = false) {
         this.userId = userId;
         this.guildId = guildId;
         this.FOR = $for;

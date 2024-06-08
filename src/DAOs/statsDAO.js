@@ -23,7 +23,7 @@ class StatsDAO extends MySQLDAO {
 
     async insert(userId, guildId, stats, transactionConn = null) {
         const conn = transactionConn || await this.getConnection();
-        const query = "INSERT INTO STATS (userId, guildId, totalExp, gold, currentHP, maxHP, tempHP, currentFP, maxFP, tempFP, currentSP, maxSP, tempSP, baseDEF) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        const query = "INSERT INTO STATS (userId, guildId, totalExp, gold, currentHP, maxHP, tempHP, currentFP, maxFP, tempFP, currentSP, maxSP, tempSP, baseDEF, baseInitiative) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         const _res = await conn.execute(query, [
             userId, guildId, 
@@ -31,7 +31,7 @@ class StatsDAO extends MySQLDAO {
             stats.currentHP, stats.maxHP, stats.tempHP, 
             stats.currentFP, stats.maxFP, stats.tempFP, 
             stats.currentSP, stats.maxSP, stats.tempSP, 
-            stats.baseDEF
+            stats.baseDEF, stats.baseInitiative
         ]);
     }
 
@@ -41,7 +41,7 @@ class StatsDAO extends MySQLDAO {
             + " currentHP = ?, maxHP = ?, tempHP = ?," 
             + " currentFP = ?, maxFP = ?, tempFP = ?," 
             + " currentSP = ?, maxSP = ?, tempSP = ?,"
-            + " baseDEF = ?"
+            + " baseDEF = ?, baseInitiative = ?"
             + " WHERE userId = ? AND guildId = ?";
 
         const res = await conn.execute(query, [
@@ -49,7 +49,7 @@ class StatsDAO extends MySQLDAO {
             stats.currentHP, stats.maxHP, stats.tempHP, 
             stats.currentFP, stats.maxFP, stats.tempFP, 
             stats.currentSP, stats.maxSP, stats.tempSP, 
-            stats.baseDEF, 
+            stats.baseDEF, stats.baseInitiative,
             userId, guildId
         ]);
 

@@ -3,7 +3,8 @@ const moment = require("moment");
 
 const userDAO = require("../DAOs/userDAO");
 const skillsDAO = require("../DAOs/skillsDAO");
-const expCalculator = require("../expCalculator");
+const expCalculator = require("../calculators/expCalculator");
+const modCalculator = require("../calculators/modCalculator");
 
 const User = require("../models/user");
 
@@ -98,6 +99,14 @@ class EmbededResponseService {
         const expView = EmbededResponseService.createStatusSummarizedView(user.stats.exp, maxLvlExp, 0);
 
         const attributes = tempAttributes || user.attributes;
+        const calcMod = modCalculator.calculateAttributeMod;
+        const forMod = calcMod(attributes.FOR);
+        const dexMod = calcMod(attributes.DEX);
+        const conMod = calcMod(attributes.CON);
+        const wisMod = calcMod(attributes.WIS);
+        const chaMod = calcMod(attributes.CHA);
+
+        const sanityDescription = EmbededResponseService.getSanityDescription(user.stats.currentSP);
         const embedFields = [
             { 
                 name: "> Status",
@@ -105,9 +114,10 @@ class EmbededResponseService {
                 value: 
                     `**🔴 HP:** ${hpView}\n` +
                     `**🔵 FP:** ${fpView}\n` +
-                    `**🟣 SP:** ${spView}\n` +
-                    `**🛡️ DEF:** ${user.stats.baseDEF}\n` +
-                    `**🎯 B.Proficiencia:** TODO`   
+                    `**🟣 SP:** ${spView} (${sanityDescription})\n` +
+                    `**🛡️ CA:** ${user.stats.baseDEF + dexMod}\n` +
+                    `**🎯 B. Proficiência:** +${modCalculator.calculateProficiencyMod(user.stats.lvl)}\n` +
+                    `**👁️ Iniciativa:** ${user.stats.baseInitiative + dexMod}`
             },
             { 
                 name: "> Status", 
@@ -119,13 +129,28 @@ class EmbededResponseService {
                     `**💰 Gold:** ${user.stats.gold}\n`
             },
             {
-                name: `> Atributos (${attributes.availablePoints})`,
+                name: "\n",
+                value: "\n",
+            },
+            {
+                name: `> Atributos (${attributes.availablePoints > 0 ? "+" : ""}${attributes.availablePoints})`,
+                inline: true,
                 value:
                     `Força: ${attributes.FOR}\n` +
                     `Destreza: ${attributes.DEX}\n` +
                     `Constituição: ${attributes.CON}\n` +
                     `Conhecimento: ${attributes.WIS}\n` +
                     `Carisma: ${attributes.CHA}`
+            },
+            {
+                name: `> Mod`,
+                inline: true,
+                value:
+                    `${forMod >= 0 ? "+" : ""}${forMod}\n` +
+                    `${dexMod >= 0 ? "+" : ""}${dexMod}\n` +
+                    `${conMod >= 0 ? "+" : ""}${conMod}\n` +
+                    `${wisMod >= 0 ? "+" : ""}${wisMod}\n` +
+                    `${chaMod >= 0 ? "+" : ""}${chaMod}`
             }
         ];
 
@@ -173,6 +198,15 @@ class EmbededResponseService {
         bar += statusName;
 
         return bar;
+    }
+
+    static getSanityDescription(currentSP) {
+        if (currentSP === 25) { return "são"; }
+        if (currentSP > 20) { return "desconfiado"; }
+        if (currentSP > 15) { return "assustado"; }
+        if (currentSP > 10) { return "apavorado"; }
+        if (currentSP > 5) { return "loucura parcial"; }
+        if (currentSP > 0) { return "insanidade"; }
     }
 }
 

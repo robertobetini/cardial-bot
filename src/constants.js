@@ -1,4 +1,18 @@
-module.exports = {
+const Constants = {
+    MAX_LEVEL: 20,
+    MIN_ATTRIBUTE_VALUE: 7,
+    MAX_ATTRIBUTE_VALUE_FOR_FIRST_TIME: 15,
+    MAX_ATTRIBUTE_VALUE: 30,
+    BASE_HP: 10,
+    BASE_FP: 2,
+    BASE_SP: 25,
+    BASE_DEF: 10,
+    BASE_INITIATIVE: 10,
+    BASE_MAX_HP_PER_LEVEL: 6,
+    BASE_MAX_FP_PER_LEVEL: 2,
+    BASE_MAX_SP_PER_LEVEL: 0,
+    INITIAL_AVAILABLE_ATTRIBUTES: 25,
+    ATTRIBUTE_PER_LEVEL: 1,
     attributes: [
         { label: "Força", value: "FOR" },
         { label: "Destreza", value: "DEX" },
@@ -40,3 +54,5 @@ module.exports = {
         { label: "Especialista", value: "Specialist" },
     ]
 };
+
+module.exports = Constants;

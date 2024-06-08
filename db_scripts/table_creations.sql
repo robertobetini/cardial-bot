@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS STATS (
     currentFP INT, maxFP INT, tempFP INT,
     currentSP INT, maxSP INT, tempSP INT,
     baseDEF INT,
+    baseInitiative INT,
 
     PRIMARY KEY (statsId),
     CONSTRAINT FK_UserStats FOREIGN KEY (userId, guildId) REFERENCES USERS(userId, guildId)

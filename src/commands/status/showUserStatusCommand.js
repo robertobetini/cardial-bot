@@ -12,18 +12,9 @@ const SkillsService = require("../../services/skillService");
 
 const Constants = require("../../constants");
 
-const MIN_ATTRIBUTE_VALUE = 7
-const MAX_ATTRIBUTE_VALUE_FOR_FIRST_TIME = 15;
-const MAX_ATTRIBUTE_VALUE = 30;
-
 const tempAttributes = {};
 
 const buildHomeActionRow = (guildId, memberId) => {
-    const statusButton = new Discord.ButtonBuilder()
-        .setCustomId(`${guildId}:${memberId}:showUserStatusCommand:showStatsRow`)
-        .setLabel("Status")
-        .setStyle(Discord.ButtonStyle.Primary);
-
     const attributesButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:showUserStatusCommand:showAttributesRow`)
         .setLabel("Atributos")
@@ -39,19 +30,19 @@ const buildHomeActionRow = (guildId, memberId) => {
         .setLabel("Personagem")
         .setStyle(Discord.ButtonStyle.Primary);
 
-    return new Discord.ActionRowBuilder().addComponents(statusButton, attributesButton, skillsButton, characterButton);
+    return new Discord.ActionRowBuilder().addComponents(attributesButton, skillsButton, characterButton);
 }
 
 const buildAttributesActionRows = (guildId, userId, selected) => {
-    const statsSelect = new Discord.StringSelectMenuBuilder()
+    const attributesSelect = new Discord.StringSelectMenuBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:selectAttribute`)
-        .setPlaceholder("Selecione um status")
+        .setPlaceholder("Selecione um atributo")
         .setOptions(createSelectOptions(Constants.attributes, selected));
 
     const gotoHomeButton = createGotoHomeButton(guildId, userId);
 
     return [
-        new Discord.ActionRowBuilder().addComponents(statsSelect),
+        new Discord.ActionRowBuilder().addComponents(attributesSelect),
         new Discord.ActionRowBuilder().addComponents(gotoHomeButton)
     ];
 }
@@ -122,11 +113,11 @@ const getAttributeButtonsAvailability = (guildId, memberId, selectedAttribute) =
     let increaseButtonEnabled = true;
     let confirmButtonEnabled = false;
 
-    const maxAttributeValue = tempAttributes[key].firstAttributionDone ? MAX_ATTRIBUTE_VALUE : MAX_ATTRIBUTE_VALUE_FOR_FIRST_TIME;
+    const maxAttributeValue = tempAttributes[key].firstAttributionDone ? Constants.MAX_ATTRIBUTE_VALUE : Constants.MAX_ATTRIBUTE_VALUE_FOR_FIRST_TIME;
     if (tempAttributes[key][selectedAttribute] >= maxAttributeValue) {
         increaseButtonEnabled = false;
     }
-    if (tempAttributes[key][selectedAttribute] <= MIN_ATTRIBUTE_VALUE) {
+    if (tempAttributes[key][selectedAttribute] <= Constants.MIN_ATTRIBUTE_VALUE) {
         decreaseButtonEnabled = false;
     }
     if (tempAttributes[key].availablePoints < 1) {
@@ -422,6 +413,9 @@ module.exports = {
         );
 
         await AttributesService.update(attributes);
+        if (!tempAttributes[key].firstAttributionDone) {
+            await StatsService.setInitialStats(attributes);
+        }
         delete tempAttributes[key];
 
         const updatedEmbed = await EmbededResponseService.getUserStatus(guildId, interaction.member);

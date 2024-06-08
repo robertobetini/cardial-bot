@@ -1,7 +1,8 @@
-const expCalculator = require("../expCalculator");
+const expCalculator = require("../calculators/expCalculator");
+const Constants = require("../constants");
 
 class Stats {
-    static maxLvl = 20;
+    static maxLvl = Constants.MAX_LEVEL;
 
     constructor(userId, guildId, totalExp = 0, gold = 0) {
         this.userId = userId;
@@ -12,19 +13,20 @@ class Stats {
         this.gold = gold;
         this.lvl = 1;
 
-        this.currentHP = 10;
-        this.maxHP = 10;
+        this.currentHP = Constants.BASE_HP;
+        this.maxHP = Constants.BASE_HP;
         this.tempHP = 0;
 
-        this.currentFP = 10;
-        this.maxFP = 10;
+        this.currentFP = Constants.BASE_FP;
+        this.maxFP = Constants.BASE_FP;
         this.tempFP = 0;
 
-        this.currentSP = 5;
-        this.maxSP = 5;
+        this.currentSP = Constants.BASE_SP;
+        this.maxSP = Constants.BASE_SP;
         this.tempSP = 0;
 
-        this.baseDEF = 10;
+        this.baseDEF = Constants.BASE_DEF;
+        this.baseInitiative = Constants.BASE_INITIATIVE;
 
         this.updateExpAndLevel();
     }
@@ -79,6 +81,7 @@ class Stats {
         stats.tempSP = fullUserDTO.tempSP;
 
         stats.baseDEF = fullUserDTO.baseDEF;
+        stats.baseInitiative = fullUserDTO.baseInitiative;
 
         return stats;
     }

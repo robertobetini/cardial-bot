@@ -1,7 +1,10 @@
-const expCalculator = require("../expCalculator");
 const Attributes = require("./attributes");
 const Stats = require("./stats");
 const Skills = require("./skills");
+
+const Constants = require("../constants");
+
+const { calculateAttributeMod } = require("../calculators/modCalculator");
 
 class User {
     constructor(userId, guildId, name, silenceEndTime = null, playerName = "", job = "", notes = "", attributes = null, stats = null, skills = null) {
@@ -19,9 +22,9 @@ class User {
     }
 
     addExp(exp) { 
-        const levelBefore = this.stats.lvl;
+        const levelBefore = this.stats?.lvl;
         this.stats?.addExp(exp); 
-        const levelAfter = this.stats.lvl;
+        const levelAfter = this.stats?.lvl;
 
         for (let i = 0; i < levelAfter - levelBefore; i++) {
             this.levelUp();
@@ -33,7 +36,16 @@ class User {
     }
 
     levelUp() {
-        return;
+        this.stats.maxHP += Constants.BASE_MAX_HP_PER_LEVEL + calculateAttributeMod(this.attributes.CON);
+        this.stats.currentHP += Constants.BASE_MAX_HP_PER_LEVEL + calculateAttributeMod(this.attributes.CON);
+
+        this.stats.maxFP += Constants.BASE_MAX_FP_PER_LEVEL;
+        this.stats.currentFP += Constants.BASE_MAX_FP_PER_LEVEL;
+
+        this.stats.maxSP += Constants.BASE_MAX_SP_PER_LEVEL;
+        this.stats.currentSP += Constants.BASE_MAX_SP_PER_LEVEL;
+
+        this.attributes.availablePoints += Constants.ATTRIBUTE_PER_LEVEL;
     }
 
     static fromDTO(userDTO) {

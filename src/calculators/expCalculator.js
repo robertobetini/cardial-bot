@@ -1,6 +1,5 @@
 const Constants = require("../constants");
 
-const totalLevelExpCache = {};
 const minExpForLevel = [
           0,
           0,
@@ -27,20 +26,59 @@ const minExpForLevel = [
 
 module.exports = {
     getLevelExp(level) {
-        if (level === 20) {
-            return minExpForLevel[level];
+        if (level >= 20) {
+            return minExpForLevel[Constants.MAX_LEVEL] - minExpForLevel[Constants.MAX_LEVEL - 1];
         }
 
         return minExpForLevel[level + 1] - minExpForLevel[level];
     },
     getTotalLevelExp(level) {
+        if (level > Constants.MAX_LEVEL) {
+            return minExpForLevel[Constants.MAX_LEVEL];
+        }
         return minExpForLevel[level];
     },
     getLevelFromExp(exp) {
+        if (exp < 1) {
+            return {
+                lvl: 1,
+                remainingExp: 0
+            };
+        }
+
+        for (let level = 1; level < Constants.MAX_LEVEL; level++) {
+            const totalLevelExp = this.getTotalLevelExp(level);
+            if (totalLevelExp > exp) {
+                return {
+                    lvl: level - 1,
+                    remainingExp: exp - this.getTotalLevelExp(level - 1)
+                };
+            } 
+
+            if (totalLevelExp === exp) {
+                return {
+                    lvl: level,
+                    remainingExp: 0
+                };
+            }
+        }
+
+        return {
+            lvl: Constants.MAX_LEVEL,
+            remainingExp: this.getLevelExp(Constants.MAX_LEVEL)
+        };
         let level = 1;
-        while (this.getTotalLevelExp(level) < exp) {
+        while (this.getTotalLevelExp(level) <= exp) {
             level++;
         }
+        if (level > Constants.MAX_LEVEL) {
+            return {
+                lvl: Constants.MAX_LEVEL,
+                remainingExp: getTotalLevelExp(Constants.MAX_LEVEL)
+            };
+        }
+        level--;
+
 
         return {
             lvl: level,

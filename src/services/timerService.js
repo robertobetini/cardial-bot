@@ -1,14 +1,10 @@
 const userDAO = require("./../DAOs/userDAO");
-const User = require("../models/user");
-
-const MINUTE_IN_MILLIS = 60 * 1000;
-const HOUR_IN_MILLIS = 60 * MINUTE_IN_MILLIS;
-const DAY_IN_MILLIS = 24 * HOUR_IN_MILLIS;
+const UserService = require("../services/userService");
+const Constants = require("../constants");
 
 class TimerService {
     static async addSilenceTime(guildId, discordUser, days, hours, minutes) {
-        let user = await TimerService.getOrCreateUser(guildId, discordUser);
-
+        let user = await UserService.getOrCreateUser(guildId, discordUser);
         if (!user.silenceEndTime) {
             user.silenceEndTime = now;
         }
@@ -19,8 +15,7 @@ class TimerService {
     }
 
     static async removeSilenceTime(guildId, discordUser, days, hours, minutes) {
-        let user = await TimerService.getOrCreateUser(guildId, discordUser);
-
+        let user = await UserService.getOrCreateUser(guildId, discordUser);
         if (!user.silenceEndTime) {
             user.silenceEndTime = now;
         }
@@ -34,24 +29,9 @@ class TimerService {
     }
 
     static getTimeSpanInMillis(days, hours, minutes) {
-        return (days * DAY_IN_MILLIS)
-        + (hours * HOUR_IN_MILLIS)
-        + (minutes * MINUTE_IN_MILLIS);
-    }
-
-    static async getOrCreateUser(guildId, userToGet) {
-        let user = await userDAO.get(userToGet.id, guildId);
-        
-        if (!user) {
-            user = new User(
-                userToGet.id,
-                guildId,
-                userToGet.username,
-                userToGet.displayAvatarURL()
-            );
-        }
-
-        return user;
+        return (days * Constants.DAY_IN_MILLIS)
+        + (hours * Constants.HOUR_IN_MILLIS)
+        + (minutes * Constants.MINUTE_IN_MILLIS);
     }
 }
 

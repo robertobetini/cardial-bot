@@ -38,7 +38,7 @@ const buildHomeActionRow = (guildId, memberId) => {
         .setLabel("Excluir")
         .setStyle(Discord.ButtonStyle.Danger);
 
-    return new Discord.ActionRowBuilder().addComponents(attributesButton, skillsButton, characterButton, removeUserButton);
+    return new Discord.ActionRowBuilder().addComponents(attributesButton, skillsButton, characterButton);
 }
 
 const buildAttributesActionRows = (guildId, userId, selected) => {

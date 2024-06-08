@@ -1,20 +1,16 @@
 const Discord = require("discord.js");
 const moment = require("moment");
 
-const userDAO = require("../DAOs/userDAO");
-const skillsDAO = require("../DAOs/skillsDAO");
 const expCalculator = require("../calculators/expCalculator");
 const modCalculator = require("../calculators/modCalculator");
 
-const User = require("../models/user");
+const UserService = require("../services/userService");
 
 const Constants = require("../constants");
 
-const PAGE_SIZE = 10;
-
 class EmbededResponseService {
     static async getExpLeaderboard(guildId, page) {
-        const users =  await userDAO.getAllFromGuild(guildId, "totalExp", page * PAGE_SIZE, PAGE_SIZE);
+        const users =  await UserService.getAllFromGuild(guildId, "totalExp", page * Constants.PAGE_SIZE, Constants.PAGE_SIZE);
 
         const fields = this.createTable(
             [ "User", "Level", "EXP" ], 
@@ -30,7 +26,7 @@ class EmbededResponseService {
     }
 
     static async getGoldLeaderboard(guildId, page) {
-        const users = await userDAO.getAllFromGuild(guildId, "gold", page * PAGE_SIZE, PAGE_SIZE);
+        const users = await UserService.getAllFromGuild(guildId, "gold", page * Constants.PAGE_SIZE, Constants.PAGE_SIZE);
 
         let fields = this.createTable(
             [ "User", "GOLD" ], 
@@ -46,7 +42,7 @@ class EmbededResponseService {
     }
 
     static async getUserSkills(guildId, userId) {
-        const user = await EmbededResponseService.getOrCreateUser(userId, guildId, true);
+        const user = await UserService.getOrCreateUser(userId, guildId, true);
 
         const fields = [
             { name: "> Perícia", value: "\n", inline: true },
@@ -75,7 +71,7 @@ class EmbededResponseService {
     }
 
     static async getUserStatus(guildId, discordUser, tempAttributes = null) {
-        let user = await EmbededResponseService.getOrCreateUser(guildId, discordUser);
+        let user = await UserService.getOrCreateUser(guildId, discordUser);
         
         const maxLvlExp = expCalculator.getLevelExp(user.stats.lvl);
 
@@ -199,24 +195,6 @@ class EmbededResponseService {
         if (currentSP > 10) { return "apavorado"; }
         if (currentSP > 5) { return "loucura parcial"; }
         if (currentSP > 0) { return "insanidade"; }
-    }
-
-    static async getOrCreateUser(guildId, userToGet) {
-        let user = await userDAO.get(userToGet.id, guildId);
-        
-        if (!user) {
-            console.log(`Creating user for ${userToGet.username}`)
-            user = new User(
-                userToGet.id,
-                guildId,
-                userToGet.username,
-                userToGet.displayAvatarURL()
-            );
-
-            await userDAO.insert(user, true);
-        }
-
-        return user;
     }
 }
 

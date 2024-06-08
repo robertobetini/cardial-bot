@@ -1,19 +1,17 @@
 const userDAO = require("./../DAOs/userDAO");
 const statsDAO = require("./../DAOs/statsDAO");
-const User = require("../models/user");
+const UserService = require("../services/userService");
 
 class EconomyService {
     static async addGold(guildId, targetUser, goldAmount) {
-        let user = await EconomyService.getOrCreateUser(guildId, targetUser);
-
+        let user = await UserService.getOrCreateUser(guildId, targetUser);
         user.tryUpdateGold(goldAmount);
-
-        await userDAO.upsert(user, true);
+        await UserService.upsert(user, true);
     }
 
     static async transferGold(guildId, partyUser, counterpartyUser, goldAmount) {
-        let party = await EconomyService.getOrCreateUser(guildId, partyUser);
-        let counterparty = await EconomyService.getOrCreateUser(guildId, counterpartyUser);
+        let party = await UserService.getOrCreateUser(guildId, partyUser);
+        let counterparty = await UserService.getOrCreateUser(guildId, counterpartyUser);
 
         party.tryUpdateGold(-goldAmount);
         counterparty.tryUpdateGold(goldAmount);
@@ -23,21 +21,6 @@ class EconomyService {
 
     static async clearGoldFromAllUsers(guildId) {
         await statsDAO.clearGoldFromAll(guildId);
-    }
-
-    static async getOrCreateUser(guildId, userToGet) {
-        let user = await userDAO.get(userToGet.id, guildId);
-        
-        if (!user) {
-            user = new User(
-                userToGet.id,
-                guildId,
-                userToGet.username,
-                userToGet.displayAvatarURL()
-            );
-        }
-
-        return user;
     }
 }
 

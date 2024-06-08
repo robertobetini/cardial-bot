@@ -56,31 +56,32 @@ const buildAttributesActionRows = (guildId, userId, selected) => {
     ];
 }
 
-const buildSelectedAttributeActionRows = (guildId, userId, selected, buttonAvailability = [true, true, true]) => {
+const buildSelectedAttributeActionRows = (guildId, userId, selected, buttonAvailability = [true, true, true, true]) => {
     let actionRows = buildAttributesActionRows(guildId, userId, selected);
 
     const cancelButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:clearTempAttributes`)
         .setLabel("Cancelar")
-        .setStyle(Discord.ButtonStyle.Danger);
+        .setStyle(Discord.ButtonStyle.Danger)
+        .setDisabled(!buttonAvailability[0]);
 
     const decreaseButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:decreaseAttribute:${selected}`)
         .setLabel("-")
         .setStyle(Discord.ButtonStyle.Primary)
-        .setDisabled(!buttonAvailability[0]);
+        .setDisabled(!buttonAvailability[1]);
 
     const increaseButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:increaseAttribute:${selected}`)
         .setLabel("+")
         .setStyle(Discord.ButtonStyle.Primary)
-        .setDisabled(!buttonAvailability[1]);
+        .setDisabled(!buttonAvailability[2]);
 
     const confirmButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:saveTempAttributes`)
         .setLabel("Confirmar")
         .setStyle(Discord.ButtonStyle.Success)
-        .setDisabled(!buttonAvailability[2]);
+        .setDisabled(!buttonAvailability[3]);
 
     actionRows[1] = actionRows[1].addComponents(cancelButton, decreaseButton, increaseButton, confirmButton);
 
@@ -112,11 +113,11 @@ const buildSkillsActionRow = async (guildId, userId, selected) => {
 const getAttributeButtonsAvailability = (guildId, memberId, selectedAttribute) => {
     const key = guildId + memberId;
 
-    console.log(tempAttributes[key]);
     if (!tempAttributes[key]) {
-        return [false, false, false];
+        return [false, false, false, false];
     }
 
+    let cancelButtonEnabled = true;
     let decreaseButtonEnabled = true;
     let increaseButtonEnabled = true;
     let confirmButtonEnabled = false;
@@ -133,7 +134,7 @@ const getAttributeButtonsAvailability = (guildId, memberId, selectedAttribute) =
         increaseButtonEnabled = false;
     }
 
-    return [ decreaseButtonEnabled, increaseButtonEnabled, confirmButtonEnabled ];
+    return [ cancelButtonEnabled, decreaseButtonEnabled, increaseButtonEnabled, confirmButtonEnabled ];
 }
 
 const buildSelectedSkillActionRows = async (guildId, userId, selected) => {
@@ -203,7 +204,10 @@ const createTempAttributeEntryIfNotExists = async (guildId, memberId) => {
     }
     
     const currentAttributes = await AttributesService.get(guildId, memberId);
-    
+    if (currentAttributes.availablePoints < 1) {
+        return;
+    }
+
     tempAttributes[key] = {};
     tempAttributes[key].FOR = currentAttributes.FOR;
     tempAttributes[key].DEX = currentAttributes.DEX;
@@ -212,6 +216,8 @@ const createTempAttributeEntryIfNotExists = async (guildId, memberId) => {
     tempAttributes[key].CHA = currentAttributes.CHA;
     tempAttributes[key].availablePoints = currentAttributes.availablePoints;
     tempAttributes[key].firstAttributionDone = currentAttributes.firstAttributionDone;
+
+    return currentAttributes;
 }
 
 module.exports = {
@@ -366,8 +372,12 @@ module.exports = {
         }
 
         const selectedAttribute = interaction.values[0];
-        await createTempAttributeEntryIfNotExists(guildId, memberId);
-        const attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute);
+        const currentAttributes = await createTempAttributeEntryIfNotExists(guildId, memberId);
+
+        let attributeButtonsAvailability = [false, false, false, false];
+        if (!currentAttributes || currentAttributes.availablePoints > 0) {
+            attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute);
+        }
         const actionRows = buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability);
         
         interaction.message.edit({ components: actionRows });
@@ -415,8 +425,10 @@ module.exports = {
         delete tempAttributes[key];
 
         const updatedEmbed = await EmbededResponseService.getUserStatus(guildId, interaction.member);
+        const actionRows = buildAttributesActionRows(guildId, memberId);
         interaction.message.edit({ 
             content: "",
+            components: actionRows,
             embeds: [updatedEmbed] 
         });
 

@@ -19,12 +19,22 @@ class User {
     }
 
     addExp(exp) { 
+        const levelBefore = this.stats.lvl;
         this.stats?.addExp(exp); 
+        const levelAfter = this.stats.lvl;
+
+        for (let i = 0; i < levelAfter - levelBefore; i++) {
+            this.levelUp();
+        }
     }
 
     tryUpdateGold(amount) {
         this.stats?.tryUpdateGold(amount);
-    } 
+    }
+
+    levelUp() {
+        return;
+    }
 
     static fromDTO(userDTO) {
         return new User(

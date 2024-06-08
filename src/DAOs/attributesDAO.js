@@ -16,14 +16,14 @@ class AttributesDAO extends MySQLDAO {
     }
     async insert(userId, guildId, attributes, transactionConn = null) {
         const conn = transactionConn || await this.getConnection();
-        const query = "INSERT INTO ATTRIBUTES (userId, guildId, `FOR`, DEX, CON, WIS, CHA, availablePoints) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        const _res = await conn.execute(query, [userId, guildId, attributes.FOR, attributes.DEX, attributes.CON, attributes.WIS, attributes.CHA, attributes.availablePoints]);
+        const query = "INSERT INTO ATTRIBUTES (userId, guildId, `FOR`, DEX, CON, WIS, CHA, availablePoints, firstAttributionDone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        const _res = await conn.execute(query, [userId, guildId, attributes.FOR, attributes.DEX, attributes.CON, attributes.WIS, attributes.CHA, attributes.availablePoints, attributes.firstAttributionDone]);
     }
 
     async update(userId, guildId, attributes, transactionConn = null) {
         const conn = transactionConn || await this.getConnection();
-        const query = "UPDATE ATTRIBUTES SET `FOR` = ?, DEX = ?, CON = ?, WIS = ?, CHA = ? WHERE userId = ? AND guildId = ?";
-        const res = await conn.execute(query, [attributes.FOR, attributes.DEX, attributes.CON, attributes.WIS, attributes.CHA, userId, guildId]);
+        const query = "UPDATE ATTRIBUTES SET `FOR` = ?, DEX = ?, CON = ?, WIS = ?, CHA = ?, availablePoints = ?, firstAttributionDone = ? WHERE userId = ? AND guildId = ?";
+        const res = await conn.execute(query, [attributes.FOR, attributes.DEX, attributes.CON, attributes.WIS, attributes.CHA, attributes.availablePoints, attributes.firstAttributionDone, userId, guildId]);
 
         return res[0].affectedRows > 0;
     }

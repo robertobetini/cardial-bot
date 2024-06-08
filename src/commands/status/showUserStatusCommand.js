@@ -12,6 +12,12 @@ const SkillsService = require("../../services/skillService");
 
 const Constants = require("../../constants");
 
+const MIN_ATTRIBUTE_VALUE = 7
+const MAX_ATTRIBUTE_VALUE_FOR_FIRST_TIME = 15;
+const MAX_ATTRIBUTE_VALUE = 30;
+
+const tempAttributes = {};
+
 const buildHomeActionRow = (guildId, memberId) => {
     const statusButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:showUserStatusCommand:showStatsRow`)
@@ -19,7 +25,7 @@ const buildHomeActionRow = (guildId, memberId) => {
         .setStyle(Discord.ButtonStyle.Primary);
 
     const attributesButton = new Discord.ButtonBuilder()
-        .setCustomId(`${guildId}:${memberId}:showUserStatusCommand:showAttributesModal`)
+        .setCustomId(`${guildId}:${memberId}:showUserStatusCommand:showAttributesRow`)
         .setLabel("Atributos")
         .setStyle(Discord.ButtonStyle.Primary);
 
@@ -36,11 +42,11 @@ const buildHomeActionRow = (guildId, memberId) => {
     return new Discord.ActionRowBuilder().addComponents(statusButton, attributesButton, skillsButton, characterButton);
 }
 
-const buildStatsActionRows = (guildId, userId, selected) => {
+const buildAttributesActionRows = (guildId, userId, selected) => {
     const statsSelect = new Discord.StringSelectMenuBuilder()
-        .setCustomId(`${guildId}:${userId}:showUserStatusCommand:selectStat`)
+        .setCustomId(`${guildId}:${userId}:showUserStatusCommand:selectAttribute`)
         .setPlaceholder("Selecione um status")
-        .setOptions(createSelectOptions(Constants.stats, selected));
+        .setOptions(createSelectOptions(Constants.attributes, selected));
 
     const gotoHomeButton = createGotoHomeButton(guildId, userId);
 
@@ -50,15 +56,33 @@ const buildStatsActionRows = (guildId, userId, selected) => {
     ];
 }
 
-const buildSelectedStatActionRows = (guildId, userId, selected) => {
-    let actionRows = buildStatsActionRows(guildId, userId, selected);
+const buildSelectedAttributeActionRows = (guildId, userId, selected, buttonAvailability = [true, true, true]) => {
+    let actionRows = buildAttributesActionRows(guildId, userId, selected);
 
-    const updateButton = new Discord.ButtonBuilder()
-        .setCustomId(`${guildId}:${userId}:showUserStatusCommand:showUpdateStatModal:${selected}`)
-        .setLabel("Atualizar")
-        .setStyle(Discord.ButtonStyle.Success);
+    const cancelButton = new Discord.ButtonBuilder()
+        .setCustomId(`${guildId}:${userId}:showUserStatusCommand:clearTempAttributes`)
+        .setLabel("Cancelar")
+        .setStyle(Discord.ButtonStyle.Danger);
 
-    actionRows[1] = actionRows[1].addComponents(updateButton);
+    const decreaseButton = new Discord.ButtonBuilder()
+        .setCustomId(`${guildId}:${userId}:showUserStatusCommand:decreaseAttribute:${selected}`)
+        .setLabel("-")
+        .setStyle(Discord.ButtonStyle.Primary)
+        .setDisabled(!buttonAvailability[0]);
+
+    const increaseButton = new Discord.ButtonBuilder()
+        .setCustomId(`${guildId}:${userId}:showUserStatusCommand:increaseAttribute:${selected}`)
+        .setLabel("+")
+        .setStyle(Discord.ButtonStyle.Primary)
+        .setDisabled(!buttonAvailability[1]);
+
+    const confirmButton = new Discord.ButtonBuilder()
+        .setCustomId(`${guildId}:${userId}:showUserStatusCommand:saveTempAttributes`)
+        .setLabel("Confirmar")
+        .setStyle(Discord.ButtonStyle.Success)
+        .setDisabled(!buttonAvailability[2]);
+
+    actionRows[1] = actionRows[1].addComponents(cancelButton, decreaseButton, increaseButton, confirmButton);
 
     return actionRows;
 }
@@ -85,6 +109,33 @@ const buildSkillsActionRow = async (guildId, userId, selected) => {
     ];
 }
 
+const getAttributeButtonsAvailability = (guildId, memberId, selectedAttribute) => {
+    const key = guildId + memberId;
+
+    console.log(tempAttributes[key]);
+    if (!tempAttributes[key]) {
+        return [false, false, false];
+    }
+
+    let decreaseButtonEnabled = true;
+    let increaseButtonEnabled = true;
+    let confirmButtonEnabled = false;
+
+    const maxAttributeValue = tempAttributes[key].firstAttributionDone ? MAX_ATTRIBUTE_VALUE : MAX_ATTRIBUTE_VALUE_FOR_FIRST_TIME;
+    if (tempAttributes[key][selectedAttribute] >= maxAttributeValue) {
+        increaseButtonEnabled = false;
+    }
+    if (tempAttributes[key][selectedAttribute] <= MIN_ATTRIBUTE_VALUE) {
+        decreaseButtonEnabled = false;
+    }
+    if (tempAttributes[key].availablePoints < 1) {
+        confirmButtonEnabled = true;
+        increaseButtonEnabled = false;
+    }
+
+    return [ decreaseButtonEnabled, increaseButtonEnabled, confirmButtonEnabled ];
+}
+
 const buildSelectedSkillActionRows = async (guildId, userId, selected) => {
     let actionRows = await buildSkillsActionRow(guildId, userId, selected);
 
@@ -96,18 +147,6 @@ const buildSelectedSkillActionRows = async (guildId, userId, selected) => {
     actionRows[2] = actionRows[2].addComponents(updateButton);
 
     return actionRows;
-}
-
-const createAttributeInput = (attribute, defaultValue) => {
-    return new Discord.TextInputBuilder()
-        .setCustomId(attribute)
-        .setLabel(attribute)
-        .setStyle(Discord.TextInputStyle.Short)
-        .setValue(defaultValue)
-        .setPlaceholder("Min: 0, Max: 999")
-        .setMaxLength(3)
-        .setMinLength(1)
-        .setRequired(true);
 }
 
 const createTextInput = (customId, label, style, required = false, defaultValue = null, placeholder = null, minLength = null, maxLength = null) => {
@@ -149,6 +188,32 @@ const createGotoHomeButton = (guildId, userId) => {
         .setStyle(Discord.ButtonStyle.Secondary);
 }
 
+const changeTempAttributesByAmount = async (guildId, memberId, selectedAttribute, amount) => {
+    await createTempAttributeEntryIfNotExists(guildId, memberId);
+    
+    const key = guildId + memberId;
+    tempAttributes[key][selectedAttribute] += amount;
+    tempAttributes[key].availablePoints -= amount;
+}
+
+const createTempAttributeEntryIfNotExists = async (guildId, memberId) => {
+    const key = guildId + memberId;
+    if (tempAttributes[key]) {
+        return;
+    }
+    
+    const currentAttributes = await AttributesService.get(guildId, memberId);
+    
+    tempAttributes[key] = {};
+    tempAttributes[key].FOR = currentAttributes.FOR;
+    tempAttributes[key].DEX = currentAttributes.DEX;
+    tempAttributes[key].CON = currentAttributes.CON;
+    tempAttributes[key].WIS = currentAttributes.WIS;
+    tempAttributes[key].CHA = currentAttributes.CHA;
+    tempAttributes[key].availablePoints = currentAttributes.availablePoints;
+    tempAttributes[key].firstAttributionDone = currentAttributes.firstAttributionDone;
+}
+
 module.exports = {
     data: new Discord.SlashCommandBuilder()
         .setName("ficha")
@@ -167,7 +232,8 @@ module.exports = {
             await interaction.editReply("É necessário cargo de ADM para consultar o status de outros usuários.");
         }
 
-        const embed = await EmbededResponseService.getUserStatus(guildId, target);
+        const key = guildId + target.id;
+        const embed = await EmbededResponseService.getUserStatus(guildId, target, tempAttributes[key]);
         const actionRow = buildHomeActionRow(guildId, target.id);
 
         await interaction.editReply({
@@ -176,35 +242,16 @@ module.exports = {
             components: [actionRow]
         });
     },
-    showAttributesModal: async (interaction, guildId, memberId) => {
+    showAttributesRow: async (interaction, guildId, memberId) => {
         if (interaction.user.id != memberId) {
             await interaction.deferUpdate();
             return;
         }
 
-        const attributes = await AttributesService.get(guildId, memberId);
+        const actionRows = buildAttributesActionRows(guildId, memberId);
+        interaction.message.edit({ components: actionRows });
 
-        const modal = new Discord.ModalBuilder()
-			.setCustomId(`${guildId}:${memberId}:showUserStatusCommand:updateAttributes`)
-			.setTitle("Atributos");
-
-        const inputs = [
-            createAttributeInput("FOR", attributes.FOR.toString()),
-            createAttributeInput("DEX", attributes.DEX.toString()),
-            createAttributeInput("CON", attributes.CON.toString()),
-            createAttributeInput("WIS", attributes.WIS.toString()),
-            createAttributeInput("CHA", attributes.CHA.toString())
-        ];
-
-        const actionRows = [];
-        for (let input of inputs) {
-            const actionRow = new Discord.ActionRowBuilder().addComponents(input);
-            actionRows.push(actionRow);
-        }
-
-        modal.addComponents(actionRows);
-
-        await interaction.showModal(modal);
+        await interaction.deferUpdate();
     },
     updateAttributes: async (interaction, guildId, memberId) => {
         const $for = Number(interaction.fields.getTextInputValue("FOR"));
@@ -223,7 +270,8 @@ module.exports = {
         const attributes = new Attributes(memberId, guildId, $for, dex, con, wis, cha);
         await AttributesService.update(attributes);
 
-        const updatedEmbed = await EmbededResponseService.getUserStatus(guildId, interaction.member);
+        const key = guildId + memberId;
+        const updatedEmbed = await EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]);
         interaction.message.edit({ 
             content: "",
             embeds: [updatedEmbed] 
@@ -287,22 +335,12 @@ module.exports = {
 
         await userDAO.update(user, false);
 
-        const updatedEmbed = await EmbededResponseService.getUserStatus(guildId, interaction.member);
+        const key = guildId + memberId;
+        const updatedEmbed = await EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]);
         interaction.message.edit({ 
             content: "",
             embeds: [updatedEmbed] 
         });
-
-        await interaction.deferUpdate();
-    },
-    showStatsRow: async (interaction, guildId, memberId) => {
-        if (interaction.user.id != memberId) {
-            await interaction.deferUpdate();
-            return;
-        }
-
-        const actionRows = buildStatsActionRows(guildId, memberId);
-        interaction.message.edit({ components: actionRows });
 
         await interaction.deferUpdate();
     },
@@ -321,59 +359,102 @@ module.exports = {
 
         await interaction.deferUpdate();
     },
-    selectStat: async (interaction, guildId, memberId) => {
+    selectAttribute: async (interaction, guildId, memberId) => {
         if (interaction.user.id != memberId) {
             await interaction.deferUpdate();
             return;
         }
 
-        const selectedStat = interaction.values[0];
-        const actionRows = buildSelectedStatActionRows(guildId, memberId, selectedStat);
+        const selectedAttribute = interaction.values[0];
+        await createTempAttributeEntryIfNotExists(guildId, memberId);
+        const attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute);
+        const actionRows = buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability);
         
         interaction.message.edit({ components: actionRows });
 
         await interaction.deferUpdate();
     },
-    showUpdateStatModal: async (interaction, guildId, memberId, selectedStat) => {
+    clearTempAttributes: async (interaction, guildId, memberId) => {
         if (interaction.user.id != memberId) {
             await interaction.deferUpdate();
             return;
         }
 
-        const stats = await StatsService.get(memberId, guildId);
-        
-        const modal = new Discord.ModalBuilder()
-			.setCustomId(`${guildId}:${memberId}:showUserStatusCommand:updateStats:${selectedStat}`)
-			.setTitle("Atualização de status");
+        const key = guildId + memberId;
+        delete tempAttributes[key];
 
-        const input = createTextInput(
-            "newValue", 
-            "Novo Valor", 
-            Discord.TextInputStyle.Short, 
-            required = true,
-            defaultValue = stats[selectedStat].toString(),
-            placeholder = "Min: 0, Max: 999",
-            minLength = 1,
-            maxLength = 3
-        );
-        const actionRow = new Discord.ActionRowBuilder().addComponents(input);
+        const updatedEmbed = await EmbededResponseService.getUserStatus(guildId, interaction.member);
+        const actionRows = buildAttributesActionRows(guildId, memberId);
+        interaction.message.edit({ 
+            content: "",
+            components: actionRows,
+            embeds: [updatedEmbed] 
+        });
 
-        modal.addComponents(actionRow);
-
-        await interaction.showModal(modal);
+        await interaction.deferUpdate();
     },
-    updateStats: async (interaction, guildId, memberId, selectedStat) => {
-        const newValue = Number(interaction.fields.getTextInputValue("newValue"));
-        
-        if (isNaN(newValue) || newValue < 0) {
+    saveTempAttributes: async (interaction, guildId, memberId) => {
+        const key = guildId + memberId;
+        if (interaction.user.id != memberId || !tempAttributes[key] || tempAttributes[key].availablePoints > 0) {
             await interaction.deferUpdate();
             return;
         }
 
-        await StatsService.updateSingleStat(memberId, guildId, selectedStat, newValue);
+        const attributes = new Attributes(
+            memberId, guildId, 
+            tempAttributes[key].FOR, 
+            tempAttributes[key].DEX, 
+            tempAttributes[key].CON, 
+            tempAttributes[key].WIS, 
+            tempAttributes[key].CHA,
+            tempAttributes[key].availablePoints,
+            true
+        );
 
-        const embed = await EmbededResponseService.getUserStatus(guildId, interaction.user);
-        interaction.message.edit({ embeds: [embed] });
+        await AttributesService.update(attributes);
+        delete tempAttributes[key];
+
+        const updatedEmbed = await EmbededResponseService.getUserStatus(guildId, interaction.member);
+        interaction.message.edit({ 
+            content: "",
+            embeds: [updatedEmbed] 
+        });
+
+        await interaction.deferUpdate();
+    },
+    increaseAttribute: async (interaction, guildId, memberId, selectedAttribute) => {
+        const key = guildId + memberId;
+        if (interaction.user.id != memberId) {
+            await interaction.deferUpdate();
+            return;
+        }
+
+        await changeTempAttributesByAmount(guildId, memberId, selectedAttribute, 1);
+        
+        const attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute);
+        interaction.message.edit({ 
+            content: "", 
+            components: buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability),
+            embeds: [ await EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]) ]
+        });
+
+        await interaction.deferUpdate();
+    },
+    decreaseAttribute: async (interaction, guildId, memberId, selectedAttribute) => {
+        const key = guildId + memberId;
+        if (interaction.user.id != memberId) {
+            await interaction.deferUpdate();
+            return;
+        }
+
+        await changeTempAttributesByAmount(guildId, memberId, selectedAttribute, -1);
+
+        const attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute);
+        interaction.message.edit({ 
+            content: "", 
+            components: buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability),
+            embeds: [ await EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]) ]
+        });
 
         await interaction.deferUpdate();
     },
@@ -434,7 +515,8 @@ module.exports = {
             return;
         }
 
-        const embed = await EmbededResponseService.getUserStatus(guildId, interaction.user);
+        const key = guildId + memberId;
+        const embed = await EmbededResponseService.getUserStatus(guildId, interaction.user, tempAttributes[key]);
         const actionRow = buildHomeActionRow(guildId, memberId);
         interaction.message.edit({ 
             embeds: [embed],

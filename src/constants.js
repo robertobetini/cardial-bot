@@ -1,4 +1,11 @@
 module.exports = {
+    attributes: [
+        { label: "Força", value: "FOR" },
+        { label: "Destreza", value: "DEX" },
+        { label: "Constituição", value: "CON" },
+        { label: "Conhecimento", value: "WIS" },
+        { label: "Carisma", value: "CHA" }
+    ],
     stats: [ 
         { label: "🔴 HP atual", value: "currentHP" },
         { label: "🔴 HP max", value: "maxHP" },

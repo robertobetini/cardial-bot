@@ -7,7 +7,7 @@ const expCalculator = require("../expCalculator");
 
 const User = require("../models/user");
 
-const constants = require("../constants");
+const Constants = require("../constants");
 
 const PAGE_SIZE = 10;
 
@@ -57,7 +57,7 @@ class EmbededResponseService {
             "Proficient": "Proficiente",
             "Specialist": "Especialista"
         }
-        for (let skill of constants.skills) {
+        for (let skill of Constants.skills) {
             fields[0].value += `${skill.label}\n`;
             fields[1].value += `${translation[user.skills[skill.value]]}\n`;
         }
@@ -72,7 +72,7 @@ class EmbededResponseService {
             .setFooter({ text: "Cardial Bot" });
     }
 
-    static async getUserStatus(guildId, discordUser) {
+    static async getUserStatus(guildId, discordUser, tempAttributes = null) {
         let user = await userDAO.get(discordUser.id, guildId, true);
         
         if (!user) {
@@ -97,6 +97,7 @@ class EmbededResponseService {
         const spView = EmbededResponseService.createStatusSummarizedView(user.stats.currentSP, user.stats.maxSP, user.stats.tempSP);
         const expView = EmbededResponseService.createStatusSummarizedView(user.stats.exp, maxLvlExp, 0);
 
+        const attributes = tempAttributes || user.attributes;
         const embedFields = [
             { 
                 name: "> Status",
@@ -118,13 +119,13 @@ class EmbededResponseService {
                     `**💰 Gold:** ${user.stats.gold}\n`
             },
             {
-                name: `> Atributos (${user.attributes.availablePoints})`,
+                name: `> Atributos (${attributes.availablePoints})`,
                 value:
-                    `Força: ${user.attributes.FOR}\n` +
-                    `Destreza: ${user.attributes.DEX}\n` +
-                    `Constituição: ${user.attributes.CON}\n` +
-                    `Conhecimento: ${user.attributes.WIS}\n` +
-                    `Carisma: ${user.attributes.CHA}`
+                    `Força: ${attributes.FOR}\n` +
+                    `Destreza: ${attributes.DEX}\n` +
+                    `Constituição: ${attributes.CON}\n` +
+                    `Conhecimento: ${attributes.WIS}\n` +
+                    `Carisma: ${attributes.CHA}`
             }
         ];
 

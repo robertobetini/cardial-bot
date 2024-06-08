@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS ATTRIBUTES (
     WIS INT, 
     CHA INT,
     availablePoints INT,
+    firstAttributionDone BOOLEAN,
 
     PRIMARY KEY (attributesId),
     CONSTRAINT FK_UserAttributes FOREIGN KEY (userId, guildId) REFERENCES USERS(userId, guildId)

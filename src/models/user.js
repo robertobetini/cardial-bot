@@ -7,10 +7,11 @@ const Constants = require("../constants");
 const { calculateAttributeMod } = require("../calculators/modCalculator");
 
 class User {
-    constructor(userId, guildId, name, silenceEndTime = null, playerName = "", job = "", notes = "", attributes = null, stats = null, skills = null) {
+    constructor(userId, guildId, name, imgUrl, silenceEndTime = null, playerName = "", job = "", notes = "", attributes = null, stats = null, skills = null) {
         this.userId = userId;
         this.guildId = guildId;
         this.username = name;
+        this.imgUrl = imgUrl;
         this.silenceEndTime = silenceEndTime;
         this.playerName = playerName;
         this.job = job;
@@ -53,6 +54,7 @@ class User {
             userDTO.userId, 
             userDTO.guildId,
             userDTO.user,
+            userDTO.imgUrl,
             userDTO.silenceEndTime,
             userDTO.playerName,
             userDTO.job,

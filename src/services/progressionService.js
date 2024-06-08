@@ -8,8 +8,9 @@ class ProgressionService {
             user = new User(
                 targetUser.id,
                 guildId,
-                targetUser.username
-            );
+                targetUser.username,
+                targetUser.displayAvatarURL()
+            );   
         }
 
         user.addExp(expAmount);

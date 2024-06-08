@@ -6,9 +6,12 @@ const RoleService = require("../../services/roleService");
 const EmbededResponseService = require("../../services/embededResponseService");
 const AttributesService = require("../../services/attributesService");
 const StatsService = require("../../services/statsService");
-
-const Attributes = require("../../models/attributes");
 const SkillsService = require("../../services/skillService");
+
+const User = require("../../models/user");
+const Attributes = require("../../models/attributes");
+
+const Logger = require("../../logger");
 
 const Constants = require("../../constants");
 
@@ -30,7 +33,12 @@ const buildHomeActionRow = (guildId, memberId) => {
         .setLabel("Personagem")
         .setStyle(Discord.ButtonStyle.Primary);
 
-    return new Discord.ActionRowBuilder().addComponents(attributesButton, skillsButton, characterButton);
+    const removeUserButton = new Discord.ButtonBuilder()
+        .setCustomId(`${guildId}:${memberId}:showUserStatusCommand:showConfirmRemovalModal`)
+        .setLabel("Excluir")
+        .setStyle(Discord.ButtonStyle.Danger);
+
+    return new Discord.ActionRowBuilder().addComponents(attributesButton, skillsButton, characterButton, removeUserButton);
 }
 
 const buildAttributesActionRows = (guildId, userId, selected) => {
@@ -300,6 +308,16 @@ module.exports = {
                 maxLength = 32
             ),
             createTextInput(
+                "imgUrl", 
+                "Imagem da thumbnail (URL)", 
+                Discord.TextInputStyle.Short, 
+                required = true,
+                defaultValue = user.imgUrl,
+                placeholder = "Ex: Geralt of Rivia, Andrezitos, x-ae-a-12",
+                minLength = 1,
+                maxLength = 512
+            ),
+            createTextInput(
                 "notes", 
                 "Notas", 
                 Discord.TextInputStyle.Paragraph,
@@ -323,11 +341,13 @@ module.exports = {
     },
     updateCharacter: async (interaction, guildId, memberId) => {
         const name = interaction.fields.getTextInputValue("name");
+        const imgUrl = interaction.fields.getTextInputValue("imgUrl");
         const notes = interaction.fields.getTextInputValue("notes");
 
         const user = await userDAO.get(memberId, guildId, false);
 
         user.playerName = name;
+        user.imgUrl = imgUrl;
         user.notes = notes;
 
         await userDAO.update(user, false);
@@ -493,7 +513,7 @@ module.exports = {
 
         await interaction.deferUpdate();
     },
-    updateSkillLevel: async (interaction, guildId, memberId, selectedSkill) => {
+    updateSkillLevel: async (interaction, guildId, memberId) => {
         if (interaction.user.id != memberId) {
             await interaction.deferUpdate();
             return;
@@ -528,6 +548,53 @@ module.exports = {
             embeds: [embed],
             components: [actionRow] 
         });
+
+        await interaction.deferUpdate();
+    },
+    showConfirmRemovalModal: async (interaction, guildId, memberId) => {
+        if (interaction.user.id != memberId) {
+            await interaction.deferUpdate();
+            return;
+        }
+
+        const modal = new Discord.ModalBuilder()
+			.setCustomId(`${guildId}:${memberId}:showUserStatusCommand:confirmUserRemoval`)
+			.setTitle("Exclusão de ficha");
+
+        const input = createTextInput(
+                "confirmUserRemovalText", 
+                "Digite 'confirmo' para excluir a sua ficha", 
+                Discord.TextInputStyle.Short, 
+                required = true,
+                defaultValue = null,
+                placeholder = "Ex: Geralt of Rivia, Andrezitos, x-ae-a-12",
+                minLength = null,
+                maxLength = 32
+            );
+        
+        const actionRows = [ new Discord.ActionRowBuilder().addComponents(input) ];
+        modal.addComponents(actionRows);
+
+        await interaction.showModal(modal);
+    },
+    confirmUserRemoval: async (interaction, guildId, memberId) => {
+        const text = interaction.fields.getTextInputValue("confirmUserRemovalText");
+        
+        if (interaction.user.id != memberId || text.toLowerCase() !== "confirmo") {
+            await interaction.deferUpdate();
+            return;
+        }
+
+        const user = new User(memberId, guildId, interaction.user.username, interaction.user.displayAvatarURL());
+        await userDAO.update(user, true);
+
+        const key = guildId + memberId;
+        delete tempAttributes[key];
+
+        Logger.info(`User ${user.name} was removed`);
+
+        const embed = await EmbededResponseService.getUserStatus(guildId, memberId);
+        interaction.message.edit({ embeds: [embed] });
 
         await interaction.deferUpdate();
     }

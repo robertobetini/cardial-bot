@@ -7,16 +7,7 @@ const DAY_IN_MILLIS = 24 * HOUR_IN_MILLIS;
 
 class TimerService {
     static async addSilenceTime(guildId, discordUser, days, hours, minutes) {
-        let user = await userDAO.get(discordUser.id, guildId);
-
-        const now = new Date().getTime();
-        if (!user) {
-            user = new User(
-                discordUser.id,
-                guildId,
-                discordUser.username
-            );
-        }
+        let user = await TimerService.getOrCreateUser(guildId, discordUser);
 
         if (!user.silenceEndTime) {
             user.silenceEndTime = now;
@@ -28,16 +19,7 @@ class TimerService {
     }
 
     static async removeSilenceTime(guildId, discordUser, days, hours, minutes) {
-        let user = await userDAO.get(discordUser.id, guildId);
-
-        const now = new Date().getTime();
-        if (!user) {
-            user = new User(
-                discordUser.id,
-                guildId,
-                discordUser.username
-            );
-        }
+        let user = await TimerService.getOrCreateUser(guildId, discordUser);
 
         if (!user.silenceEndTime) {
             user.silenceEndTime = now;
@@ -55,6 +37,21 @@ class TimerService {
         return (days * DAY_IN_MILLIS)
         + (hours * HOUR_IN_MILLIS)
         + (minutes * MINUTE_IN_MILLIS);
+    }
+
+    static async getOrCreateUser(guildId, userToGet) {
+        let user = await userDAO.get(userToGet.id, guildId);
+        
+        if (!user) {
+            user = new User(
+                userToGet.id,
+                guildId,
+                userToGet.username,
+                userToGet.displayAvatarURL()
+            );
+        }
+
+        return user;
     }
 }
 

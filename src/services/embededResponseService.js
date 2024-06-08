@@ -46,7 +46,7 @@ class EmbededResponseService {
     }
 
     static async getUserSkills(guildId, userId) {
-        const user = await userDAO.get(userId, guildId, true);
+        const user = await EmbededResponseService.getOrCreateUser(userId, guildId, true);
 
         const fields = [
             { name: "> Perícia", value: "\n", inline: true },
@@ -65,6 +65,7 @@ class EmbededResponseService {
 
         return new Discord.EmbedBuilder()
             .setColor(0xbbbbbb)
+            .setThumbnail(user.imgUrl)
             .setTitle(user.playerName || "<sem_nome>")
             .setDescription(user.notes || " ")
             .setAuthor({ name: `Personagem de ${user.username}` })
@@ -74,17 +75,7 @@ class EmbededResponseService {
     }
 
     static async getUserStatus(guildId, discordUser, tempAttributes = null) {
-        let user = await userDAO.get(discordUser.id, guildId, true);
-        
-        if (!user) {
-            user = new User(
-                discordUser.id,
-                guildId,
-                discordUser.username
-            );
-
-            await userDAO.upsert(user, true);
-        }
+        let user = await EmbededResponseService.getOrCreateUser(guildId, discordUser);
         
         const maxLvlExp = expCalculator.getLevelExp(user.stats.lvl);
 
@@ -157,6 +148,7 @@ class EmbededResponseService {
         return new Discord.EmbedBuilder()
             .setColor(0xbbbbbb)
             .setTitle(user.playerName || "<sem_nome>")
+            .setThumbnail(user.imgUrl)
             .setDescription(user.notes || " ")
             .setAuthor({ name: `Personagem de ${user.username}` })
             .addFields(embedFields)
@@ -207,6 +199,24 @@ class EmbededResponseService {
         if (currentSP > 10) { return "apavorado"; }
         if (currentSP > 5) { return "loucura parcial"; }
         if (currentSP > 0) { return "insanidade"; }
+    }
+
+    static async getOrCreateUser(guildId, userToGet) {
+        let user = await userDAO.get(userToGet.id, guildId);
+        
+        if (!user) {
+            console.log(`Creating user for ${userToGet.username}`)
+            user = new User(
+                userToGet.id,
+                guildId,
+                userToGet.username,
+                userToGet.displayAvatarURL()
+            );
+
+            await userDAO.insert(user, true);
+        }
+
+        return user;
     }
 }
 

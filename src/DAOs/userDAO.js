@@ -68,8 +68,8 @@ class UserDAO extends MySQLDAO {
         await conn.beginTransaction();
 
         try {
-            const query = "INSERT INTO USERS (userId, guildId, user, silenceEndTime, playerName, job) VALUES (?, ?, ?, ?, ?, ?)";
-            const _res =  await conn.execute(query, [ user.userId, user.guildId, user.username, user.silenceEndTime, user.playerName, user.job ]);
+            const query = "INSERT INTO USERS (userId, guildId, user, silenceEndTime, playerName, job, imgUrl) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            const _res =  await conn.execute(query, [ user.userId, user.guildId, user.username, user.silenceEndTime, user.playerName, user.job, user.imgUrl ]);
     
             if (deepInsert) {
                 await statsDAO.insert(user.userId, user.guildId, user.stats, conn);
@@ -89,8 +89,8 @@ class UserDAO extends MySQLDAO {
         await conn.beginTransaction();
 
         try {
-            const query = "UPDATE USERS SET silenceEndTime = ?, playerName = ?, job = ?, notes = ? WHERE userId = ? and guildId = ?";
-            const res =  await conn.execute(query, [ user.silenceEndTime, user.playerName, user.job, user.notes, user.userId, user.guildId ]);
+            const query = "UPDATE USERS SET silenceEndTime = ?, playerName = ?, job = ?, notes = ?, imgUrl = ? WHERE userId = ? and guildId = ?";
+            const res =  await conn.execute(query, [ user.silenceEndTime, user.playerName, user.job, user.notes, user.imgUrl, user.userId, user.guildId ]);
     
             if (deepUpdate) {
                 await statsDAO.update(user.userId, user.guildId, user.stats, conn);

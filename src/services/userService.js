@@ -32,7 +32,7 @@ class UserService {
     }
 
     static async getAllFromGuild(guildId, orderby, skip, limit) {
-        await userDAO.getAllFromGuild(guildId, orderby, skip, limit);
+        return await userDAO.getAllFromGuild(guildId, orderby, skip, limit);
     }
 }
 

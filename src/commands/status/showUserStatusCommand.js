@@ -313,7 +313,7 @@ module.exports = {
                 Discord.TextInputStyle.Short, 
                 required = true,
                 defaultValue = user.imgUrl,
-                placeholder = "Ex: Geralt of Rivia, Andrezitos, x-ae-a-12",
+                placeholder = null,
                 minLength = 1,
                 maxLength = 512
             ),

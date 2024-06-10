@@ -367,7 +367,7 @@ module.exports = {
             return;
         }
 
-        const embed = await EmbededResponseService.getUserSkills(guildId, memberId);
+        const embed = await EmbededResponseService.getUserSkills(guildId, interaction.user);
         const actionRows = await buildSkillsActionRow(guildId, memberId);
         interaction.message.edit({
             embeds: [embed],
@@ -507,7 +507,7 @@ module.exports = {
         const newSkillLevel = skillValueOptions.find(opt => opt.default).value;
 
         await SkillsService.updateSingleSkill(memberId, guildId, selectedSkill, newSkillLevel);
-        const embed = await EmbededResponseService.getUserSkills(guildId, memberId);
+        const embed = await EmbededResponseService.getUserSkills(guildId, interaction.user);
 
         interaction.message.edit({ embeds: [embed] });
 

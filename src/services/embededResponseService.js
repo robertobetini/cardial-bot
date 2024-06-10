@@ -41,8 +41,8 @@ class EmbededResponseService {
             .setFooter({ text: "Cardial Bot" }), isEmpty];
     }
 
-    static async getUserSkills(guildId, userId) {
-        const user = await UserService.getOrCreateUser(userId, guildId, true);
+    static async getUserSkills(guildId, discordUser) {
+        const user = await UserService.getOrCreateUser(guildId, discordUser, true);
 
         const fields = [
             { name: "> Perícia", value: "\n", inline: true },

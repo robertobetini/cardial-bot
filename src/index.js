@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const Discord = require("discord.js");
 
 const commandLoader = require("./commandLoader");
@@ -8,9 +10,8 @@ const buttonHandler = require("./interactions/buttonInteractionHandler");
 const modalHandler = require("./interactions/modalInteractionHandler");
 const stringSelectMenuHandler = require("./interactions/stringSelectMenuHandler");
 
-const Logger = require("./logger");
 
-require('dotenv').config();
+const Logger = require("./logger");
 
 const MILLIS_IN_SECOND = 1000;
 const UPDATE_SILENT_USERS_INTERVAL_TIME = Number(process.env.UPDATE_SILENT_USERS_INTERVAL_TIME) * MILLIS_IN_SECOND ?? 60000;

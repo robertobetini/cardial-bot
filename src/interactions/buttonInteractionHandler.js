@@ -13,7 +13,7 @@ module.exports = {
         const info = customId.split(":");
         const [ guildId, memberId, command, actionHandler, customArg ] = info;
 
-        Logger.info(`Processing button handler: ${command}.${actionHandler}`);
+        Logger.debug(`Processing button handler: ${command}.${actionHandler}`);
         await commands[command][actionHandler](interaction, guildId, memberId, customArg);
     }
 }

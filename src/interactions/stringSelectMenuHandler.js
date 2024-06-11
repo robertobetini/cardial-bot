@@ -15,7 +15,7 @@ module.exports = {
             return;
         }
 
-        Logger.info(`Processing string select menu handler: ${command}.${actionHandler}`);
+        Logger.debug(`Processing string select menu handler: ${command}.${actionHandler}`);
         await commands[command][actionHandler](interaction, guildId, memberId, customArg);
     }
 }

@@ -13,7 +13,7 @@ module.exports = {
         await interaction.reply(".");
 
         try {
-            Logger.info(`Executing command: ${interaction.commandName}`);
+            Logger.debug(`Executing command: ${interaction.commandName}`);
             await command.execute(interaction);
         } catch (error) {
             Logger.error(error);

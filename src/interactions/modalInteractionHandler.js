@@ -11,7 +11,7 @@ module.exports = {
         const info = customId.split(":");
         const [ guildId, memberId, command, actionHandler, customArg ] = info;
 
-        Logger.info(`Processing modal handler: ${command}.${actionHandler}`);
+        Logger.debug(`Processing modal handler: ${command}.${actionHandler}`);
         await commands[command][actionHandler](interaction, guildId, memberId, customArg);
     }
 }

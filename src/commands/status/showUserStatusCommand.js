@@ -109,7 +109,7 @@ const buildSkillsActionRow = async (guildId, userId, selected) => {
     ];
 }
 
-const getAttributeButtonsAvailability = (guildId, memberId, selectedAttribute) => {
+const getAttributeButtonsAvailability = (guildId, memberId, selectedAttribute, currentAttributes = null) => {
     const key = guildId + memberId;
 
     if (!tempAttributes[key]) {
@@ -125,7 +125,9 @@ const getAttributeButtonsAvailability = (guildId, memberId, selectedAttribute) =
     if (tempAttributes[key][selectedAttribute] >= maxAttributeValue) {
         increaseButtonEnabled = false;
     }
-    if (tempAttributes[key][selectedAttribute] <= Constants.MIN_ATTRIBUTE_VALUE) {
+
+    const minAttributeValue = currentAttributes ? currentAttributes[selectedAttribute] : Constants.MIN_ATTRIBUTE_VALUE;
+    if (tempAttributes[key][selectedAttribute] <= minAttributeValue) {
         decreaseButtonEnabled = false;
     }
     if (tempAttributes[key].availablePoints < 1) {
@@ -198,16 +200,16 @@ const changeTempAttributesByAmount = async (guildId, memberId, selectedAttribute
 
 const createTempAttributeEntryIfNotExists = async (guildId, memberId) => {
     const key = guildId + memberId;
+    const currentAttributes = await AttributesService.get(guildId, memberId);
     if (tempAttributes[key]) {
-        return;
+        return currentAttributes;
     }
     
-    const currentAttributes = await AttributesService.get(guildId, memberId);
     if (currentAttributes.availablePoints < 1) {
-        return;
+        return currentAttributes;
     }
 
-    tempAttributes[key] = {};
+    tempAttributes[key] = { currentAttributes };
     tempAttributes[key].FOR = currentAttributes.FOR;
     tempAttributes[key].DEX = currentAttributes.DEX;
     tempAttributes[key].CON = currentAttributes.CON;
@@ -255,32 +257,6 @@ module.exports = {
 
         const actionRows = buildAttributesActionRows(guildId, memberId);
         interaction.message.edit({ components: actionRows });
-
-        await interaction.deferUpdate();
-    },
-    updateAttributes: async (interaction, guildId, memberId) => {
-        const $for = Number(interaction.fields.getTextInputValue("FOR"));
-        const dex = Number(interaction.fields.getTextInputValue("DEX"));
-        const con = Number(interaction.fields.getTextInputValue("CON"));
-        const wis = Number(interaction.fields.getTextInputValue("WIS"));
-        const cha = Number(interaction.fields.getTextInputValue("CHA"));
-        
-        for (let attribute of [ $for, dex, con, wis, cha ]) {
-            if (isNaN(attribute) || attribute < 0) {
-                await interaction.deferUpdate();
-                return;
-            }
-        }
-
-        const attributes = new Attributes(memberId, guildId, $for, dex, con, wis, cha);
-        await AttributesService.update(attributes);
-
-        const key = guildId + memberId;
-        const updatedEmbed = await EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]);
-        interaction.message.edit({ 
-            content: "",
-            embeds: [updatedEmbed] 
-        });
 
         await interaction.deferUpdate();
     },
@@ -387,7 +363,7 @@ module.exports = {
 
         let attributeButtonsAvailability = [false, false, false, false];
         if (!currentAttributes || currentAttributes.availablePoints > 0) {
-            attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute);
+            attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute, currentAttributes);
         }
         const actionRows = buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability);
         
@@ -432,10 +408,13 @@ module.exports = {
             true
         );
 
-        await AttributesService.update(attributes);
+        let propagateChangesToStats = true;
         if (!tempAttributes[key].firstAttributionDone) {
             await StatsService.setInitialStats(attributes);
+            propagateChangesToStats = false;
         }
+
+        await AttributesService.update(attributes, propagateChangesToStats);
         delete tempAttributes[key];
 
         const updatedEmbed = await EmbededResponseService.getUserStatus(guildId, interaction.member);
@@ -457,7 +436,7 @@ module.exports = {
 
         await changeTempAttributesByAmount(guildId, memberId, selectedAttribute, 1);
         
-        const attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute);
+        const attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute, tempAttributes[key].currentAttributes);
         interaction.message.edit({ 
             content: "", 
             components: buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability),
@@ -475,7 +454,7 @@ module.exports = {
 
         await changeTempAttributesByAmount(guildId, memberId, selectedAttribute, -1);
 
-        const attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute);
+        const attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute, tempAttributes[key].currentAttributes);
         interaction.message.edit({ 
             content: "", 
             components: buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability),

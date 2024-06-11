@@ -27,6 +27,7 @@ module.exports = {
             
             const target = interaction.options.getUser("user");
             const amount = interaction.options.getInteger("quantidade");
+            console.log("adicionando exp", target.id);
 
             await ProgressionService.addExp(interaction.guild.id, target, amount);
 

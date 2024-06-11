@@ -1,12 +1,15 @@
 const userDAO = require("../DAOs/userDAO");
 const User = require("../models/user");
 
+const Logger = require("../logger");
+
 class UserService {
     static async get(guildId, userId, fullUser = true) {
         return await userDAO.get(userId, guildId, fullUser);
     }
 
     static async getOrCreateUser(guildId, userToGet, fullUser = true) {
+        console.log("buscando user ", userToGet.id);
         let user = await UserService.get(guildId, userToGet.id, fullUser);
         
         if (!user) {
@@ -17,7 +20,8 @@ class UserService {
                 userToGet.displayAvatarURL()
             );
 
-            userDAO.insert(user, fullUser);
+            Logger.info(`Creating user for ${user.username}`);
+            await userDAO.insert(user, fullUser);
         }
 
         return user;

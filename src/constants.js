@@ -1,5 +1,6 @@
 const Constants = {
     PAGE_SIZE: 10,
+    MILLIS_IN_SECOND: 1000,
     MINUTE_IN_MILLIS: 60 * 1000,
     HOUR_IN_MILLIS: 60 * (60 * 1000),
     DAY_IN_MILLIS: 24 * (60 * 60 * 1000),
@@ -17,6 +18,7 @@ const Constants = {
     BASE_MAX_SP_PER_LEVEL: 0,
     INITIAL_AVAILABLE_ATTRIBUTES: 8,
     ATTRIBUTE_PER_LEVEL: 1,
+    INITIATIVE_COMMAND_MAX_USERS: 6,
     attributes: [
         { label: "Força", value: "FOR" },
         { label: "Destreza", value: "DEX" },

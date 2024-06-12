@@ -10,6 +10,7 @@ class EconomyService {
     }
 
     static async transferGold(guildId, partyUser, counterpartyUser, goldAmount) {
+        //TODO: refatorar pra usar promise.all
         let party = await UserService.getOrCreateUser(guildId, partyUser);
         let counterparty = await UserService.getOrCreateUser(guildId, counterpartyUser);
 

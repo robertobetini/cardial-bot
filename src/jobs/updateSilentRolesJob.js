@@ -1,12 +1,13 @@
 const RoleService = require("../services/roleService");
 const userDAO = require("../DAOs/userDAO");
-
+const Role = require("../models/role");
 const Logger = require("../logger");
 
 module.exports = {
     execute: async () => {
         Logger.info("Running update silent roles routine.");
 
+        //TODO: refatorar para promise.all
         const roles = await RoleService.getAllRoles();
         const users = await userDAO.getAllSilent();
 

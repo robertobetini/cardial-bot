@@ -10,11 +10,10 @@ const buttonHandler = require("./interactions/buttonInteractionHandler");
 const modalHandler = require("./interactions/modalInteractionHandler");
 const stringSelectMenuHandler = require("./interactions/stringSelectMenuHandler");
 
-
+const Constants = require("./constants");
 const Logger = require("./logger");
 
-const MILLIS_IN_SECOND = 1000;
-const UPDATE_SILENT_USERS_INTERVAL_TIME = Number(process.env.UPDATE_SILENT_USERS_INTERVAL_TIME) * MILLIS_IN_SECOND ?? 60000;
+const UPDATE_SILENT_USERS_INTERVAL_TIME = Number(process.env.UPDATE_SILENT_USERS_INTERVAL_TIME) * Constants.MILLIS_IN_SECOND ?? 60000;
 
 const client = new Discord.Client({ intents: [ Discord.GatewayIntentBits.Guilds ] });
 
@@ -45,6 +44,8 @@ client.on(Discord.Events.InteractionCreate, async interaction => {
 		Logger.info(`Processing chat interaction (${interaction.commandName})`);
 		await commandHandler.handleAsync(interaction);
     }
+
+	Logger.info(`Couldn't process interaction of type (${interaction.type})`);
 });
 
 client.login(process.env.TOKEN);

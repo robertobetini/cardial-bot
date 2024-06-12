@@ -6,7 +6,7 @@ class SkillsService {
     }
     
     static async updateSingleSkill(userId, guildId, skill, newValue) {
-        await skillsDAO.updateSingleSkill(userId, guildId, skill, newValue);
+        return await skillsDAO.updateSingleSkill(userId, guildId, skill, newValue);
     }
 }
 

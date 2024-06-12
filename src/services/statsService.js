@@ -5,8 +5,6 @@ const Constants = require("../constants");
 
 const { calculateAttributeMod } = require("../calculators/modCalculator");
 
-
-
 class StatsService {
     static async getUserStats(userId, guildId) {
         return await userDAO.get(userId, guildId, false);

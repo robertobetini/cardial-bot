@@ -8,13 +8,21 @@ const ERROR_LABEL = `${Colors.RED}[ERROR]${Colors.RESET}`;
 class Logger {
     static log = (label, message) => {
         const dateLabel = `${Colors.AQUA}${new Date().toLocaleString()}${Colors.RESET}`;
-        console.log(`${dateLabel} ${label} ${message}`);
+        process.stdout.write(`${dateLabel} ${label} `);
+        console.log(message);
     }
 
     static debug = (message) => Logger.log(DEBUG_LABEL, message); 
     static info  = (message) => Logger.log(INFO_LABEL,  message);
     static warn  = (message) => Logger.log(WARN_LABEL,  message);
     static error = (message) => Logger.log(ERROR_LABEL, message);
+
+    static time = (label) => console.time(label);
+    static timeEnd = (label) => {
+        const dateLabel = `${Colors.AQUA}${new Date().toLocaleString()}${Colors.RESET}`;
+        process.stdout.write(`${dateLabel} ${DEBUG_LABEL} `);
+        console.timeEnd(label);
+    }
 }
 
 // configure logger based on LOG_LEVEL

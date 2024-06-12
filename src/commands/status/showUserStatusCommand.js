@@ -343,6 +343,7 @@ module.exports = {
             return;
         }
 
+        // TODO: refatorar para usar promise.all()
         const embed = await EmbededResponseService.getUserSkills(guildId, interaction.user);
         const actionRows = await buildSkillsActionRow(guildId, memberId);
         interaction.message.edit({

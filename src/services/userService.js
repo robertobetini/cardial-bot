@@ -9,7 +9,6 @@ class UserService {
     }
 
     static async getOrCreateUser(guildId, userToGet, fullUser = true) {
-        console.log("buscando user ", userToGet.id);
         let user = await UserService.get(guildId, userToGet.id, fullUser);
         
         if (!user) {

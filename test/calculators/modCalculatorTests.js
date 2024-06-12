@@ -34,7 +34,7 @@ test(TESTING_MODULE, modCalculator.calculateAttributeMod,
         })
 );
 
-test(TESTING_MODULE, modCalculator.calculateProficiencyMod,
+test(TESTING_MODULE, modCalculator.calculateProficiencyBonus,
     () => 
         it("should calculate proficiency mod correctly", () => {
             var expected = [
@@ -47,7 +47,7 @@ test(TESTING_MODULE, modCalculator.calculateProficiencyMod,
             ];
             
             for (let value in expected) {
-                const result = modCalculator.calculateProficiencyMod(value);
+                const result = modCalculator.calculateProficiencyBonus(value);
                 assert.equal(expected[value], result);
             }
         })

@@ -19,7 +19,7 @@ module.exports = {
     calculateAttributeMod(value) {
         return attrModTable[value];
     },
-    calculateProficiencyMod(level) {
+    calculateProficiencyBonus(level) {
         return proficiencyModTable[level];
     }
 }

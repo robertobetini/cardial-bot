@@ -1,12 +1,13 @@
 const Discord = require("discord.js");
-const moment = require("moment");
 
 const expCalculator = require("../calculators/expCalculator");
 const modCalculator = require("../calculators/modCalculator");
+const challengeModCalculator = require("../calculators/challengeModCalculator");
 
 const UserService = require("../services/userService");
 
 const Constants = require("../constants");
+const Colors = require("../colors");
 
 class EmbededResponseService {
     static async getExpLeaderboard(guildId, page) {
@@ -45,8 +46,9 @@ class EmbededResponseService {
         const user = await UserService.getOrCreateUser(guildId, discordUser, true);
 
         const fields = [
-            { name: "> Perícia", value: "\n", inline: true },
-            { name: "> Proficiência", value: "\n", inline: true }
+            { name: "> Perícia",      value: "\n", inline: true },
+            { name: "> Proficiência", value: "\n", inline: true },
+            { name: "> Mod",          value: "\n", inline: true }
         ];
 
         const translation = {
@@ -57,6 +59,8 @@ class EmbededResponseService {
         for (let skill of Constants.skills) {
             fields[0].value += `${skill.label}\n`;
             fields[1].value += `${translation[user.skills[skill.value]]}\n`;
+            const challengeMod = challengeModCalculator.calculateChallengeMod(skill.value, user);
+            fields[2].value += `${challengeMod > 0 ? "+" : ""}${challengeMod}\n`
         }
 
         return new Discord.EmbedBuilder()
@@ -74,11 +78,6 @@ class EmbededResponseService {
         let user = await UserService.getOrCreateUser(guildId, discordUser);
         
         const maxLvlExp = expCalculator.getLevelExp(user.stats.lvl);
-
-        let silenceTimespan = "-";
-        if (user.silenceEndTime) {
-            silenceTimespan = moment(user.silenceEndTime).toNow(true);
-        }
 
         const hpView = EmbededResponseService.createStatusSummarizedView(user.stats.currentHP, user.stats.maxHP, user.stats.tempHP);
         const fpView = EmbededResponseService.createStatusSummarizedView(user.stats.currentFP, user.stats.maxFP, user.stats.tempFP);
@@ -103,7 +102,7 @@ class EmbededResponseService {
                     `**🔵 FP:** ${fpView}\n` +
                     `**🟣 SP:** ${spView} (${sanityDescription})\n` +
                     `**🛡️ CA:** ${user.stats.baseDEF + dexMod}\n` +
-                    `**🎯 B. Proficiência:** +${modCalculator.calculateProficiencyMod(user.stats.lvl)}\n` +
+                    `**🎯 B. Proficiência:** +${modCalculator.calculateProficiencyBonus(user.stats.lvl)}\n` +
                     `**👁️ Iniciativa:** ${user.stats.baseInitiative + dexMod}`
             },
             { 
@@ -165,6 +164,54 @@ class EmbededResponseService {
         }
 
         return fields;
+    }
+
+    static getRollView(dice, results, rerollsSoFar = 0) {
+        const calculateWhiteSpaces = (value) => {
+            
+            if (value >= 1000) { return " ";   }
+            if (value >=  100) { return "  ";  } 
+            if (value >=   10) { return "   "; }
+            return "    ";
+        }
+
+        const total = results.reduce((acc, current) => acc += current, 0);
+        let response = "```ansi\n";
+        for (let result of results) {
+            response += `${calculateWhiteSpaces(result)}${result}\n`;
+        }
+        response += 
+            "─────\n" +
+            `${Colors.BOLD}${calculateWhiteSpaces(total)}${total}\n` +
+            "```";
+
+        return new Discord.EmbedBuilder()
+            .setColor(0xbbbbbb)
+            .setTitle(`${results.length}d${dice}${rerollsSoFar > 0 ? ` (${rerollsSoFar})` : ""}`)     
+            .setDescription(response)
+            .setTimestamp()
+            .setFooter({ text: "Cardial Bot" });
+    }
+
+    static getSmartRollView(challenge, dice, diceValue, modValues, rerollsSoFar = 0) {
+        const modsTotal = modValues.reduce((acc, current) => acc += current, 0);
+        const total = diceValue + modsTotal;
+
+        const modsDiscriminator = modValues.reduce((text, current) => text += `[${current > 0 ? Colors.GREEN + "+" : Colors.RED + ""}${current}${Colors.RESET}] `, "");
+        const response =  
+            // `\`\`\`ansi\n${dice} (${modsTotal > 0 ? Colors.GREEN + "+" : Colors.RED + ""}${modsTotal}${Colors.RESET})\`\`\`` + 
+            `\`${dice} (${modsTotal > 0 ? "+" : ""}${modsTotal})\`` + 
+            "\n" + 
+            `\`\`\`ansi\n${Colors.BOLD}${total}${Colors.RESET} <- [${Colors.GREEN}${diceValue}${Colors.RESET}] ${modsDiscriminator}\`\`\``;
+
+        const challengeLabel = Constants.skills.find(s => s.value === challenge)?.label;
+
+        return new Discord.EmbedBuilder()
+            .setColor(0xbbbbbb)
+            .setTitle(`Teste de ${challengeLabel}${rerollsSoFar > 0 ? ` (${rerollsSoFar})` : ""}`)     
+            .setDescription(response)
+            .setTimestamp()
+            .setFooter({ text: "Cardial Bot" });
     }
 
     static createStatusSummarizedView(currentValue, maxValue, tempValue) {

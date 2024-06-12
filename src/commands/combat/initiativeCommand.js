@@ -7,20 +7,14 @@ const Constants = require("../../constants");
 
 const data = new Discord.SlashCommandBuilder()
     .setName("iniciativa")
-    .setDescription("Adiciona jogadores para teste de iniciativa")
-    .addUserOption(option =>
-        option
-            .setName("jogador1")
-            .setDescription("Jogador 1")
-            .setRequired(true)
-    );
+    .setDescription("Adiciona jogadores para teste de iniciativa");
 
-for (let i = 2; i <= Constants.INITIATIVE_COMMAND_MAX_USERS; i++) {
+for (let i = 1; i <= Constants.INITIATIVE_COMMAND_MAX_USERS; i++) {
     data.addUserOption(option => 
         option
             .setName(`jogador${i}`)
             .setDescription(`Jogador ${i}`)
-            .setRequired(false)
+            .setRequired(i === 1)
     );
 }
 

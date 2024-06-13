@@ -118,12 +118,8 @@ class UserDAO extends MySQLDAO {
         const conn = await this.getConnection();
         await conn.beginTransaction();
 
-        //TODO: refatorar pra usar promise.all
         try {
-            for (let user of users) {
-                await this.upsert(user, deepUpsert);
-            }
-
+            await Promise.all(users.map(u => this.upsert(u, deepUpsert)));
             conn.commit();
         } catch(err) {
             conn.rollback()

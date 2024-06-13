@@ -31,21 +31,18 @@ client.on(Discord.Events.InteractionCreate, async interaction => {
 	if (interaction.isButton()) {
 		Logger.info(`Processing button interaction (${interaction.customId})`);
 		await buttonHandler.handleAsync(interaction);
-	}
-	if (interaction.isModalSubmit()) {
+	} else if (interaction.isModalSubmit()) {
 		Logger.info(`Processing modal submit interaction (${interaction.customId})`);
 		await modalHandler.handleAsync(interaction);
-	}
-	if (interaction.isStringSelectMenu()) {
+	} else if (interaction.isStringSelectMenu()) {
 		Logger.info(`Processing string select menu interaction (${interaction.customId})`);
 		await stringSelectMenuHandler.handleAsync(interaction);
-	}
-	if (interaction.isChatInputCommand()) {
+	} else if (interaction.isChatInputCommand()) {
 		Logger.info(`Processing chat interaction (${interaction.commandName})`);
 		await commandHandler.handleAsync(interaction);
-    }
-
-	Logger.info(`Couldn't process interaction of type (${interaction.type})`);
+    } else {
+		Logger.info(`Couldn't process interaction of type (${interaction.type})`);
+	}
 });
 
 client.login(process.env.TOKEN);

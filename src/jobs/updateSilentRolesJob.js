@@ -7,9 +7,10 @@ module.exports = {
     execute: async () => {
         Logger.info("Running update silent roles routine.");
 
-        //TODO: refatorar para promise.all
-        const roles = await RoleService.getAllRoles();
-        const users = await userDAO.getAllSilent();
+        const [roles, users] = await Promise.all([
+            RoleService.getAllRoles(),
+            userDAO.getAllSilent()
+        ]);
 
         for (let user of users) {
             const now = new Date().getTime();

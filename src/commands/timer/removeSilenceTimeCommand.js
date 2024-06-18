@@ -2,7 +2,7 @@ const Discord = require("discord.js");
 
 const RoleService = require("../../services/roleService");
 const TimerService = require("./../../services/timerService");
-const StatusService = require("./../../services/statusService");
+const EmbededResponseService = require("./../../services/embededResponseService");
 const Role = require("./../../models/role");
 
 module.exports = {
@@ -49,7 +49,7 @@ module.exports = {
             await TimerService.removeSilenceTime(interaction.guild.id, target, days, hours, minutes);
 
             var message = `Tempo de silenciamento atualizado para ${Discord.userMention(target.id)}.\n` +
-                await StatusService.getUserStatus(interaction.guild.id, target);
+                await EmbededResponseService.getUserStatus(interaction.guild.id, target);
 
             await interaction.editReply(message);
         } catch(err) {

@@ -1,46 +1,52 @@
-const expCalculator = require("../expCalculator");
+const Attributes = require("./attributes");
+const Stats = require("./stats");
+const Skills = require("./skills");
+
+const Constants = require("../constants");
+
+const { calculateAttributeMod } = require("../calculators/modCalculator");
 
 class User {
-    static maxLvl = 20;
-
-    constructor(userId, guildId, name, gold = 0, exp = 0, silenceEndTime = null) {
+    constructor(userId, guildId, name, imgUrl, silenceEndTime = null, playerName = "", job = "", notes = "", attributes = null, stats = null, skills = null) {
         this.userId = userId;
         this.guildId = guildId;
         this.username = name;
-        this.gold = gold;
-        this.totalExp = exp;
+        this.imgUrl = imgUrl;
         this.silenceEndTime = silenceEndTime;
+        this.playerName = playerName;
+        this.job = job;
+        this.notes = notes
 
-        this.updateExpAndLevel();
+        this.attributes = attributes || new Attributes(userId, guildId);
+        this.stats = stats || new Stats(userId, guildId);
+        this.skills = skills || new Skills(userId, guildId);
     }
 
-    updateExpAndLevel() {
-        const result = expCalculator.getLevelFromExp(this.totalExp);
-        this.lvl = result.lvl;
-        this.exp = result.remainingExp;
-    }
+    addExp(exp) { 
+        const levelBefore = this.stats?.lvl;
+        this.stats?.addExp(exp); 
+        const levelAfter = this.stats?.lvl;
 
-    addExp(exp) {
-        let newTotalExp = this.totalExp + exp;
-
-        if (newTotalExp < 0) {
-            newTotalExp = 0;
-        } else if (newTotalExp > expCalculator.getTotalLevelExp(this.maxLvl)) {
-            newTotalExp = expCalculator.getTotalLevelExp(this.maxLvl);
+        for (let i = 0; i < levelAfter - levelBefore; i++) {
+            this.levelUp();
         }
-
-        this.totalExp = newTotalExp;
-        this.updateExpAndLevel();
     }
 
     tryUpdateGold(amount) {
-        const newAmount = this.gold + amount;
+        this.stats?.tryUpdateGold(amount);
+    }
 
-        if (newAmount < 0) {
-            throw new Error(`O usuário não possui saldo para suficiente para ser removido (Saldo atual: $${this.gold}).`);
-        }
+    levelUp() {
+        this.stats.maxHP += Constants.BASE_MAX_HP_PER_LEVEL + calculateAttributeMod(this.attributes.CON);
+        this.stats.currentHP += Constants.BASE_MAX_HP_PER_LEVEL + calculateAttributeMod(this.attributes.CON);
 
-        this.gold = newAmount;
+        this.stats.maxFP += Constants.BASE_MAX_FP_PER_LEVEL;
+        this.stats.currentFP += Constants.BASE_MAX_FP_PER_LEVEL;
+
+        this.stats.maxSP += Constants.BASE_MAX_SP_PER_LEVEL;
+        this.stats.currentSP += Constants.BASE_MAX_SP_PER_LEVEL;
+
+        this.attributes.availablePoints += Constants.ATTRIBUTE_PER_LEVEL;
     }
 
     static fromDTO(userDTO) {
@@ -48,9 +54,15 @@ class User {
             userDTO.userId, 
             userDTO.guildId,
             userDTO.user,
-            userDTO.gold,
-            userDTO.totalExp,
-            userDTO.silenceEndTime);
+            userDTO.imgUrl,
+            userDTO.silenceEndTime,
+            userDTO.playerName,
+            userDTO.job,
+            userDTO.notes,
+            Attributes.fromDTO(userDTO),
+            Stats.fromDTO(userDTO),
+            Skills.fromDTO(userDTO)
+        );
     }
 }
 

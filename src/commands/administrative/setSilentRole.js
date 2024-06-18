@@ -16,7 +16,7 @@ module.exports = {
             const role = interaction.options.getRole("cargo");
     
             if (interaction.user.id !== interaction.guild.ownerId) {
-                await interaction.editReply("Apenas usuários com o cargo de ADM podem alterar o cargo de SILENT.");
+                await interaction.editReply("Apenas o dono do servidor pode alterar o cargo de SILENT.");
             }
             
             const silentRole = new Role(interaction.guild.id, role.id, Role.SILENT_TYPE);

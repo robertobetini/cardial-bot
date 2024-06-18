@@ -1,6 +1,8 @@
-const Discord = require("discord.js");
-const path = require('node:path');
 const fs = require("fs");
+const path = require('node:path');
+const Discord = require("discord.js");
+
+const Logger = require("./logger");
 
 const commands = [];
 
@@ -23,7 +25,7 @@ module.exports = {
                     discordClient.commands.set(command.data.name, command);
                     commands.push(command.data.toJSON());
                 } else {
-                    console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+                    Logger.warn(`The command at ${filePath} is missing a required "data" or "execute" property.`);
                 }
             }
         }
@@ -31,16 +33,22 @@ module.exports = {
     async deployAllCommands() {
         try {
             const rest = new Discord.REST().setToken(process.env.TOKEN);
-            console.log(`Started refreshing ${commands.length} application (/) commands.`);
-    
+            Logger.info(`Started refreshing ${commands.length} application (/) commands.`);
+            
+            const applicationId = process.env.APPLICATION_ID;
+            const debugGuildId = process.env.DEBUG_GUILD_ID;
+            const commandDeployRoute = process.env.DEBUG 
+                ? Discord.Routes.applicationGuildCommands(applicationId, debugGuildId) 
+                : Discord.Routes.applicationCommands(applicationId);
+
             const data = await rest.put(
-                Discord.Routes.applicationCommands(process.env.APPLICATION_ID),
+                commandDeployRoute,
                 { body: commands },
             );
-    
-            console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+
+            Logger.info(`Successfully reloaded ${data.length} application (/) commands.`);
         } catch (error) {
-            console.error(error);
+            Logger.error(error);
         }
     }
 }

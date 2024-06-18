@@ -17,6 +17,7 @@ module.exports = {
     
             if (interaction.user.id !== interaction.guild.ownerId) {
                 await interaction.editReply("Apenas o dono do servidor pode alterar o cargo de ADM.");
+                return;
             }
             
             const admRole = new Role(interaction.guild.id, role.id, Role.ADM_TYPE);

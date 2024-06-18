@@ -1,21 +1,10 @@
-const userDAO = require("./../DAOs/userDAO");
-const User = require("../models/user");
+const UserService = require("../services/userService");
 
 class ProgressionService {
     static async addExp(guildId, targetUser, expAmount) {
-        let user = await userDAO.get(targetUser.id, guildId);
-
-        if (!user) {
-            user = new User(
-                targetUser.id,
-                guildId,
-                targetUser.username
-            );
-        }
-
+        const user = await UserService.getOrCreateUser(guildId, targetUser);
         user.addExp(expAmount);
-
-        await userDAO.upsert(user);
+        await UserService.upsert(user, true);
     }
 }
 

@@ -1,7 +1,7 @@
 const Discord = require("discord.js");
 const RoleService = require("./../../services/roleService");
 const ProgressionService = require("./../../services/progressionService");
-const StatusService = require("./../../services/statusService");
+const EmbededResponseService = require("./../../services/embededResponseService");
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -27,13 +27,17 @@ module.exports = {
             
             const target = interaction.options.getUser("user");
             const amount = interaction.options.getInteger("quantidade");
+            console.log("adicionando exp", target.id);
 
             await ProgressionService.addExp(interaction.guild.id, target, amount);
 
-            var message = `${amount} EXP concedido a ${Discord.userMention(target.id)}.\n` +
-                await StatusService.getUserStatus(interaction.guild.id, target);
+            const message = `${amount} EXP concedido a ${Discord.userMention(target.id)}.`;
+            const embed = await EmbededResponseService.getUserStatus(interaction.guild.id, target);
 
-            await interaction.editReply(message);
+            await interaction.editReply({
+                content: message,
+                embeds: [embed]
+            });
         } catch(err) {
             await interaction.editReply(err.message);
         }

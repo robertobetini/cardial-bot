@@ -1,49 +1,54 @@
-const Discord = require("discord.js");
-
-const commandLoader =  require("./commandLoader");
-const StatusService = require("./services/statusService");
-
 require('dotenv').config();
 
-const MILLIS_IN_SECOND = 1000;
-const UPDATE_SILENT_USERS_INTERVAL_TIME = Number(process.env.UPDATE_SILENT_USERS_INTERVAL_TIME) * MILLIS_IN_SECOND ?? 60000;
+const Discord = require("discord.js");
+
+const commandLoader = require("./commandLoader");
+const updateSilentRolesJob = require("./jobs/updateSilentRolesJob");
+
+const commandHandler = require("./interactions/commandInteractionHandler");
+const buttonHandler = require("./interactions/buttonInteractionHandler");
+const modalHandler = require("./interactions/modalInteractionHandler");
+const stringSelectMenuHandler = require("./interactions/stringSelectMenuHandler");
+
+const Constants = require("./constants");
+const Logger = require("./logger");
+
+const UPDATE_SILENT_USERS_INTERVAL_TIME = Number(process.env.UPDATE_SILENT_USERS_INTERVAL_TIME) * Constants.MILLIS_IN_SECOND ?? 60000;
 
 const client = new Discord.Client({ intents: [ Discord.GatewayIntentBits.Guilds ] });
 
 commandLoader.loadAllCommands(client);
 commandLoader.deployAllCommands()
     .then()
-    .catch(err => console.log(err));
+    .catch(err => Logger.error(err));
 
 client.on("ready", () => {
-	console.log("Bot is ready.");
-	setInterval(async () => await StatusService.updateUserSilentRoles(), UPDATE_SILENT_USERS_INTERVAL_TIME);
+	Logger.info("Bot is ready.");
+	setInterval(async () => await updateSilentRolesJob.execute(), UPDATE_SILENT_USERS_INTERVAL_TIME);
 });
 
 client.on(Discord.Events.InteractionCreate, async interaction => {
-	if (!interaction.isChatInputCommand()) {
-        return;
-    }
-
-    const command = interaction.client.commands.get(interaction.commandName);
-	
-	if (!command) {
-		console.error(`No command matching ${interaction.commandName} was found.`);
-		return;
-	}
-
-	// reply at command acknowledgement and later edit to avoid losing interaction
-	await interaction.reply(".");
-
 	try {
-		await command.execute(interaction);
-	} catch (error) {
-		console.error(error);
-		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp("There was an error while executing this command!");
+		if (interaction.isButton()) {
+			Logger.info(`Processing button interaction (${interaction.customId})`);
+			await buttonHandler.handleAsync(interaction);
+		} else if (interaction.isModalSubmit()) {
+			Logger.info(`Processing modal submit interaction (${interaction.customId})`);
+			await modalHandler.handleAsync(interaction);
+		} else if (interaction.isStringSelectMenu()) {
+			Logger.info(`Processing string select menu interaction (${interaction.customId})`);
+			await stringSelectMenuHandler.handleAsync(interaction);
+		} else if (interaction.isChatInputCommand()) {
+			Logger.info(`Processing chat interaction (${interaction.commandName})`);
+			await commandHandler.handleAsync(interaction);
 		} else {
-			await interaction.editReply("There was an error while executing this command!");
+			Logger.info(`Couldn't process interaction of type (${interaction.type})`);
 		}
+	} catch(err) {
+		Logger.error(err);
+		interaction.replied || interaction.deferred 
+                ? await interaction.followUp(`There was an error while executing this command: ${err}`)
+                : await interaction.editReply({ content: `There was an error while executing this command: ${err}`});
 	}
 });
 

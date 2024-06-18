@@ -168,7 +168,6 @@ class EmbededResponseService {
 
     static getRollView(dice, results, rerollsSoFar = 0) {
         const calculateWhiteSpaces = (value) => {
-            
             if (value >= 1000) { return " ";   }
             if (value >=  100) { return "  ";  } 
             if (value >=   10) { return "   "; }
@@ -199,7 +198,6 @@ class EmbededResponseService {
 
         const modsDiscriminator = modValues.reduce((text, current) => text += `[${current > 0 ? Colors.GREEN + "+" : Colors.RED + ""}${current}${Colors.RESET}] `, "");
         const response =  
-            // `\`\`\`ansi\n${dice} (${modsTotal > 0 ? Colors.GREEN + "+" : Colors.RED + ""}${modsTotal}${Colors.RESET})\`\`\`` + 
             `\`${dice} (${modsTotal > 0 ? "+" : ""}${modsTotal})\`` + 
             "\n" + 
             `\`\`\`ansi\n${Colors.BOLD}${total}${Colors.RESET} <- [${Colors.GREEN}${diceValue}${Colors.RESET}] ${modsDiscriminator}\`\`\``;
@@ -212,6 +210,74 @@ class EmbededResponseService {
             .setDescription(response)
             .setTimestamp()
             .setFooter({ text: "Cardial Bot" });
+    }
+
+    static getInitiativeView(players, monsters) {
+        const response = 
+            "```ansi\n" + 
+            players.reduce((text, p) => text += EmbededResponseService.createInitiativeLine(p), "") + 
+            "\n───────────────────────────────────────────────────────\n" + 
+            monsters.reduce((text, m) => text += EmbededResponseService.createInitiativeLine(m), "") + 
+            "\n```";
+
+        const fields = [
+            {
+                name: `> Nome`,
+                inline: true,
+                value: players.reduce((text, p) => text += `${p.playerName ?? p.username}\n`, "") + monsters.reduce((text, m) => text += `${m.name}\n`, "")
+            },
+            {
+                name: `> FP`,
+                inline: true,
+                value: players.reduce((text, p) => text += `${p.stats.currentFP}/${p.stats.maxFP}\n`, "") + monsters.reduce((text, m) => text += `${m.stats.currentFP}/${m.stats.maxFP}\n`, "")
+            },
+            {
+                name: `> HP`,
+                inline: true,
+                value: players.reduce((text, p) => text += `${p.stats.currentHP}/${p.stats.maxHP}\n`, "") + monsters.reduce((text, m) => text += `${m.stats.currentHP}/${m.stats.maxHP}\n`, "")
+            }
+        ];
+
+        return new Discord.EmbedBuilder()
+            .setColor(0xbbbbbb)
+            .setTitle("Iniciativa")     
+            // .setDescription(response)
+            .setFields(fields)
+            .setTimestamp()
+            .setFooter({ text: "Cardial Bot" });
+    }
+
+    static createInitiativeLine(combatEntity, nameSize = 28, separator = " ") {
+        let line = combatEntity.selected ? Colors.GREEN : "";
+        line += combatEntity.selected ? "> " : "  ";
+        const name = (combatEntity.playerName ?? combatEntity.name).substr(0, nameSize);
+        line += name;
+
+        const whiteSpaceCount = name.length > nameSize ? 0 : nameSize - name.length;
+        for (let i = 0; i < whiteSpaceCount; i++) {
+            line += " ";
+        }
+
+        const fpView = EmbededResponseService.createInitiativeStatView(combatEntity.stats.currentFP, combatEntity.stats.maxFP, combatEntity.stats.tempFP, Colors.BLUE);
+        const hpView = EmbededResponseService.createInitiativeStatView(combatEntity.stats.currentHP, combatEntity.stats.maxHP, combatEntity.stats.tempHP, Colors.RED);
+
+        return `${line} ${separator} ${combatEntity.selected ? Colors.RESET : ""}${fpView} ${separator} ${hpView}\n`;
+    }
+
+    static createInitiativeStatView(currentValue, maxValue, tempValue, ansiColor, truncateStatLen = 4) {
+        let firstWhiteSpaces = "";
+        for (let i = 0; i < truncateStatLen - currentValue.toString().length; i++) {
+            firstWhiteSpaces += " ";
+        }
+
+        const totalValue = maxValue + tempValue;
+
+        let secondWhiteSpaces = "";
+        for (let i = 0; i < truncateStatLen - totalValue.toString().length; i++) {
+            secondWhiteSpaces += " ";
+        }
+        
+        return firstWhiteSpaces + ansiColor + currentValue + "/" + totalValue + Colors.RESET + secondWhiteSpaces;
     }
 
     static createStatusSummarizedView(currentValue, maxValue, tempValue) {

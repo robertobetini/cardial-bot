@@ -16,9 +16,11 @@ const Constants = {
     BASE_MAX_HP_PER_LEVEL: 6,
     BASE_MAX_FP_PER_LEVEL: 2,
     BASE_MAX_SP_PER_LEVEL: 0,
-    INITIAL_AVAILABLE_ATTRIBUTES: 8,
+    INITIAL_AVAILABLE_ATTRIBUTES: 25,
+    // INITIAL_AVAILABLE_ATTRIBUTES: 8, // testing purposes
     ATTRIBUTE_PER_LEVEL: 1,
     INITIATIVE_COMMAND_MAX_USERS: 6,
+    EPHEMERAL_COMMANDS: ["ficha"],
     attributes: [
         { label: "Força", value: "FOR" },
         { label: "Destreza", value: "DEX" },
@@ -58,7 +60,7 @@ const Constants = {
         { label: "Sem proficiência", value: "NoProficiency" },
         { label: "Proficiente", value: "Proficient" },
         { label: "Especialista", value: "Specialist" },
-    ]
+    ],
 };
 
 module.exports = Constants;

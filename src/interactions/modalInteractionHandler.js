@@ -1,7 +1,8 @@
 const Logger = require("../logger");
 
 const commands = {
-    showUserStatusCommand: require("../commands/status/showUserStatusCommand")
+    showUserStatusCommand: require("../commands/status/showUserStatusCommand"),
+    initiativeCommand: require("../commands/combat/initiativeCommand")
 };
 
 module.exports = {

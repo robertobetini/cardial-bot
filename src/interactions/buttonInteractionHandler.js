@@ -5,7 +5,8 @@ const commands = {
     showGoldLeaderboardCommand:  require("../commands/economy/showGoldLeaderboardCommand"),
     showUserStatusCommand: require("../commands/status/showUserStatusCommand"),
     smartRollCommand: require("../commands/rolls/smartRollCommand"),
-    pureRollCommand: require("../commands/rolls/pureRollCommand")
+    pureRollCommand: require("../commands/rolls/pureRollCommand"),
+    initiativeCommand: require("../commands/combat/initiativeCommand")
 };
 
 module.exports = {

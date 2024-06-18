@@ -8,14 +8,12 @@ const AttributesService = require("../../services/attributesService");
 const StatsService = require("../../services/statsService");
 const SkillsService = require("../../services/skillService");
 
-const User = require("../../models/user");
 const Attributes = require("../../models/attributes");
-
-const Logger = require("../../logger");
 
 const Constants = require("../../constants");
 
 const tempAttributes = {};
+const originalInteractions = {};
 
 const buildHomeActionRow = (guildId, memberId) => {
     const attributesButton = new Discord.ButtonBuilder()
@@ -32,11 +30,6 @@ const buildHomeActionRow = (guildId, memberId) => {
         .setCustomId(`${guildId}:${memberId}:showUserStatusCommand:showCharacterModal`)
         .setLabel("Personagem")
         .setStyle(Discord.ButtonStyle.Primary);
-
-    const removeUserButton = new Discord.ButtonBuilder()
-        .setCustomId(`${guildId}:${memberId}:showUserStatusCommand:showConfirmRemovalModal`)
-        .setLabel("Excluir")
-        .setStyle(Discord.ButtonStyle.Danger);
 
     return new Discord.ActionRowBuilder().addComponents(attributesButton, skillsButton, characterButton);
 }
@@ -111,7 +104,6 @@ const buildSkillsActionRow = async (guildId, userId, selected) => {
 
 const getAttributeButtonsAvailability = (guildId, memberId, selectedAttribute, currentAttributes = null) => {
     const key = guildId + memberId;
-
     if (!tempAttributes[key]) {
         return [false, false, false, false];
     }
@@ -232,7 +224,6 @@ module.exports = {
 				.setRequired(false)),
     async execute(interaction) {
         const target = interaction.options.getUser("user") || interaction.user;
-
         const guildId = interaction.guild.id;
 
         if (target.id !== interaction.user.id && !await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
@@ -243,8 +234,12 @@ module.exports = {
         const embed = await EmbededResponseService.getUserStatus(guildId, target, tempAttributes[key]);
         const actionRow = buildHomeActionRow(guildId, target.id);
 
+        if (originalInteractions[key]) {
+            await originalInteractions[key].deleteReply();
+        }
+        originalInteractions[key] = interaction;
+
         await interaction.editReply({
-            content: "",
             embeds: [embed],
             components: [actionRow]
         });
@@ -255,8 +250,10 @@ module.exports = {
             return;
         }
 
+        const key = guildId + memberId;
         const actionRows = buildAttributesActionRows(guildId, memberId);
-        interaction.message.edit({ components: actionRows });
+        
+        originalInteractions[key]?.editReply({ components: actionRows });
 
         await interaction.deferUpdate();
     },
@@ -330,10 +327,7 @@ module.exports = {
 
         const key = guildId + memberId;
         const updatedEmbed = await EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]);
-        interaction.message.edit({ 
-            content: "",
-            embeds: [updatedEmbed] 
-        });
+        originalInteractions[key]?.editReply({ embeds: [updatedEmbed] });
 
         await interaction.deferUpdate();
     },
@@ -348,7 +342,8 @@ module.exports = {
             buildSkillsActionRow(guildId, memberId)
         ]);
 
-        interaction.message.edit({
+        const key = guildId + memberId;
+        originalInteractions[key]?.editReply({
             embeds: [embed],
             components: actionRows 
         });
@@ -370,7 +365,8 @@ module.exports = {
         }
         const actionRows = buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability);
         
-        interaction.message.edit({ components: actionRows });
+        const key = guildId + memberId;
+        originalInteractions[key]?.editReply({ components: actionRows });
 
         await interaction.deferUpdate();
     },
@@ -385,10 +381,9 @@ module.exports = {
 
         const updatedEmbed = await EmbededResponseService.getUserStatus(guildId, interaction.member);
         const actionRows = buildAttributesActionRows(guildId, memberId);
-        interaction.message.edit({ 
-            content: "",
-            components: actionRows,
-            embeds: [updatedEmbed] 
+        originalInteractions[key]?.editReply({ 
+            embeds: [updatedEmbed],
+            components: actionRows 
         });
 
         await interaction.deferUpdate();
@@ -422,10 +417,9 @@ module.exports = {
 
         const updatedEmbed = await EmbededResponseService.getUserStatus(guildId, interaction.member);
         const actionRows = buildAttributesActionRows(guildId, memberId);
-        interaction.message.edit({ 
-            content: "",
-            components: actionRows,
-            embeds: [updatedEmbed] 
+        originalInteractions[key]?.editReply({ 
+            embeds: [updatedEmbed],
+            components: actionRows 
         });
 
         await interaction.deferUpdate();
@@ -440,10 +434,9 @@ module.exports = {
         await changeTempAttributesByAmount(guildId, memberId, selectedAttribute, 1);
         
         const attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute, tempAttributes[key].currentAttributes);
-        interaction.message.edit({ 
-            content: "", 
-            components: buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability),
-            embeds: [ await EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]) ]
+        originalInteractions[key]?.editReply({ 
+            embeds: [ await EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]) ],
+            components: buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability)
         });
 
         await interaction.deferUpdate();
@@ -458,10 +451,9 @@ module.exports = {
         await changeTempAttributesByAmount(guildId, memberId, selectedAttribute, -1);
 
         const attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute, tempAttributes[key].currentAttributes);
-        interaction.message.edit({ 
-            content: "", 
-            components: buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability),
-            embeds: [ await EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]) ]
+        originalInteractions[key]?.editReply({ 
+            embeds: [ await EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]) ],
+            components: buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability), 
         });
 
         await interaction.deferUpdate();
@@ -475,7 +467,8 @@ module.exports = {
         const selectedSkill = interaction.values[0];
         const actionRows = await buildSelectedSkillActionRows(guildId, memberId, selectedSkill);
 
-        interaction.message.edit({ components: actionRows });
+        const key = guildId + memberId;
+        originalInteractions[key]?.editReply({ components: actionRows });
 
         await interaction.deferUpdate();
     },
@@ -491,7 +484,8 @@ module.exports = {
         await SkillsService.updateSingleSkill(memberId, guildId, selectedSkill, newSkillLevel);
         const embed = await EmbededResponseService.getUserSkills(guildId, interaction.user);
 
-        interaction.message.edit({ embeds: [embed] });
+        const key = guildId + memberId;
+        originalInteractions[key]?.editReply({ embeds: [embed] });
 
         await interaction.deferUpdate();
     },
@@ -513,7 +507,8 @@ module.exports = {
             selectedOption.default = true;
         }
         
-        interaction.message.edit({ components: interaction.message.components });
+        const key = guildId + memberId;
+        originalInteractions[key]?.editReply({ components: interaction.message.components });
 
         await interaction.deferUpdate();
     },
@@ -526,57 +521,10 @@ module.exports = {
         const key = guildId + memberId;
         const embed = await EmbededResponseService.getUserStatus(guildId, interaction.user, tempAttributes[key]);
         const actionRow = buildHomeActionRow(guildId, memberId);
-        interaction.message.edit({ 
+        originalInteractions[key]?.editReply({ 
             embeds: [embed],
-            components: [actionRow] 
+            components: [actionRow]
         });
-
-        await interaction.deferUpdate();
-    },
-    showConfirmRemovalModal: async (interaction, guildId, memberId) => {
-        if (interaction.user.id != memberId) {
-            await interaction.deferUpdate();
-            return;
-        }
-
-        const modal = new Discord.ModalBuilder()
-			.setCustomId(`${guildId}:${memberId}:showUserStatusCommand:confirmUserRemoval`)
-			.setTitle("Exclusão de ficha");
-
-        const input = createTextInput(
-                "confirmUserRemovalText", 
-                "Digite 'confirmo' para excluir a sua ficha", 
-                Discord.TextInputStyle.Short, 
-                required = true,
-                defaultValue = null,
-                placeholder = "Ex: Geralt of Rivia, Andrezitos, x-ae-a-12",
-                minLength = null,
-                maxLength = 32
-            );
-        
-        const actionRows = [ new Discord.ActionRowBuilder().addComponents(input) ];
-        modal.addComponents(actionRows);
-
-        await interaction.showModal(modal);
-    },
-    confirmUserRemoval: async (interaction, guildId, memberId) => {
-        const text = interaction.fields.getTextInputValue("confirmUserRemovalText");
-        
-        if (interaction.user.id != memberId || text.toLowerCase() !== "confirmo") {
-            await interaction.deferUpdate();
-            return;
-        }
-
-        const user = new User(memberId, guildId, interaction.user.username, interaction.user.displayAvatarURL());
-        await userDAO.update(user, true);
-
-        const key = guildId + memberId;
-        delete tempAttributes[key];
-
-        Logger.info(`User ${user.name} was removed`);
-
-        const embed = await EmbededResponseService.getUserStatus(guildId, memberId);
-        interaction.message.edit({ embeds: [embed] });
 
         await interaction.deferUpdate();
     }

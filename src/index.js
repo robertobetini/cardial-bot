@@ -1,6 +1,5 @@
 require('dotenv').config();
 
-
 const Discord = require("discord.js");
 
 const commandLoader = require("./commandLoader");
@@ -31,16 +30,16 @@ client.on("ready", () => {
 client.on(Discord.Events.InteractionCreate, async interaction => {
 	try {
 		if (interaction.isButton()) {
-			Logger.info(`Processing button interaction (${interaction.customId})`);
+			Logger.debug(`Processing button interaction (${interaction.customId})`);
 			await buttonHandler.handleAsync(interaction);
 		} else if (interaction.isModalSubmit()) {
-			Logger.info(`Processing modal submit interaction (${interaction.customId})`);
+			Logger.debug(`Processing modal submit interaction (${interaction.customId})`);
 			await modalHandler.handleAsync(interaction);
 		} else if (interaction.isStringSelectMenu()) {
-			Logger.info(`Processing string select menu interaction (${interaction.customId})`);
+			Logger.debug(`Processing string select menu interaction (${interaction.customId})`);
 			await stringSelectMenuHandler.handleAsync(interaction);
 		} else if (interaction.isChatInputCommand()) {
-			Logger.info(`Processing chat interaction (${interaction.commandName})`);
+			Logger.debug(`Processing chat interaction (${interaction.commandName})`);
 			await commandHandler.handleAsync(interaction);
 		} else {
 			Logger.info(`Couldn't process interaction of type (${interaction.type})`);

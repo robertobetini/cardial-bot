@@ -1,6 +1,6 @@
 {
   "name": "cardial-bot",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Bot de controle de fichas, rolagem de dados, etc. para o sistema de RPG Aincrad.",
   "main": "src/index.js",
   "scripts": {

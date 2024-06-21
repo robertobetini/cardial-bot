@@ -327,15 +327,17 @@ module.exports = {
         await interaction.showModal(modal);
     },
     updateCharacter: async (interaction, guildId, memberId) => {
-        const name = interaction.fields.getTextInputValue("name");
+        const user = await userDAO.get(memberId, guildId, false);
+        
+        let name = null;
+        if (!user.playerName) {
+            name = interaction.fields.getTextInputValue("name");
+            user.playerName = name;
+        }
+
         const imgUrl = interaction.fields.getTextInputValue("imgUrl");
         const notes = interaction.fields.getTextInputValue("notes");
 
-        const user = await userDAO.get(memberId, guildId, false);
-
-        if (name) {
-            user.playerName = name;
-        }
         user.imgUrl = imgUrl;
         user.notes = notes;
 

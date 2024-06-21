@@ -43,8 +43,10 @@ class EmbededResponseService {
     }
 
     static async getUserSkills(guildId, discordUser) {
-        const user = await UserService.getOrCreateUser(guildId, discordUser, true);
-
+        const user = typeof(discordUser) === "string" 
+            ? await UserService.get(guildId, discordUser, true) 
+            : await UserService.getOrCreateUser(guildId, discordUser, true);
+            
         const fields = [
             { name: "> Perícia",      value: "\n", inline: true },
             { name: "> Proficiência", value: "\n", inline: true },
@@ -110,8 +112,8 @@ class EmbededResponseService {
                 inline: true,
                 value: 
                     `**⭐️ Nível:** ${user.stats.lvl} (${expView} exp)\n` +
-                    `**⚔️ R.Arma:** TODO\n` +
-                    `**💼 R.Profissão:** TODO\n` +
+                    // `**⚔️ R.Arma:** TODO\n` +
+                    // `**💼 R.Profissão:** TODO\n` +
                     `**💰 Gold:** ${user.stats.gold}\n`
             },
             {
@@ -213,28 +215,28 @@ class EmbededResponseService {
     }
 
     static getInitiativeView(players, monsters) {
-        const response = 
-            "```ansi\n" + 
-            players.reduce((text, p) => text += EmbededResponseService.createInitiativeLine(p), "") + 
-            "\n───────────────────────────────────────────────────────\n" + 
-            monsters.reduce((text, m) => text += EmbededResponseService.createInitiativeLine(m), "") + 
-            "\n```";
+        // const response = 
+        //     "```ansi\n" + 
+        //     players.reduce((text, p) => text += EmbededResponseService.createInitiativeLine(p), "") + 
+        //     "\n───────────────────────────────────────────────────────\n" + 
+        //     monsters.reduce((text, m) => text += EmbededResponseService.createInitiativeLine(m), "") + 
+        //     "\n```";
 
         const fields = [
             {
-                name: `> Nome`,
+                name: `> Nome \n`,
                 inline: true,
                 value: players.reduce((text, p) => text += `${p.playerName ?? p.username}\n`, "") + monsters.reduce((text, m) => text += `${m.name}\n`, "")
             },
             {
                 name: `> FP`,
                 inline: true,
-                value: players.reduce((text, p) => text += `${p.stats.currentFP}/${p.stats.maxFP}\n`, "") + monsters.reduce((text, m) => text += `${m.stats.currentFP}/${m.stats.maxFP}\n`, "")
+                value: players.reduce((text, p) => text += `${EmbededResponseService.createStatusBar(p.stats.currentFP, p.stats.maxFP, p.stats.tempFP, 4)}\n`, "") + monsters.reduce((text, m) => text += `${m.stats.currentFP}/${m.stats.maxFP}\n`, "")
             },
             {
                 name: `> HP`,
                 inline: true,
-                value: players.reduce((text, p) => text += `${p.stats.currentHP}/${p.stats.maxHP}\n`, "") + monsters.reduce((text, m) => text += `${m.stats.currentHP}/${m.stats.maxHP}\n`, "")
+                value: players.reduce((text, p) => text += `${EmbededResponseService.createStatusBar(p.stats.currentHP, p.stats.maxHP, p.stats.tempHP, 4)}\n`, "") + monsters.reduce((text, m) => text += `${m.stats.currentHP}/${m.stats.maxHP}\n`, "")
             }
         ];
 
@@ -287,7 +289,7 @@ class EmbededResponseService {
         return view;
     }
 
-    static createStatusBar(statusName, currentValue, maxValue, tempValue, barSize) {
+    static createStatusBar(currentValue, maxValue, tempValue, barSize) {
         const progression = Math.floor((currentValue + tempValue) / (maxValue + tempValue) * barSize);
 
         let bar = "[";
@@ -296,7 +298,6 @@ class EmbededResponseService {
         }
         bar += `] ${currentValue} / ${maxValue + tempValue} `;
         bar += tempValue > 0 ? ` (+${tempValue}) ` : "";
-        bar += statusName;
 
         return bar;
     }

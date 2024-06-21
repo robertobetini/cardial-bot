@@ -11,6 +11,8 @@ const SkillsService = require("../../services/skillService");
 const Attributes = require("../../models/attributes");
 
 const Constants = require("../../constants");
+const UserService = require("../../services/userService");
+const Logger = require("../../logger");
 
 const tempAttributes = {};
 const originalInteractions = {};
@@ -235,7 +237,11 @@ module.exports = {
         const actionRow = buildHomeActionRow(guildId, target.id);
 
         if (originalInteractions[key]) {
-            await originalInteractions[key].deleteReply();
+            try {
+                await originalInteractions[key].deleteReply();
+            } catch {
+                Logger.warn("Tried to delet non-existing interaction message");
+            }
         }
         originalInteractions[key] = interaction;
 
@@ -269,17 +275,23 @@ module.exports = {
 			.setCustomId(`${guildId}:${memberId}:showUserStatusCommand:updateCharacter`)
 			.setTitle("Status de personagem");
 
-        const inputs = [
-            createTextInput(
-                "name", 
-                "Nome", 
-                Discord.TextInputStyle.Short, 
-                required = true,
-                defaultValue = user.playerName,
-                placeholder = "Ex: Geralt of Rivia, Andrezitos, x-ae-a-12",
-                minLength = 1,
-                maxLength = 32
-            ),
+        const inputs = [];
+        if (!user.playerName) {
+            inputs.push(
+                createTextInput(
+                    "name", 
+                    "Nome", 
+                    Discord.TextInputStyle.Short, 
+                    required = false,
+                    defaultValue = user.playerName,
+                    placeholder = "Ex: Geralt of Rivia, Andrezitos, x-ae-a-12",
+                    minLength = 1,
+                    maxLength = 32,
+                )
+            );
+        }
+
+        inputs.push(
             createTextInput(
                 "imgUrl", 
                 "Imagem da thumbnail (URL)", 
@@ -289,7 +301,9 @@ module.exports = {
                 placeholder = null,
                 minLength = 1,
                 maxLength = 512
-            ),
+            )
+        );
+        inputs.push(
             createTextInput(
                 "notes", 
                 "Notas", 
@@ -300,8 +314,8 @@ module.exports = {
                 minLength = null,
                 maxLength = 1024
             )
-        ];
-        
+        );
+
         const actionRows = [];
         for (let input of inputs) {
             const actionRow = new Discord.ActionRowBuilder().addComponents(input);
@@ -319,7 +333,9 @@ module.exports = {
 
         const user = await userDAO.get(memberId, guildId, false);
 
-        user.playerName = name;
+        if (name) {
+            user.playerName = name;
+        }
         user.imgUrl = imgUrl;
         user.notes = notes;
 
@@ -338,7 +354,7 @@ module.exports = {
         }
 
         const [embed, actionRows] = await Promise.all([
-            EmbededResponseService.getUserSkills(guildId, interaction.user),
+            EmbededResponseService.getUserSkills(guildId, memberId),
             buildSkillsActionRow(guildId, memberId)
         ]);
 
@@ -395,6 +411,15 @@ module.exports = {
             return;
         }
 
+        const user = await UserService.get(guildId, memberId, false);
+        if (!user.playerName) {
+            await interaction.reply({ 
+                content: "Você precisa escolher um nome para seu personagem antes de terminar a ficha!",
+                ephemeral: true 
+            });
+            return;
+        }
+
         const attributes = new Attributes(
             memberId, guildId, 
             tempAttributes[key].FOR, 
@@ -410,6 +435,11 @@ module.exports = {
         if (!tempAttributes[key].firstAttributionDone) {
             await StatsService.setInitialStats(attributes);
             propagateChangesToStats = false;
+            Logger.info(`User ${interaction.member.username} (${user.playerName}) finished first attributes pick up`);
+
+            interaction.member.permissions.has('MANAGE_NICKNAMES') && memberId !== interaction.guild.ownerId
+                ? interaction.member.setNickname(user.playerName)
+                : await interaction.reply({ content: "Não consigo atualizar o seu nickname porque você é o dono do servidor ou tem um cargo maior do que o meu.", ephemeral: true });
         }
 
         await AttributesService.update(attributes, propagateChangesToStats);
@@ -422,6 +452,9 @@ module.exports = {
             components: actionRows 
         });
 
+        if (interaction.replied) {
+            return;
+        }
         await interaction.deferUpdate();
     },
     increaseAttribute: async (interaction, guildId, memberId, selectedAttribute) => {

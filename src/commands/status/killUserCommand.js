@@ -14,7 +14,6 @@ module.exports = {
 				.setRequired(true)),
     async execute(interaction) {
         const target = interaction.options.getUser("user");
-
         const guildId = interaction.guild.id;
 
         if (!await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
@@ -22,7 +21,14 @@ module.exports = {
         }
 
         const user = new User(target.id, guildId, target.username, target.displayAvatarURL());
-        await userDAO.update(user, true);
+        const [member, _] = await Promise.all([
+            await interaction.guild.members.fetch(target.id),
+            await userDAO.update(user, true)
+        ]);
+
+        if (member.permissions.has('MANAGE_NICKNAMES') && member.id !== interaction.guild.ownerId) {
+            member.setNickname(target.displayName);
+        }
 
         await interaction.editReply({
             content: `Jogador ${Discord.userMention(target.id)} foi d&scon&#t@dº...`,

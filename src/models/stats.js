@@ -60,6 +60,22 @@ class Stats {
         this.gold = newAmount;
     }
 
+    
+    modifyStat(stat, amount) {
+        let newValue = this[stat] + amount;
+        newValue = newValue < 0 ? 0 : newValue;
+
+        if (stat === "currentHP") {
+            newValue = newValue > this.maxHP ? this.maxHP : newValue;
+        } else if (stat === "currentFP") {
+            newValue = newValue > this.maxFP ? this.maxFP : newValue;
+        } else if (stat === "currentSP") {
+            newValue = newValue > this.maxSP ? this.maxSP : newValue;
+        }
+
+        this[stat] = newValue;
+    }
+
     static fromDTO(fullUserDTO) {
         const stats = new Stats(
             fullUserDTO.userId,

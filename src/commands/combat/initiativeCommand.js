@@ -99,12 +99,12 @@ module.exports = {
                 .setLabel("Nome")
                 .setStyle(Discord.TextInputStyle.Short)
                 .setRequired(true),
-            new Discord.TextInputBuilder()
-                .setCustomId("dice")
-                .setLabel("Dado de iniciativa")
-                .setPlaceholder("Ex.: 1d20+2")
-                .setStyle(Discord.TextInputStyle.Short)
-                .setRequired(true)
+            // new Discord.TextInputBuilder()
+            //     .setCustomId("dice")
+            //     .setLabel("Dado de iniciativa")
+            //     .setPlaceholder("Ex.: 1d20+2")
+            //     .setStyle(Discord.TextInputStyle.Short)
+            //     .setRequired(true)
         ];
 
         const actionRows = [];
@@ -119,7 +119,7 @@ module.exports = {
     },
     addMob: async (interaction, guildId, memberId, combatId) => {
         const name = interaction.fields.getTextInputValue("name");
-        const dice = interaction.fields.getTextInputValue("dice");
+        // const dice = interaction.fields.getTextInputValue("dice");
 
         const monster = {
             playerName: name,
@@ -131,7 +131,7 @@ module.exports = {
                 maxFP: 0,
                 tempFP: 0,
                 baseDEF: 0,
-                baseInitiative: parseDiceString(dice)
+                // baseInitiative: parseDiceString(dice)
             }
         };
 

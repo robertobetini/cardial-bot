@@ -18,6 +18,10 @@ const buildRerollActionRow = (guildId, userId, challenge, rerollsSoFar) => {
 
 const roll = async (guildId, userId, challenge, rerollsSoFar) => {
     const user = await UserService.get(guildId, userId, true);
+    if (!user || !user.attributes.firstAttributionDone) {
+        return { content: "Você precisa terminar sua ficha antes de executar os testes!", ephemeral: true };
+    }
+
     const dice = 20;
     const totalMod = calculateChallengeMod(challenge, user);
     const roll = Math.floor(Math.random() * dice + 1);

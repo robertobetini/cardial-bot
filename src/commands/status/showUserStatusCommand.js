@@ -439,7 +439,7 @@ module.exports = {
             propagateChangesToStats = false;
             Logger.info(`User ${interaction.member.username} (${user.playerName}) finished first attributes pick up`);
 
-            interaction.member.permissions.has('MANAGE_NICKNAMES') && memberId !== interaction.guild.ownerId
+            interaction.member.permissions.has(Discord.PermissionFlagsBits.ManageNicknames) && memberId !== interaction.guild.ownerId
                 ? interaction.member.setNickname(user.playerName)
                 : await interaction.reply({ content: "Não consigo atualizar o seu nickname porque você é o dono do servidor ou tem um cargo maior do que o meu.", ephemeral: true });
         }

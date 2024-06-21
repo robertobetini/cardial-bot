@@ -26,7 +26,7 @@ module.exports = {
             await userDAO.update(user, true)
         ]);
 
-        if (member.permissions.has('MANAGE_NICKNAMES') && member.id !== interaction.guild.ownerId) {
+        if (member.permissions.has(Discord.PermissionFlagsBits.ManageNicknames) && member.id !== interaction.guild.ownerId) {
             member.setNickname(target.displayName);
         }
 
@@ -34,5 +34,5 @@ module.exports = {
             content: `Jogador ${Discord.userMention(target.id)} foi d&scon&#t@dº...`,
             files: [ { attachment: "assets/death.gif" } ]
         });
-    },
+    }
 };

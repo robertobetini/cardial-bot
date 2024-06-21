@@ -9,6 +9,7 @@ const UserService = require("../services/userService");
 const Constants = require("../constants");
 const Colors = require("../colors");
 
+const DEFAULT_FOOTER = "Elysium System\u205F\u205F\u205F\u205F\u205F\u205F\u205F\u205F\u205F";
 class EmbededResponseService {
     static async getExpLeaderboard(guildId, page) {
         const users =  await UserService.getAllFromGuild(guildId, "totalExp", page * Constants.PAGE_SIZE, Constants.PAGE_SIZE);
@@ -23,7 +24,7 @@ class EmbededResponseService {
             .setTitle("Placar de nível")
             .setFields(fields)
             .setTimestamp()
-            .setFooter({ text: "Cardial Bot" }), isEmpty];
+            .setFooter({ text: DEFAULT_FOOTER }), isEmpty];
     }
 
     static async getGoldLeaderboard(guildId, page) {
@@ -39,7 +40,7 @@ class EmbededResponseService {
             .setTitle("Placar de gold")
             .setFields(fields)
             .setTimestamp()
-            .setFooter({ text: "Cardial Bot" }), isEmpty];
+            .setFooter({ text: DEFAULT_FOOTER }), isEmpty];
     }
 
     static async getUserSkills(guildId, discordUser) {
@@ -73,7 +74,7 @@ class EmbededResponseService {
             .setAuthor({ name: `Personagem de ${user.username}` })
             .addFields(fields)
             .setTimestamp()
-            .setFooter({ text: "Cardial Bot" });
+            .setFooter({ text: DEFAULT_FOOTER });
     }
 
     static async getUserStatus(guildId, discordUser, tempAttributes = null) {
@@ -150,7 +151,7 @@ class EmbededResponseService {
             .setAuthor({ name: `Personagem de ${user.username}` })
             .addFields(embedFields)
             .setTimestamp()
-            .setFooter({ text: "Cardial Bot" });
+            .setFooter({ text: DEFAULT_FOOTER });
     }
 
     static createTable(columnNames, rows) {
@@ -191,7 +192,7 @@ class EmbededResponseService {
             .setTitle(`${results.length}d${dice}${rerollsSoFar > 0 ? ` (${rerollsSoFar})` : ""}`)     
             .setDescription(response)
             .setTimestamp()
-            .setFooter({ text: "Cardial Bot" });
+            .setFooter({ text: DEFAULT_FOOTER });
     }
 
     static getSmartRollView(challenge, dice, diceValue, modValues, rerollsSoFar = 0) {
@@ -211,7 +212,7 @@ class EmbededResponseService {
             .setTitle(`Teste de ${challengeLabel}${rerollsSoFar > 0 ? ` (${rerollsSoFar})` : ""}`)     
             .setDescription(response)
             .setTimestamp()
-            .setFooter({ text: "Cardial Bot" });
+            .setFooter({ text: DEFAULT_FOOTER });
     }
 
     static getInitiativeView(players, monsters) {
@@ -246,7 +247,7 @@ class EmbededResponseService {
             // .setDescription(response)
             .setFields(fields)
             .setTimestamp()
-            .setFooter({ text: "Cardial Bot" });
+            .setFooter({ text: DEFAULT_FOOTER });
     }
 
     static createInitiativeLine(combatEntity, nameSize = 28, separator = " ") {

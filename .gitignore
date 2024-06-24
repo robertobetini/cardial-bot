@@ -130,6 +130,6 @@ dist
 .pnp.*
 
 # sqlite3 db
-.db
-.db-shm
-.db-wal
+*.db
+*.db-shm
+*.db-wal

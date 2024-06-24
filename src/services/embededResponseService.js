@@ -9,7 +9,10 @@ const UserService = require("../services/userService");
 const Constants = require("../constants");
 const Colors = require("../colors");
 
-const DEFAULT_FOOTER = "Elysium System\u205F\u205F\u205F\u205F\u205F\u205F\u205F\u205F\u205F";
+const DEFAULT_FOOTER = "Elysium Systemㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⁣ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⁣";
+const SHORT_FOOTER = "Elysium Systemㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⁣ㅤㅤㅤ⁣";
+const SHORTEST_FOOTER = "Elysium System";
+
 class EmbededResponseService {
     static async getExpLeaderboard(guildId, page) {
         const users =  await UserService.getAllFromGuild(guildId, "totalExp", page * Constants.PAGE_SIZE, Constants.PAGE_SIZE);
@@ -23,7 +26,6 @@ class EmbededResponseService {
             .setColor(0xbbbbbb)
             .setTitle("Placar de nível")
             .setFields(fields)
-            .setTimestamp()
             .setFooter({ text: DEFAULT_FOOTER }), isEmpty];
     }
 
@@ -39,7 +41,6 @@ class EmbededResponseService {
             .setColor(0xbbbbbb)
             .setTitle("Placar de gold")
             .setFields(fields)
-            .setTimestamp()
             .setFooter({ text: DEFAULT_FOOTER }), isEmpty];
     }
 
@@ -73,7 +74,6 @@ class EmbededResponseService {
             .setDescription(user.notes || " ")
             .setAuthor({ name: `Personagem de ${user.username}` })
             .addFields(fields)
-            .setTimestamp()
             .setFooter({ text: DEFAULT_FOOTER });
     }
 
@@ -150,7 +150,6 @@ class EmbededResponseService {
             .setDescription(user.notes || " ")
             .setAuthor({ name: `Personagem de ${user.username}` })
             .addFields(embedFields)
-            .setTimestamp()
             .setFooter({ text: DEFAULT_FOOTER });
     }
 
@@ -191,8 +190,7 @@ class EmbededResponseService {
             .setColor(0xbbbbbb)
             .setTitle(`${results.length}d${dice}${rerollsSoFar > 0 ? ` (${rerollsSoFar})` : ""}`)     
             .setDescription(response)
-            .setTimestamp()
-            .setFooter({ text: DEFAULT_FOOTER });
+            .setFooter({ text: SHORTEST_FOOTER });
     }
 
     static getSmartRollView(challenge, dice, diceValue, modValues, rerollsSoFar = 0) {
@@ -211,8 +209,7 @@ class EmbededResponseService {
             .setColor(0xbbbbbb)
             .setTitle(`Teste de ${challengeLabel}${rerollsSoFar > 0 ? ` (${rerollsSoFar})` : ""}`)     
             .setDescription(response)
-            .setTimestamp()
-            .setFooter({ text: DEFAULT_FOOTER });
+            .setFooter({ text: SHORT_FOOTER });
     }
 
     static getInitiativeView(players, monsters) {
@@ -246,7 +243,6 @@ class EmbededResponseService {
             .setTitle("Iniciativa")     
             // .setDescription(response)
             .setFields(fields)
-            .setTimestamp()
             .setFooter({ text: DEFAULT_FOOTER });
     }
 

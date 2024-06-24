@@ -9,6 +9,10 @@ class Role {
     }
 
     static fromDTO(roleDTO) {
+        if (!roleDTO) {
+            return null;
+        }
+
         return new Role(roleDTO.guildId, roleDTO.roleId, roleDTO.type);
     }
 }

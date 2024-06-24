@@ -4,6 +4,7 @@ const Constants = require("../constants");
 
 class TimerService {
     static async addSilenceTime(guildId, discordUser, days, hours, minutes) {
+        const now = Date.now();
         let user = await UserService.getOrCreateUser(guildId, discordUser);
         if (!user.silenceEndTime) {
             user.silenceEndTime = now;
@@ -15,6 +16,7 @@ class TimerService {
     }
 
     static async removeSilenceTime(guildId, discordUser, days, hours, minutes) {
+        const now = Date.now();
         let user = await UserService.getOrCreateUser(guildId, discordUser);
         if (!user.silenceEndTime) {
             user.silenceEndTime = now;

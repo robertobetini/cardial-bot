@@ -77,6 +77,10 @@ class Stats {
     }
 
     static fromDTO(fullUserDTO) {
+        if (!fullUserDTO) {
+            return null;
+        }
+
         const stats = new Stats(
             fullUserDTO.userId,
             fullUserDTO.guildId,

@@ -27,10 +27,6 @@ test(TESTING_MODULE, Stats.prototype.tryUpdateGold,
             user.stats = stats;
             user.attributes = attributes;
 
-            console.log(stats);
-            console.log(attributes);
-            console.log(user);
-
             expected = {
                 maxHP: 18,
                 maxFP: 4,
@@ -39,7 +35,6 @@ test(TESTING_MODULE, Stats.prototype.tryUpdateGold,
             };
             
             user.levelUp();
-            console.log(user);
 
             assert.equal(expected["maxHP"], user.stats.maxHP);
             assert.equal(expected["maxFP"], user.stats.maxFP);

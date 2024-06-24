@@ -50,6 +50,10 @@ class User {
     }
 
     static fromDTO(userDTO) {
+        if (!userDTO) {
+            return null;
+        }
+
         return new User(
             userDTO.userId, 
             userDTO.guildId,

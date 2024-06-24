@@ -1,38 +1,40 @@
-const MySQLDAO = require("./mySQLDAO");
+const Sqlite3DAO = require("./sqlite3DAO");
 
 const Attributes = require("../models/attributes");
 
-class AttributesDAO extends MySQLDAO {
+class AttributesDAO extends Sqlite3DAO {
     async get(userId, guildId) {
-        const conn = await this.getConnection();
+        const db = this.getConnection();
         const query = "SELECT * FROM ATTRIBUTES WHERE userId = ? AND guildId = ?";
-        const res = await conn.execute(query, [userId, guildId]);
+        const attributes = db.prepare(query).run(userId, guildId);
 
-        if (res[0].length === 0) {
-            return null;
-        }
-
-        return Attributes.fromDTO(res[0][0]);
+        return Attributes.fromDTO(attributes);
     }
-    async insert(userId, guildId, attributes, transactionConn = null) {
-        const conn = transactionConn || await this.getConnection();
+    async insert(userId, guildId, attributes, transactionDb = null) {
+        const db = transactionDb || this.getConnection();
         const query = "INSERT INTO ATTRIBUTES (userId, guildId, `FOR`, DEX, CON, WIS, CHA, availablePoints, firstAttributionDone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        const _res = await conn.execute(query, [userId, guildId, attributes.FOR, attributes.DEX, attributes.CON, attributes.WIS, attributes.CHA, attributes.availablePoints, attributes.firstAttributionDone]);
+        const firstAttributionDone = attributes.firstAttributionDone ? 1 : 0;
+        db
+            .prepare(query)
+            .run(userId, guildId, attributes.FOR, attributes.DEX, attributes.CON, attributes.WIS, attributes.CHA, attributes.availablePoints, firstAttributionDone);
     }
 
-    async update(userId, guildId, attributes, transactionConn = null) {
-        const conn = transactionConn || await this.getConnection();
+    async update(userId, guildId, attributes, transactionDb = null) {
+        const db = transactionDb || this.getConnection();
         const query = "UPDATE ATTRIBUTES SET `FOR` = ?, DEX = ?, CON = ?, WIS = ?, CHA = ?, availablePoints = ?, firstAttributionDone = ? WHERE userId = ? AND guildId = ?";
-        const res = await conn.execute(query, [attributes.FOR, attributes.DEX, attributes.CON, attributes.WIS, attributes.CHA, attributes.availablePoints, attributes.firstAttributionDone, userId, guildId]);
+        const firstAttributionDone = attributes.firstAttributionDone ? 1 : 0;
+        const res = db
+            .prepare(query)
+            .run(attributes.FOR, attributes.DEX, attributes.CON, attributes.WIS, attributes.CHA, attributes.availablePoints, firstAttributionDone, userId, guildId);
 
-        return res[0].affectedRows > 0;
+        return res.changes.valueOf() > 0;
     }
 
-    async upsert(userId, guildId, attributes, transactionConn = null) {
-        const updated = await this.update(userId, guildId, attributes, transactionConn);
+    async upsert(userId, guildId, attributes, transactionDb = null) {
+        const updated = await this.update(userId, guildId, attributes, transactionDb);
 
         if (!updated) {
-            await this.insert(userId, guildId, attributes, transactionConn);
+            await this.insert(userId, guildId, attributes, transactionDb);
         }
     }
 }

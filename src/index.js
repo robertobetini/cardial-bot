@@ -3,6 +3,7 @@ require('dotenv').config();
 const Discord = require("discord.js");
 
 const commandLoader = require("./commandLoader");
+const dbInit = require("./dbInit");
 const updateSilentRolesJob = require("./jobs/updateSilentRolesJob");
 
 const commandHandler = require("./interactions/commandInteractionHandler");
@@ -17,6 +18,7 @@ const UPDATE_SILENT_USERS_INTERVAL_TIME = Number(process.env.UPDATE_SILENT_USERS
 
 const client = new Discord.Client({ intents: [ Discord.GatewayIntentBits.Guilds ] });
 
+dbInit.init();
 commandLoader.loadAllCommands(client);
 commandLoader.deployAllCommands()
     .then()

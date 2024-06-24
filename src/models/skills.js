@@ -20,6 +20,10 @@ class Skills {
     }
 
     static fromDTO(fullUserDTO) {
+        if (!fullUserDTO) {
+            return null;
+        }
+
         const skills = new Skills(fullUserDTO.userId, fullUserDTO.guildId);
 
         skills.athletics = fullUserDTO.athletics;

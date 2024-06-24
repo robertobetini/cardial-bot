@@ -14,6 +14,10 @@ class Attributes {
     }
 
     static fromDTO(fullUserDTO) {
+        if (!fullUserDTO) {
+            return null;
+        }
+        
         return new Attributes(
             fullUserDTO.userId,
             fullUserDTO.guildId,

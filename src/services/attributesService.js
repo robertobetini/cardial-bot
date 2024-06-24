@@ -14,7 +14,6 @@ class AttributesService {
             const user = await UserService.get(attributes.guildId, attributes.userId, true);
     
             const conModDiff = calculateAttributeMod(attributes.CON) - calculateAttributeMod(user.attributes.CON);
-            console.log(conModDiff);
             if (conModDiff === 0) {
                 return;
             }

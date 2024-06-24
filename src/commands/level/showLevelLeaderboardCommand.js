@@ -69,7 +69,6 @@ module.exports = {
         const newPage = currentPage + 1;
         
         const [leaderboard, isEmpty] = await EmbededResponseService.getExpLeaderboard(guildId, newPage);
-        console.log(leaderboard);
         if (!isEmpty) {
             pages[interaction.message.id] = newPage;
             interaction.message.edit({ embeds: [leaderboard] });

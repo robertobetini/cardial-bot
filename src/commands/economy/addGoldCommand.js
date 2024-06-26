@@ -1,33 +1,34 @@
 const Discord = require("discord.js");
+
 const RoleService = require("./../../services/roleService");
 const EconomyService = require("../../services/economyService");
 
+const Constants = require("../../constants");
+const { addMultipleUserOptions, getUsersFromInput } = require ("../helpers");
+
+const data = new Discord.SlashCommandBuilder()
+    .setName("addgold")
+    .setDescription("Adiciona GOLD ao(s) usuário(s) escolhido(s)")
+    .addIntegerOption(option =>
+        option
+            .setName("quantidade")
+            .setDescription("Quantidade de GOLD a adicionar ao(s) usuário(s)")
+            .setMinValue(1)
+            .setRequired(true)
+    );
+
+addMultipleUserOptions(data, Constants.COMMAND_MAX_USERS, 1);
+
 module.exports = {
-    data: new Discord.SlashCommandBuilder()
-        .setName("addgold")
-        .setDescription("Adiciona GOLD ao usuário escolhido")
-        .addUserOption(option =>
-			option
-				.setName("user")
-				.setDescription("O usuário que irá receber GOLD")
-				.setRequired(true))
-		.addIntegerOption(option =>
-			option
-				.setName("quantidade")
-				.setDescription("Quantidade de GOLD a adicionar ao usuário")
-                .setMinValue(1)
-                .setRequired(true)),
+    data,
     async execute(interaction) {
-        if (!RoleService.isMemberAdm(interaction.guild, interaction.member)) {
-            await interaction.editReply("Você não possui cargo de ADM para executar o comando.");
-            return;
-        }
+        RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
 
-        const target = interaction.options.getUser("user");
         const amount = interaction.options.getInteger("quantidade");
+        const targets = getUsersFromInput(interaction, Constants.COMMAND_MAX_USERS);
 
-        EconomyService.addGold(interaction.guild.id, target, amount);
+        EconomyService.addGold(targets.users, amount);
 
-        await interaction.editReply(`$${amount} concedido a ${Discord.userMention(target.id)}.`);
+        await interaction.editReply(`${amount} GOLD concedido a ${targets.mentions}.`);
     }
 }

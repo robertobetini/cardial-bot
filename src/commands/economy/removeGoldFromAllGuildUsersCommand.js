@@ -7,13 +7,8 @@ module.exports = {
         .setName("retirargoldtodos")
         .setDescription("Remove todo o GOLD de todos os usuários"),
     async execute(interaction) {
-        if (!RoleService.isMemberAdm(interaction.guild, interaction.member)) {
-            await interaction.editReply("Você não possui cargo de ADM para executar o comando.");
-            return;
-        }
-
+        RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
         EconomyService.clearGoldFromAllUsers(interaction.guild.id);
-
         await interaction.editReply(`Todo o GOLD foi removido dos usuários.`);
     }
 }

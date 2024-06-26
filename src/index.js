@@ -48,9 +48,7 @@ client.on(Discord.Events.InteractionCreate, async interaction => {
 		}
 	} catch(err) {
 		Logger.error(err);
-		interaction.replied || interaction.deferred
-			? await interaction.followUp({ content: `There was an error while executing this command: ${err}`})
-			: await interaction.reply(`There was an error while executing this command: ${err}`);
+		interaction.replied || interaction.deferred ? await interaction.followUp(err.toString()) : await interaction.reply(err.toString());
 	}
 });
 

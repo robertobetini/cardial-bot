@@ -1,10 +1,10 @@
 const Discord = require("discord.js");
 const { randomId } = require("../../utils");
-const UserService = require("../../services/userService");
 const EmbededResponseService = require("../../services/embededResponseService");
 
 const Logger = require("../../logger");
 const Constants = require("../../constants");
+const { addMultipleUserOptions, getUsersFromInput } = require ("../helpers");
 
 const combats = {};
 
@@ -12,22 +12,13 @@ const data = new Discord.SlashCommandBuilder()
     .setName("iniciativa")
     .setDescription("Adiciona jogadores para teste de iniciativa");
 
-for (let i = 1; i <= Constants.INITIATIVE_COMMAND_MAX_USERS; i++) {
-    data.addUserOption(option => 
-        option
-            .setName(`jogador${i}`)
-            .setDescription(`Jogador ${i}`)
-            .setRequired(i === 1)
-    );
-}
+addMultipleUserOptions(data, Constants.COMMAND_MAX_USERS, 1);
 
 const parseDiceString = (dice) => {
     const result = /^(\d+)d(\d+)(\+\d*|-\d*)?$/.exec(dice);
     if (!result) {
         throw new Error("Invalid dice pattern");
     }
-
-    console.log(result);
 
     const diceCount = result[1];
     const diceSides = result[2];
@@ -55,26 +46,9 @@ module.exports = {
     execute: async (interaction) => {
         const guildId = interaction.guild.id;
         const userId = interaction.user.id;
-        const users = [];
-
-        for (let i = 1; i <= Constants.INITIATIVE_COMMAND_MAX_USERS; i++) {
-            const user = interaction.options.getUser(`jogador${i}`);
-            if (!user) {
-                continue;
-            }
-
-            Logger.debug(`Adicionando jogador ${user.username} à busca de fichas`);
-            users.push(UserService.get(guildId, user.id, true));
-        }
-
-        Logger.debug("Consulta de fichas realizada");
-
-        if (users.findIndex(u => u == null || !u.attributes.firstAttributionDone) >= 0) {
-            await interaction.editReply("Existem usuários sem ficha ou com ficha incompleta.");
-            return;
-        }
-
+        const users = getUsersFromInput(interaction, Constants.COMMAND_MAX_USERS);
         const combatId = randomId(10);
+        
         users[0].selected = true;
         combats[combatId] = {
             participants: users

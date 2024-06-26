@@ -16,10 +16,11 @@ const Constants = {
     BASE_MAX_HP_PER_LEVEL: 6,
     BASE_MAX_FP_PER_LEVEL: 2,
     BASE_MAX_SP_PER_LEVEL: 0,
+    INITIAL_GOLD: 1000,
     // INITIAL_AVAILABLE_ATTRIBUTES: 25,
     INITIAL_AVAILABLE_ATTRIBUTES: 4, // testing purposes
     ATTRIBUTE_PER_LEVEL: 1,
-    INITIATIVE_COMMAND_MAX_USERS: 6,
+    COMMAND_MAX_USERS: 6,
     EPHEMERAL_COMMANDS: ["ficha", "atualizastatus"],
     attributes: [
         { label: "Força", value: "FOR" },

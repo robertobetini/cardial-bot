@@ -2,33 +2,32 @@ const Discord = require("discord.js");
 const RoleService = require("./../../services/roleService");
 const ProgressionService = require("./../../services/progressionService");
 
+const { addMultipleUserOptions, getUsersFromInput } = require ("../helpers");
+const Constants = require("../../constants");
+
+const data = new Discord.SlashCommandBuilder()
+    .setName("addexp")
+    .setDescription("Adiciona EXP ao(s) usuário(s) escolhido(s)")
+    .addIntegerOption(option =>
+        option
+            .setName("quantidade")
+            .setDescription("Quantidade de EXP a fornecer ao(s) usuário(s)")
+            .setMinValue(1)
+            .setRequired(true)
+    );
+
+addMultipleUserOptions(data, Constants.COMMAND_MAX_USERS, 1);
+
 module.exports = {
-    data: new Discord.SlashCommandBuilder()
-        .setName("addexp")
-        .setDescription("Adiciona EXP ao usuário escolhido")
-        .addUserOption(option =>
-			option
-				.setName("user")
-				.setDescription("O usuário que irá receber a EXP")
-				.setRequired(true))
-		.addIntegerOption(option =>
-			option
-				.setName("quantidade")
-				.setDescription("Quantidade de EXP a fornecer ao usuário")
-                .setMinValue(1)
-                .setRequired(true)),
+    data,
     async execute(interaction) {
-        if (!RoleService.isMemberAdm(interaction.guild, interaction.member)) {
-            await interaction.editReply("Você não possui cargo de ADM para executar o comando.");
-            return;
-        };
+        RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
         
-        const target = interaction.options.getUser("user");
         const amount = interaction.options.getInteger("quantidade");
+        const targets = getUsersFromInput(interaction, Constants.COMMAND_MAX_USERS);
 
-        ProgressionService.addExp(interaction.guild.id, target, amount);
+        ProgressionService.addExp(targets.users, amount);
 
-        const message = `${amount} EXP concedido a ${Discord.userMention(target.id)}.`;
-        await interaction.editReply({ content: message });
+        await interaction.editReply(`${amount} EXP concedido a ${targets.mentions}.`);
     }
 }

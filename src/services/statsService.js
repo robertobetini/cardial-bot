@@ -43,6 +43,8 @@ class StatsService {
         currentStats.baseDEF = Constants.BASE_DEF;
         currentStats.baseInitiative = Constants.BASE_INITIATIVE;
 
+        currentStats.gold = Constants.INITIAL_GOLD;
+
         console.log(currentStats);
         this.update(currentStats);
     }

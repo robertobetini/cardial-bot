@@ -31,13 +31,25 @@ class Stats {
         this.updateExpAndLevel();
     }
 
-    updateExpAndLevel() {
+    updateExpAndLevel(constrainLevel) {
         const result = expCalculator.getLevelFromExp(this.totalExp);
+
+        if (constrainLevel) {
+            if (result.lvl > this.lvl) {
+                this.exp = expCalculator.getLevelExp(this.lvl);
+            } else if (result.lvl < this.lvl) {
+                this.exp = 0;
+            } else {
+                this.exp = result.remainingExp;        
+            }
+            return;
+        }
+
         this.lvl = result.lvl;
         this.exp = result.remainingExp;
     }
 
-    addExp(exp) {
+    addExp(exp, constrainLevel) {
         let newTotalExp = this.totalExp + exp;
 
         if (newTotalExp < 0) {
@@ -47,14 +59,14 @@ class Stats {
         }
 
         this.totalExp = newTotalExp;
-        this.updateExpAndLevel();
+        this.updateExpAndLevel(constrainLevel);
     }
 
     tryUpdateGold(amount) {
         const newAmount = this.gold + amount;
 
         if (newAmount < 0) {
-            throw new Error(`O usuário não possui saldo para suficiente para ser removido (Saldo atual: ${this.gold}).`);
+            throw new Error(`O usuário não possui saldo para suficiente para realizar o envio (\`Saldo atual: ${this.gold}\`).`);
         }
 
         this.gold = newAmount;

@@ -1,10 +1,16 @@
 const UserService = require("../services/userService");
 
 class ProgressionService {
-    static addExp(guildId, targetUser, expAmount) {
-        const user = UserService.getOrCreateUser(guildId, targetUser);
-        user.addExp(expAmount);
-        UserService.upsert(user, true);
+    static addExp(users, expAmount, constrainLevel = false) {
+        for (let user of users) {
+            if (!user) {
+                throw new Error(`Existem jogadores sem ficha ou com ficha incompleta.`);
+            }
+
+            user.addExp(expAmount, constrainLevel);
+        }
+
+        UserService.batchUpsert(users, true);
     }
 }
 

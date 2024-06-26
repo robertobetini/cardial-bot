@@ -22,9 +22,9 @@ class User {
         this.skills = skills || new Skills(userId, guildId);
     }
 
-    addExp(exp) { 
+    addExp(exp, constrainLevel = false) { 
         const levelBefore = this.stats?.lvl;
-        this.stats?.addExp(exp); 
+        this.stats?.addExp(exp, constrainLevel); 
         const levelAfter = this.stats?.lvl;
 
         for (let i = 0; i < levelAfter - levelBefore; i++) {

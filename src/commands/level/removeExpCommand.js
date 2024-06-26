@@ -1,33 +1,34 @@
 const Discord = require("discord.js");
+
 const RoleService = require("./../../services/roleService");
 const ProgressionService = require("./../../services/progressionService");
 
+const Constants = require("../../constants");
+const { addMultipleUserOptions, getUsersFromInput } = require ("../helpers");
+
+const data = new Discord.SlashCommandBuilder()
+    .setName("retirarexp")
+    .setDescription("Remove EXP do(s) usuário(s) escolhido(s)")
+    .addIntegerOption(option =>
+        option
+            .setName("quantidade")
+            .setDescription("Quantidade de EXP a retirar do(s) usuário(s)")
+            .setMinValue(1)
+            .setRequired(true)
+    );
+
+addMultipleUserOptions(data, Constants.COMMAND_MAX_USERS, 1);
+
 module.exports = {
-    data: new Discord.SlashCommandBuilder()
-        .setName("retirarexp")
-        .setDescription("Remove EXP do usuário escolhido")
-        .addUserOption(option =>
-			option
-				.setName("user")
-				.setDescription("O usuário de quem irá ser retirada EXP")
-				.setRequired(true))
-		.addIntegerOption(option =>
-			option
-				.setName("quantidade")
-				.setDescription("Quantidade de EXP a retirar ao usuário")
-                .setMinValue(1)
-                .setRequired(true)),
+    data,
     async execute(interaction) {
-        if (!RoleService.isMemberAdm(interaction.guild, interaction.member)) {
-            await interaction.editReply("Você não possui cargo de ADM para executar o comando.");
-            return;
-        };
+        RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);;
         
-        const target = interaction.options.getUser("user");
         const amount = interaction.options.getInteger("quantidade");
+        const targets = getUsersFromInput(interaction, Constants.COMMAND_MAX_USERS);
 
-        ProgressionService.addExp(interaction.guild.id, target, -amount);
+        ProgressionService.addExp(targets.users, -amount, true);
 
-        await interaction.editReply(`${amount} EXP retirado de ${Discord.userMention(target.id)}.`);
+        await interaction.editReply(`${amount} EXP retirado de ${targets.mentions}.`);
     }
 }

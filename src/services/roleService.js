@@ -10,6 +10,12 @@ class RoleService {
         return roleDAO.get(guildId, type);
     }
 
+    static ensureMemberIsAdmOrOwner(guild, discordMemder) { 
+        if (!RoleService.isMemberAdm(guild, discordMemder)) {
+            throw new Error("Você não possui cargo de ADM para executar o comando.");
+        }
+    }
+
     static isMemberAdm(guild, discordMember) {
         if (guild.ownerId === discordMember.user.id) {
             return true;

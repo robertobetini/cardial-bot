@@ -22,10 +22,7 @@ module.exports = {
         .setName("placarnivel")
         .setDescription("Mostra o placar atual de níveis dos usuários"),
     async execute(interaction) {
-        if (!RoleService.isMemberAdm(interaction.guild, interaction.member)) {
-            await interaction.editReply("Você não possui cargo de ADM para executar o comando.");
-            return;
-        };
+        RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);;
         
         if (Object.keys(pages).length > 3) {
             pages = {};

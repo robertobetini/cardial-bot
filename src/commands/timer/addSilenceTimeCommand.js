@@ -29,10 +29,7 @@ module.exports = {
                 .setDescription("Quantidade de minutos em silêncio")
                 .setMinValue(0)),
     async execute(interaction) {
-        if (!RoleService.isMemberAdm(interaction.guild, interaction.member)) {
-            await interaction.editReply("Você não possui cargo de ADM para executar o comando.");
-            return;
-        };
+        RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);;
         
         const target = interaction.options.getUser("user");
         const days = interaction.options.getInteger("dias");

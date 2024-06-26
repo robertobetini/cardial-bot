@@ -14,6 +14,10 @@ module.exports = {
         const commandFolders = fs.readdirSync(foldersPath);
     
         for (const folder of commandFolders) {
+            if (folder.endsWith(".js")) {
+                continue;
+            }
+
             const commandsPath = path.join(foldersPath, folder);
             const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
     

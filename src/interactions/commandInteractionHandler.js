@@ -18,14 +18,7 @@ module.exports = {
             ephemeral: Constants.EPHEMERAL_COMMANDS.findIndex(c => c === commandName) >= 0
         });
 
-        try {
-            Logger.debug(`Executing command: ${interaction.commandName}`);
-            await command.execute(interaction, interaction.token);
-        } catch (error) {
-            Logger.error(error);
-            interaction.replied || interaction.deferred 
-                ? await interaction.followUp("There was an error while executing this command!")
-                : await interaction.editReply("There was an error while executing this command!");
-        }
+        Logger.debug(`Executing command: ${interaction.commandName}`);
+        await command.execute(interaction, interaction.token);
     }
 };

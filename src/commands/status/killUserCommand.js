@@ -13,13 +13,10 @@ module.exports = {
                 .setDescription("Usuário")
 				.setRequired(true)),
     async execute(interaction) {
+        RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
+        
         const target = interaction.options.getUser("user");
         const guildId = interaction.guild.id;
-
-        if (!RoleService.isMemberAdm(interaction.guild, interaction.member)) {
-            await interaction.editReply("É necessário cargo de ADM para remover um personagem.");
-            return;
-        }
 
         const user = new User(target.id, guildId, target.username, target.displayAvatarURL());
         const member = await interaction.guild.members.fetch(target.id);

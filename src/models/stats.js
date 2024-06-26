@@ -1,5 +1,6 @@
 const expCalculator = require("../calculators/expCalculator");
 const Constants = require("../constants");
+const Logger = require("../logger");
 
 class Stats {
     static maxLvl = Constants.MAX_LEVEL;
@@ -36,9 +37,13 @@ class Stats {
 
         if (constrainLevel) {
             if (result.lvl > this.lvl) {
+                Logger.warn(`Constraining level up for player (${this.guildId}|${this.userId})`);
                 this.exp = expCalculator.getLevelExp(this.lvl);
+                this.totalExp = expCalculator.getTotalLevelExp(this.lvl) + this.exp;
             } else if (result.lvl < this.lvl) {
+                Logger.warn(`Constraining level down for player (${this.guildId}|${this.userId})`);
                 this.exp = 0;
+                this.totalExp = expCalculator.getTotalLevelExp(this.lvl);
             } else {
                 this.exp = result.remainingExp;        
             }

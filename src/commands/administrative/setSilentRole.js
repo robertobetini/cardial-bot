@@ -12,18 +12,15 @@ module.exports = {
 				.setDescription("O cargo que será considerado como SILENT pelo bot")
 				.setRequired(true)),
     async execute(interaction) {
-        try {
-            const role = interaction.options.getRole("cargo");
-    
-            if (interaction.user.id !== interaction.guild.ownerId) {
-                await interaction.editReply("Apenas o dono do servidor pode alterar o cargo de SILENT.");
-            }
-            
-            const silentRole = new Role(interaction.guild.id, role.id, Role.SILENT_TYPE);
-            RoleService.upsert(silentRole);
-            await interaction.editReply("Cargo de SILENT alterado com sucesso.");
-        } catch(err) {
-            await interaction.editReply(err.message);
+        const role = interaction.options.getRole("cargo");
+
+        if (interaction.user.id !== interaction.guild.ownerId) {
+            await interaction.editReply("Apenas o dono do servidor pode alterar o cargo de SILENT.");
+            return;
         }
+        
+        const silentRole = new Role(interaction.guild.id, role.id, Role.SILENT_TYPE);
+        RoleService.upsert(silentRole);
+        await interaction.editReply("Cargo de SILENT alterado com sucesso.");
     }
 }

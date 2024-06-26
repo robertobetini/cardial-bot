@@ -15,6 +15,7 @@ module.exports = {
     
             if (interaction.user.id !== interaction.guild.ownerId) {
                 await interaction.editReply("Apenas o dono do servidor pode definir o canal padrão.");
+                return;
             }
             
             await interaction.editReply(`Canal de comunicação padrão alterado para ${Discord.channelMention(channel.id)}.`);

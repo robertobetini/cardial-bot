@@ -19,7 +19,8 @@ module.exports = {
                 .setRequired(true)),
     async execute(interaction) {
         if (!RoleService.isMemberAdm(interaction.guild, interaction.member)) {
-            interaction.editReply("Você não possui cargo de ADM para executar o comando.");
+            await interaction.editReply("Você não possui cargo de ADM para executar o comando.");
+            return;
         }
 
         const target = interaction.options.getUser("user");

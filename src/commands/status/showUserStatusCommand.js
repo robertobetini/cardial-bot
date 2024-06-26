@@ -230,6 +230,7 @@ module.exports = {
 
         if (target.id !== interaction.user.id && !RoleService.isMemberAdm(interaction.guild, interaction.member)) {
             await interaction.editReply("É necessário cargo de ADM para consultar o status de outros usuários.");
+            return;
         }
 
         const key = guildId + target.id;

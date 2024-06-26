@@ -54,7 +54,7 @@ class Stats {
         const newAmount = this.gold + amount;
 
         if (newAmount < 0) {
-            throw new Error(`O usuário não possui saldo para suficiente para ser removido (Saldo atual: $${this.gold}).`);
+            throw new Error(`O usuário não possui saldo para suficiente para ser removido (Saldo atual: ${this.gold}).`);
         }
 
         this.gold = newAmount;

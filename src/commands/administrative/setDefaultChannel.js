@@ -10,17 +10,13 @@ module.exports = {
 				.setDescription("O canal que receberá por padrão comunicações do bot")
 				.setRequired(true)),
     async execute(interaction) {
-        try {
-            const channel = interaction.options.getChannel("channel");
-    
-            if (interaction.user.id !== interaction.guild.ownerId) {
-                await interaction.editReply("Apenas o dono do servidor pode definir o canal padrão.");
-                return;
-            }
-            
-            await interaction.editReply(`Canal de comunicação padrão alterado para ${Discord.channelMention(channel.id)}.`);
-        } catch(err) {
-            await interaction.editReply(err.message);
+        const channel = interaction.options.getChannel("channel");
+
+        if (interaction.user.id !== interaction.guild.ownerId) {
+            await interaction.editReply("Apenas o dono do servidor pode definir o canal padrão.");
+            return;
         }
+        
+        await interaction.editReply(`Canal de comunicação padrão alterado para ${Discord.channelMention(channel.id)}.`);
     }
 }

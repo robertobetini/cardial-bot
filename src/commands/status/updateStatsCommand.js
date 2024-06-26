@@ -37,6 +37,7 @@ module.exports = {
 
         if (!RoleService.isMemberAdm(interaction.guild, interaction.member)) {
             await interaction.editReply("É necessário cargo de ADM para remover um personagem.");
+            return;
         }
 
         const user = UserService.get(guildId, target.id, true);

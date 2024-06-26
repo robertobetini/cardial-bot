@@ -9,6 +9,7 @@ module.exports = {
     async execute(interaction) {
         if (!RoleService.isMemberAdm(interaction.guild, interaction.member)) {
             await interaction.editReply("Você não possui cargo de ADM para executar o comando.");
+            return;
         }
 
         EconomyService.clearGoldFromAllUsers(interaction.guild.id);

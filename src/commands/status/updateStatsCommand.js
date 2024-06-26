@@ -35,11 +35,11 @@ module.exports = {
         const target = interaction.options.getUser("user");
         const guildId = interaction.guild.id;
 
-        if (!await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
+        if (!RoleService.isMemberAdm(interaction.guild, interaction.member)) {
             await interaction.editReply("É necessário cargo de ADM para remover um personagem.");
         }
 
-        const user = await UserService.get(guildId, target.id, true);
+        const user = UserService.get(guildId, target.id, true);
         if (!user) {
             await interaction.editReply({ content: "O jogador não possui ficha ainda!" });
             return;
@@ -50,7 +50,7 @@ module.exports = {
 
         user.stats.modifyStat(stat, value);
 
-        await StatsService.update(user.stats);
+        StatsService.update(user.stats);
 
         await interaction.editReply({ content: "Status atualizado com sucesso!" });
     },

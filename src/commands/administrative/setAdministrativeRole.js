@@ -21,7 +21,7 @@ module.exports = {
             }
             
             const admRole = new Role(interaction.guild.id, role.id, Role.ADM_TYPE);
-            await RoleService.upsert(admRole);
+            RoleService.upsert(admRole);
             await interaction.editReply("Cargo de ADM alterado com sucesso.");
         } catch(err) {
             await interaction.editReply(err.message);

@@ -1,7 +1,6 @@
 const Discord = require("discord.js");
 const RoleService = require("./../../services/roleService");
 const ProgressionService = require("./../../services/progressionService");
-const EmbededResponseService = require("./../../services/embededResponseService");
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -19,21 +18,17 @@ module.exports = {
                 .setMinValue(1)
                 .setRequired(true)),
     async execute(interaction) {
-        try {
-            if (!await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
-                interaction.editReply("Você não possui cargo de ADM para executar o comando.");
-                return;
-            };
-            
-            const target = interaction.options.getUser("user");
-            const amount = interaction.options.getInteger("quantidade");
+        if (!RoleService.isMemberAdm(interaction.guild, interaction.member)) {
+            interaction.editReply("Você não possui cargo de ADM para executar o comando.");
+            return;
+        };
+        
+        const target = interaction.options.getUser("user");
+        const amount = interaction.options.getInteger("quantidade");
 
-            await ProgressionService.addExp(interaction.guild.id, target, amount);
+        ProgressionService.addExp(interaction.guild.id, target, amount);
 
-            const message = `${amount} EXP concedido a ${Discord.userMention(target.id)}.`;
-            await interaction.editReply({ content: message });
-        } catch(err) {
-            await interaction.editReply(err.message);
-        }
+        const message = `${amount} EXP concedido a ${Discord.userMention(target.id)}.`;
+        await interaction.editReply({ content: message });
     }
 }

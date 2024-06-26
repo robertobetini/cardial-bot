@@ -5,7 +5,7 @@ const skillsDAO = require("./skillsDAO");
 const User = require("../models/user");
 
 class UserDAO extends Sqlite3DAO {
-    async getAllSilent() {
+    getAllSilent() {
         const db = this.getConnection();
         const query = "SELECT * FROM USERS WHERE silenceEndTime > 0";
         const users = db.prepare(query).all();
@@ -13,7 +13,7 @@ class UserDAO extends Sqlite3DAO {
         return users.map(u => User.fromDTO(u));
     }
 
-    async getAllFromGuild(guildId, orderby, skip, limit, fullUser = true) {
+    getAllFromGuild(guildId, orderby, skip, limit, fullUser = true) {
         const db = this.getConnection();
 
         let query = "SELECT * FROM USERS AS u";
@@ -32,7 +32,7 @@ class UserDAO extends Sqlite3DAO {
         return users.map(u => User.fromDTO(u));
     }
 
-    async get(userId, guildId, fullUser = true) {
+    get(userId, guildId, fullUser = true) {
         const db = this.getConnection();
 
         let query = "SELECT * FROM USERS AS u";
@@ -47,7 +47,7 @@ class UserDAO extends Sqlite3DAO {
         return User.fromDTO(user);
     }
 
-    async insert(user, deepInsert = false) {
+    insert(user, deepInsert = false) {
         const db = this.getConnection();
         const query = "INSERT INTO USERS (userId, guildId, user, silenceEndTime, playerName, job, imgUrl) "
             + "VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -65,7 +65,7 @@ class UserDAO extends Sqlite3DAO {
         execute(user);
     }
 
-    async update(user, deepUpdate = false) {
+    update(user, deepUpdate = false) {
         const db = this.getConnection();
         const query = "UPDATE USERS SET silenceEndTime = ?, playerName = ?, job = ?, notes = ?, imgUrl = ? " 
             + "WHERE userId = ? and guildId = ?";
@@ -85,21 +85,21 @@ class UserDAO extends Sqlite3DAO {
         return execute(user);
     }
 
-    async upsert(user, deepUpsert = false) {
-        const updated = await this.update(user, deepUpsert);
+    upsert(user, deepUpsert = false) {
+        const updated = this.update(user, deepUpsert);
 
         if (!updated) {
-            await this.insert(user, deepUpsert);
+            this.insert(user, deepUpsert);
         }
     }
 
-    async batchUpsert(users, deepUpsert = false) {
+    batchUpsert(users, deepUpsert = false) {
         const db = this.getConnection();
-        const execute = db.transaction(async (users) => await Promise.all(users.map(u => this.upsert(u, deepUpsert))));
-        await execute(users);
+        const execute = db.transaction((users) => users.map(u => this.upsert(u, deepUpsert)));
+        execute(users);
     }
 
-    async clearGoldFromAll(guildId) {
+    clearGoldFromAll(guildId) {
         const db = this.getConnection();
         const query = "UPDATE USERS SET gold = 0 WHERE guildId = ?";
         db.prepare(query).run(guildId);

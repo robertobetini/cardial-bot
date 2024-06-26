@@ -18,16 +18,12 @@ module.exports = {
                 .setMinValue(1)
                 .setRequired(true)),
     async execute(interaction) {
-        try {
-            const target = interaction.options.getUser("user");
-            const amount = interaction.options.getInteger("quantidade");
+        const target = interaction.options.getUser("user");
+        const amount = interaction.options.getInteger("quantidade");
 
-            await EconomyService.transferGold(interaction.guild.id, interaction.user, target, amount);
+        EconomyService.transferGold(interaction.guild.id, interaction.user, target, amount);
 
-            await interaction.editReply(`$${amount} transferido de ${Discord.userMention(interaction.user.id)} para ${Discord.userMention(target.id)}.`);
-        } catch(err) {
-            await interaction.editReply(err.message);
-        }
+        await interaction.editReply(`$${amount} transferido de ${Discord.userMention(interaction.user.id)} para ${Discord.userMention(target.id)}.`);
     }
 }
 

@@ -29,7 +29,7 @@ module.exports = {
                 .setDescription("Quantidade de minutos em silêncio")
                 .setMinValue(0)),
     async execute(interaction) {
-        if (!await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
+        if (!RoleService.isMemberAdm(interaction.guild, interaction.member)) {
             interaction.editReply("Você não possui cargo de ADM para executar o comando.");
             return;
         };
@@ -44,9 +44,9 @@ module.exports = {
             return;
         }
 
-        await TimerService.addSilenceTime(interaction.guild.id, target, days, hours, minutes);
+        TimerService.addSilenceTime(interaction.guild.id, target, days, hours, minutes);
 
-        const role = await RoleService.getRole(interaction.guild.id, Role.SILENT_TYPE);
+        const role = RoleService.getRole(interaction.guild.id, Role.SILENT_TYPE);
         const updateRoleEndpoint = Discord.Routes.guildMemberRole(interaction.guild.id, target.id, role.roleId);
         const rest = new Discord.REST().setToken(process.env.TOKEN);
         const _data = await rest.put(updateRoleEndpoint);

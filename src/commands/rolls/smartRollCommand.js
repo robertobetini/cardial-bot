@@ -16,8 +16,8 @@ const buildRerollActionRow = (guildId, userId, challenge, rerollsSoFar) => {
     return new Discord.ActionRowBuilder().addComponents(button);
 }
 
-const roll = async (guildId, userId, challenge, rerollsSoFar) => {
-    const user = await UserService.get(guildId, userId, true);
+const roll = (guildId, userId, challenge, rerollsSoFar) => {
+    const user = UserService.get(guildId, userId, true);
     if (!user || !user.attributes.firstAttributionDone) {
         return { content: "Você precisa terminar sua ficha antes de executar os testes!", ephemeral: true };
     }
@@ -49,7 +49,7 @@ module.exports = {
         const userId = interaction.user.id;
         const challenge = interaction.options.getString("rolagem");
 
-        const response = await roll(guildId, userId, challenge, 0);
+        const response = roll(guildId, userId, challenge, 0);
         await interaction.editReply(response);
     },
     reroll: async (interaction, guildId, memberId, challenge, rerollsSoFar) => {
@@ -58,7 +58,7 @@ module.exports = {
             return;
         }
 
-        const response = await roll(guildId, memberId, challenge, rerollsSoFar);
+        const response = roll(guildId, memberId, challenge, rerollsSoFar);
         await interaction.reply(response);
     }
 }

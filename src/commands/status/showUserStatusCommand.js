@@ -82,13 +82,13 @@ const buildSelectedAttributeActionRows = (guildId, userId, selected, buttonAvail
     return actionRows;
 }
 
-const buildSkillsActionRow = async (guildId, userId, selected) => {
+const buildSkillsActionRow = (guildId, userId, selected) => {
     const skillsSelect = new Discord.StringSelectMenuBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:selectSkill`)
         .setPlaceholder("Selecione uma perícia")
         .setOptions(createSelectOptions(Constants.skills, selected));
 
-    const skills = await SkillsService.get(userId, guildId);
+    const skills = SkillsService.get(userId, guildId);
 
     const skillValuesSelect = new Discord.StringSelectMenuBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:updateSkillLevel`)
@@ -132,8 +132,8 @@ const getAttributeButtonsAvailability = (guildId, memberId, selectedAttribute, c
     return [ cancelButtonEnabled, decreaseButtonEnabled, increaseButtonEnabled, confirmButtonEnabled ];
 }
 
-const buildSelectedSkillActionRows = async (guildId, userId, selected) => {
-    let actionRows = await buildSkillsActionRow(guildId, userId, selected);
+const buildSelectedSkillActionRows = (guildId, userId, selected) => {
+    let actionRows = buildSkillsActionRow(guildId, userId, selected);
 
     const updateButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:updateSkill:${selected}`)
@@ -184,17 +184,17 @@ const createGotoHomeButton = (guildId, userId) => {
         .setStyle(Discord.ButtonStyle.Secondary);
 }
 
-const changeTempAttributesByAmount = async (guildId, memberId, selectedAttribute, amount) => {
-    await createTempAttributeEntryIfNotExists(guildId, memberId);
+const changeTempAttributesByAmount = (guildId, memberId, selectedAttribute, amount) => {
+    createTempAttributeEntryIfNotExists(guildId, memberId);
     
     const key = guildId + memberId;
     tempAttributes[key][selectedAttribute] += amount;
     tempAttributes[key].availablePoints -= amount;
 }
 
-const createTempAttributeEntryIfNotExists = async (guildId, memberId) => {
+const createTempAttributeEntryIfNotExists = (guildId, memberId) => {
     const key = guildId + memberId;
-    const currentAttributes = await AttributesService.get(guildId, memberId);
+    const currentAttributes = AttributesService.get(guildId, memberId);
     if (tempAttributes[key]) {
         return currentAttributes;
     }
@@ -228,12 +228,12 @@ module.exports = {
         const target = interaction.options.getUser("user") || interaction.user;
         const guildId = interaction.guild.id;
 
-        if (target.id !== interaction.user.id && !await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
+        if (target.id !== interaction.user.id && !RoleService.isMemberAdm(interaction.guild, interaction.member)) {
             await interaction.editReply("É necessário cargo de ADM para consultar o status de outros usuários.");
         }
 
         const key = guildId + target.id;
-        const embed = await EmbededResponseService.getUserStatus(guildId, target, tempAttributes[key]);
+        const embed = EmbededResponseService.getUserStatus(guildId, target, tempAttributes[key]);
         const actionRow = buildHomeActionRow(guildId, target.id);
 
         if (originalInteractions[key]) {
@@ -269,7 +269,7 @@ module.exports = {
             return;
         }
 
-        const user = await StatsService.getUserStats(memberId, guildId);
+        const user = StatsService.getUserStats(memberId, guildId);
 
         const modal = new Discord.ModalBuilder()
 			.setCustomId(`${guildId}:${memberId}:showUserStatusCommand:updateCharacter`)
@@ -327,7 +327,7 @@ module.exports = {
         await interaction.showModal(modal);
     },
     updateCharacter: async (interaction, guildId, memberId) => {
-        const user = await userDAO.get(memberId, guildId, false);
+        const user = userDAO.get(memberId, guildId, false);
         
         let name = null;
         if (!user.playerName) {
@@ -341,10 +341,10 @@ module.exports = {
         user.imgUrl = imgUrl;
         user.notes = notes;
 
-        await userDAO.update(user, false);
+        userDAO.update(user, false);
 
         const key = guildId + memberId;
-        const updatedEmbed = await EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]);
+        const updatedEmbed = EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]);
         originalInteractions[key]?.editReply({ embeds: [updatedEmbed] });
 
         await interaction.deferUpdate();
@@ -355,10 +355,8 @@ module.exports = {
             return;
         }
 
-        const [embed, actionRows] = await Promise.all([
-            EmbededResponseService.getUserSkills(guildId, memberId),
-            buildSkillsActionRow(guildId, memberId)
-        ]);
+        const embed = EmbededResponseService.getUserSkills(guildId, memberId);
+        const actionRows = buildSkillsActionRow(guildId, memberId);
 
         const key = guildId + memberId;
         originalInteractions[key]?.editReply({
@@ -375,7 +373,7 @@ module.exports = {
         }
 
         const selectedAttribute = interaction.values[0];
-        const currentAttributes = await createTempAttributeEntryIfNotExists(guildId, memberId);
+        const currentAttributes = createTempAttributeEntryIfNotExists(guildId, memberId);
 
         let attributeButtonsAvailability = [false, false, false, false];
         if (!currentAttributes || currentAttributes.availablePoints > 0) {
@@ -397,7 +395,7 @@ module.exports = {
         const key = guildId + memberId;
         delete tempAttributes[key];
 
-        const updatedEmbed = await EmbededResponseService.getUserStatus(guildId, interaction.member);
+        const updatedEmbed = EmbededResponseService.getUserStatus(guildId, interaction.member);
         const actionRows = buildAttributesActionRows(guildId, memberId);
         originalInteractions[key]?.editReply({ 
             embeds: [updatedEmbed],
@@ -413,7 +411,7 @@ module.exports = {
             return;
         }
 
-        const user = await UserService.get(guildId, memberId, false);
+        const user = UserService.get(guildId, memberId, false);
         if (!user.playerName) {
             await interaction.reply({ 
                 content: "Você precisa escolher um nome para seu personagem antes de terminar a ficha!",
@@ -432,22 +430,25 @@ module.exports = {
             tempAttributes[key].availablePoints,
             true
         );
+        console.log(attributes);
 
         let propagateChangesToStats = true;
         if (!tempAttributes[key].firstAttributionDone) {
-            await StatsService.setInitialStats(attributes);
+            StatsService.setInitialStats(attributes);
             propagateChangesToStats = false;
-            Logger.info(`User ${interaction.member.username} (${user.playerName}) finished first attributes pick up`);
+            Logger.info(`User ${user.username} (${user.playerName}) finished first attributes pick up`);
 
-            interaction.member.permissions.has(Discord.PermissionFlagsBits.ManageNicknames) && memberId !== interaction.guild.ownerId
-                ? interaction.member.setNickname(user.playerName)
-                : await interaction.reply({ content: "Não consigo atualizar o seu nickname porque você é o dono do servidor ou tem um cargo maior do que o meu.", ephemeral: true });
+            try {
+                await interaction.member.setNickname(user.playerName);
+            } catch {
+                await interaction.reply({ content: "Não consigo atualizar o seu nickname porque você é o dono do servidor ou tem um cargo maior do que o meu.", ephemeral: true });
+            }
         }
 
-        await AttributesService.update(attributes, propagateChangesToStats);
+        AttributesService.update(attributes, propagateChangesToStats);
         delete tempAttributes[key];
 
-        const updatedEmbed = await EmbededResponseService.getUserStatus(guildId, interaction.member);
+        const updatedEmbed = EmbededResponseService.getUserStatus(guildId, interaction.member);
         const actionRows = buildAttributesActionRows(guildId, memberId);
         originalInteractions[key]?.editReply({ 
             embeds: [updatedEmbed],
@@ -470,7 +471,7 @@ module.exports = {
         
         const attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute, tempAttributes[key].currentAttributes);
         originalInteractions[key]?.editReply({ 
-            embeds: [ await EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]) ],
+            embeds: [ EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]) ],
             components: buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability)
         });
 
@@ -487,7 +488,7 @@ module.exports = {
 
         const attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute, tempAttributes[key].currentAttributes);
         originalInteractions[key]?.editReply({ 
-            embeds: [ await EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]) ],
+            embeds: [ EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]) ],
             components: buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability), 
         });
 
@@ -500,7 +501,7 @@ module.exports = {
         }
 
         const selectedSkill = interaction.values[0];
-        const actionRows = await buildSelectedSkillActionRows(guildId, memberId, selectedSkill);
+        const actionRows = buildSelectedSkillActionRows(guildId, memberId, selectedSkill);
 
         const key = guildId + memberId;
         originalInteractions[key]?.editReply({ components: actionRows });
@@ -516,8 +517,8 @@ module.exports = {
         const skillValueOptions = interaction.message.components[1].components[0].data.options;
         const newSkillLevel = skillValueOptions.find(opt => opt.default).value;
 
-        await SkillsService.updateSingleSkill(memberId, guildId, selectedSkill, newSkillLevel);
-        const embed = await EmbededResponseService.getUserSkills(guildId, interaction.user);
+        SkillsService.updateSingleSkill(memberId, guildId, selectedSkill, newSkillLevel);
+        const embed = EmbededResponseService.getUserSkills(guildId, interaction.user);
 
         const key = guildId + memberId;
         originalInteractions[key]?.editReply({ embeds: [embed] });
@@ -554,7 +555,7 @@ module.exports = {
         }
 
         const key = guildId + memberId;
-        const embed = await EmbededResponseService.getUserStatus(guildId, interaction.user, tempAttributes[key]);
+        const embed = EmbededResponseService.getUserStatus(guildId, interaction.user, tempAttributes[key]);
         const actionRow = buildHomeActionRow(guildId, memberId);
         originalInteractions[key]?.editReply({ 
             embeds: [embed],

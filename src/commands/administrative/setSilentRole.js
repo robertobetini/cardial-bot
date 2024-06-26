@@ -20,7 +20,7 @@ module.exports = {
             }
             
             const silentRole = new Role(interaction.guild.id, role.id, Role.SILENT_TYPE);
-            await RoleService.upsert(silentRole);
+            RoleService.upsert(silentRole);
             await interaction.editReply("Cargo de SILENT alterado com sucesso.");
         } catch(err) {
             await interaction.editReply(err.message);

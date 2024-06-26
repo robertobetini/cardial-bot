@@ -3,21 +3,21 @@ const UserService = require("../services/userService");
 const Constants = require("../constants");
 
 class TimerService {
-    static async addSilenceTime(guildId, discordUser, days, hours, minutes) {
+    static addSilenceTime(guildId, discordUser, days, hours, minutes) {
         const now = Date.now();
-        let user = await UserService.getOrCreateUser(guildId, discordUser);
+        let user = UserService.getOrCreateUser(guildId, discordUser);
         if (!user.silenceEndTime) {
             user.silenceEndTime = now;
         }
 
         user.silenceEndTime += this.getTimeSpanInMillis(days, hours, minutes);
 
-        await userDAO.upsert(user);
+        userDAO.upsert(user);
     }
 
-    static async removeSilenceTime(guildId, discordUser, days, hours, minutes) {
+    static removeSilenceTime(guildId, discordUser, days, hours, minutes) {
         const now = Date.now();
-        let user = await UserService.getOrCreateUser(guildId, discordUser);
+        let user = UserService.getOrCreateUser(guildId, discordUser);
         if (!user.silenceEndTime) {
             user.silenceEndTime = now;
         }
@@ -27,7 +27,7 @@ class TimerService {
             user.silenceEndTime = now;
         }
 
-        await userDAO.upsert(user);
+        userDAO.upsert(user);
     }
 
     static getTimeSpanInMillis(days, hours, minutes) {

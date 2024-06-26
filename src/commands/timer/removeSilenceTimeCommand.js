@@ -3,7 +3,6 @@ const Discord = require("discord.js");
 const RoleService = require("../../services/roleService");
 const TimerService = require("./../../services/timerService");
 const EmbededResponseService = require("./../../services/embededResponseService");
-const Role = require("./../../models/role");
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -30,30 +29,26 @@ module.exports = {
                 .setDescription("Quantidade de minutos em silêncio")
                 .setMinValue(0)),
     async execute(interaction) {
-        try {
-            if (!await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
-                interaction.editReply("Você não possui cargo de ADM para executar o comando.");
-                return;
-            };
-            
-            const target = interaction.options.getUser("user");
-            const days = interaction.options.getInteger("dias");
-            const hours = interaction.options.getInteger("horas");
-            const minutes = interaction.options.getInteger("minutos");
+        if (!RoleService.isMemberAdm(interaction.guild, interaction.member)) {
+            interaction.editReply("Você não possui cargo de ADM para executar o comando.");
+            return;
+        };
+        
+        const target = interaction.options.getUser("user");
+        const days = interaction.options.getInteger("dias");
+        const hours = interaction.options.getInteger("horas");
+        const minutes = interaction.options.getInteger("minutos");
 
-            if (days < 1 && hours < 1 && minutes < 1) {
-                await interaction.editReply("Insira um período de tempo válido.");
-                return;
-            }
-
-            await TimerService.removeSilenceTime(interaction.guild.id, target, days, hours, minutes);
-
-            var message = `Tempo de silenciamento atualizado para ${Discord.userMention(target.id)}.\n` +
-                await EmbededResponseService.getUserStatus(interaction.guild.id, target);
-
-            await interaction.editReply(message);
-        } catch(err) {
-            await interaction.editReply(err.message);
+        if (days < 1 && hours < 1 && minutes < 1) {
+            await interaction.editReply("Insira um período de tempo válido.");
+            return;
         }
+
+        TimerService.removeSilenceTime(interaction.guild.id, target, days, hours, minutes);
+
+        var message = `Tempo de silenciamento atualizado para ${Discord.userMention(target.id)}.\n` +
+            EmbededResponseService.getUserStatus(interaction.guild.id, target);
+
+        await interaction.editReply(message);
     }
 }

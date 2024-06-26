@@ -14,8 +14,8 @@ const SHORT_FOOTER = "Elysium Systemㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⁣ㅤㅤ�
 const SHORTEST_FOOTER = "Elysium System";
 
 class EmbededResponseService {
-    static async getExpLeaderboard(guildId, page) {
-        const users =  await UserService.getAllFromGuild(guildId, "totalExp", page * Constants.PAGE_SIZE, Constants.PAGE_SIZE);
+    static getExpLeaderboard(guildId, page) {
+        const users = UserService.getAllFromGuild(guildId, "totalExp", page * Constants.PAGE_SIZE, Constants.PAGE_SIZE);
 
         const fields = this.createTable(
             [ "User", "Level", "EXP" ], 
@@ -29,8 +29,8 @@ class EmbededResponseService {
             .setFooter({ text: DEFAULT_FOOTER }), isEmpty];
     }
 
-    static async getGoldLeaderboard(guildId, page) {
-        const users = await UserService.getAllFromGuild(guildId, "gold", page * Constants.PAGE_SIZE, Constants.PAGE_SIZE);
+    static getGoldLeaderboard(guildId, page) {
+        const users = UserService.getAllFromGuild(guildId, "gold", page * Constants.PAGE_SIZE, Constants.PAGE_SIZE);
 
         let fields = this.createTable(
             [ "User", "GOLD" ], 
@@ -44,10 +44,10 @@ class EmbededResponseService {
             .setFooter({ text: DEFAULT_FOOTER }), isEmpty];
     }
 
-    static async getUserSkills(guildId, discordUser) {
+    static getUserSkills(guildId, discordUser) {
         const user = typeof(discordUser) === "string" 
-            ? await UserService.get(guildId, discordUser, true) 
-            : await UserService.getOrCreateUser(guildId, discordUser, true);
+            ? UserService.get(guildId, discordUser, true) 
+            : UserService.getOrCreateUser(guildId, discordUser, true);
             
         const fields = [
             { name: "> Perícia",      value: "\n", inline: true },
@@ -77,8 +77,8 @@ class EmbededResponseService {
             .setFooter({ text: DEFAULT_FOOTER });
     }
 
-    static async getUserStatus(guildId, discordUser, tempAttributes = null) {
-        let user = await UserService.getOrCreateUser(guildId, discordUser);
+    static getUserStatus(guildId, discordUser, tempAttributes = null) {
+        let user = UserService.getOrCreateUser(guildId, discordUser);
         
         const maxLvlExp = expCalculator.getLevelExp(user.stats.lvl);
 

@@ -3,14 +3,15 @@ const Sqlite3DAO = require("./sqlite3DAO");
 const Attributes = require("../models/attributes");
 
 class AttributesDAO extends Sqlite3DAO {
-    async get(userId, guildId) {
+    get(userId, guildId) {
         const db = this.getConnection();
         const query = "SELECT * FROM ATTRIBUTES WHERE userId = ? AND guildId = ?";
-        const attributes = db.prepare(query).run(userId, guildId);
+        const attributes = db.prepare(query).get(userId, guildId);
 
         return Attributes.fromDTO(attributes);
     }
-    async insert(userId, guildId, attributes, transactionDb = null) {
+    
+    insert(userId, guildId, attributes, transactionDb = null) {
         const db = transactionDb || this.getConnection();
         const query = "INSERT INTO ATTRIBUTES (userId, guildId, `FOR`, DEX, CON, WIS, CHA, availablePoints, firstAttributionDone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         const firstAttributionDone = attributes.firstAttributionDone ? 1 : 0;
@@ -19,7 +20,7 @@ class AttributesDAO extends Sqlite3DAO {
             .run(userId, guildId, attributes.FOR, attributes.DEX, attributes.CON, attributes.WIS, attributes.CHA, attributes.availablePoints, firstAttributionDone);
     }
 
-    async update(userId, guildId, attributes, transactionDb = null) {
+    update(userId, guildId, attributes, transactionDb = null) {
         const db = transactionDb || this.getConnection();
         const query = "UPDATE ATTRIBUTES SET `FOR` = ?, DEX = ?, CON = ?, WIS = ?, CHA = ?, availablePoints = ?, firstAttributionDone = ? WHERE userId = ? AND guildId = ?";
         const firstAttributionDone = attributes.firstAttributionDone ? 1 : 0;
@@ -30,11 +31,11 @@ class AttributesDAO extends Sqlite3DAO {
         return res.changes.valueOf() > 0;
     }
 
-    async upsert(userId, guildId, attributes, transactionDb = null) {
-        const updated = await this.update(userId, guildId, attributes, transactionDb);
+    upsert(userId, guildId, attributes, transactionDb = null) {
+        const updated = this.update(userId, guildId, attributes, transactionDb);
 
         if (!updated) {
-            await this.insert(userId, guildId, attributes, transactionDb);
+            this.insert(userId, guildId, attributes, transactionDb);
         }
     }
 }

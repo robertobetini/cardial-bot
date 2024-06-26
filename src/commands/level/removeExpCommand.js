@@ -18,20 +18,16 @@ module.exports = {
                 .setMinValue(1)
                 .setRequired(true)),
     async execute(interaction) {
-        try {
-            if (!await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
-                interaction.editReply("Você não possui cargo de ADM para executar o comando.");
-                return;
-            };
-            
-            const target = interaction.options.getUser("user");
-            const amount = interaction.options.getInteger("quantidade");
+        if (!RoleService.isMemberAdm(interaction.guild, interaction.member)) {
+            interaction.editReply("Você não possui cargo de ADM para executar o comando.");
+            return;
+        };
+        
+        const target = interaction.options.getUser("user");
+        const amount = interaction.options.getInteger("quantidade");
 
-            await ProgressionService.addExp(interaction.guild.id, target, -amount);
+        ProgressionService.addExp(interaction.guild.id, target, -amount);
 
-            await interaction.editReply(`${amount} EXP retirado de ${Discord.userMention(target.id)}.`);
-        } catch(err) {
-            await interaction.editReply(err.message);
-        }
+        await interaction.editReply(`${amount} EXP retirado de ${Discord.userMention(target.id)}.`);
     }
 }

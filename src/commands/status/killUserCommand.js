@@ -16,15 +16,13 @@ module.exports = {
         const target = interaction.options.getUser("user");
         const guildId = interaction.guild.id;
 
-        if (!await RoleService.isMemberAdm(interaction.guild, interaction.member)) {
+        if (!RoleService.isMemberAdm(interaction.guild, interaction.member)) {
             await interaction.editReply("É necessário cargo de ADM para remover um personagem.");
         }
 
         const user = new User(target.id, guildId, target.username, target.displayAvatarURL());
-        const [member, _] = await Promise.all([
-            await interaction.guild.members.fetch(target.id),
-            await userDAO.update(user, true)
-        ]);
+        const member = await interaction.guild.members.fetch(target.id);
+        userDAO.update(user, true);
 
         if (member.permissions.has(Discord.PermissionFlagsBits.ManageNicknames) && member.id !== interaction.guild.ownerId) {
             member.setNickname(target.displayName);

@@ -55,7 +55,7 @@ module.exports = {
     execute: async (interaction) => {
         const guildId = interaction.guild.id;
         const userId = interaction.user.id;
-        const promises = [];
+        const users = [];
 
         for (let i = 1; i <= Constants.INITIATIVE_COMMAND_MAX_USERS; i++) {
             const user = interaction.options.getUser(`jogador${i}`);
@@ -64,10 +64,9 @@ module.exports = {
             }
 
             Logger.debug(`Adicionando jogador ${user.username} à busca de fichas`);
-            promises.push(UserService.get(guildId, user.id, true));
+            users.push(UserService.get(guildId, user.id, true));
         }
 
-        const users = await Promise.all(promises);
         Logger.debug("Consulta de fichas realizada");
 
         if (users.findIndex(u => u == null || !u.attributes.firstAttributionDone) >= 0) {

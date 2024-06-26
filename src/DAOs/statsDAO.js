@@ -3,21 +3,22 @@ const Sqlite3DAO = require("./sqlite3DAO");
 const Stats = require("../models/stats");
 
 class StatsDAO extends Sqlite3DAO {
-    async clearGoldFromAll(guildId) {
+    clearGoldFromAll(guildId) {
         const db = this.getConnection();
         const query = "UPDATE STATS SET gold = 0 WHERE guildId = ?";
         db.prepare(query).run(guildId);
     }
 
-    async get(userId, guildId) {
+    get(userId, guildId) {
         const db = this.getConnection();
         const query = "SELECT * FROM STATS WHERE userId = ? AND guildId = ?";
-        const stat = db.prepare(query).run(userId, guildId);
+        const stat = db.prepare(query).get(userId, guildId);
+        console.log(stat);
 
         return Stats.fromDTO(stat);
     }
 
-    async insert(userId, guildId, stats, transactionDb = null) {
+    insert(userId, guildId, stats, transactionDb = null) {
         const db = transactionDb || this.getConnection();
         const query = "INSERT INTO STATS (userId, guildId, totalExp, gold, currentHP, maxHP, tempHP, currentFP, maxFP, tempFP, currentSP, maxSP, tempSP, baseDEF, baseInitiative) "
          + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -32,7 +33,7 @@ class StatsDAO extends Sqlite3DAO {
         );
     }
 
-    async update(userId, guildId, stats, transactionDb = null) {
+    update(userId, guildId, stats, transactionDb = null) {
         const db = transactionDb || this.getConnection();
         const query = "UPDATE STATS SET totalExp = ?, gold = ?," 
             + " currentHP = ?, maxHP = ?, tempHP = ?," 
@@ -53,15 +54,15 @@ class StatsDAO extends Sqlite3DAO {
         return res.changes.valueOf() > 0;
     }
 
-    async upsert(userId, guildId, stats, transactionDb = null) {
-        const updated = await this.update(userId, guildId, stats, transactionDb);
+    upsert(userId, guildId, stats, transactionDb = null) {
+        const updated = this.update(userId, guildId, stats, transactionDb);
 
         if (!updated) {
-            await this.insert(userId, guildId, stats, transactionDb);
+            this.insert(userId, guildId, stats, transactionDb);
         }
     }
 
-    async updateSingleStat(userId, guildId, stat, newValue) {
+    updateSingleStat(userId, guildId, stat, newValue) {
         const db = this.getConnection();
         const query = "UPDATE STATS SET " + stat +" = ? WHERE userId = ? AND guildId = ?";
         db.prepare(query).run(newValue, userId, guildId);

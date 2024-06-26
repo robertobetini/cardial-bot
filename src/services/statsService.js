@@ -6,24 +6,24 @@ const Constants = require("../constants");
 const { calculateAttributeMod } = require("../calculators/modCalculator");
 
 class StatsService {
-    static async getUserStats(userId, guildId) {
-        return await userDAO.get(userId, guildId, false);
+    static getUserStats(userId, guildId) {
+        return userDAO.get(userId, guildId, false);
     }
 
-    static async get(userId, guildId) {
-        return await statsDAO.get(userId, guildId);
+    static get(userId, guildId) {
+        return statsDAO.get(userId, guildId);
     }
 
-    static async updateSingleStat(userId, guildId, stat, newValue) {
-        return await statsDAO.updateSingleStat(userId, guildId, stat, newValue);
+    static updateSingleStat(userId, guildId, stat, newValue) {
+        return statsDAO.updateSingleStat(userId, guildId, stat, newValue);
     }
 
-    static async update(stats) {
-        return await statsDAO.update(stats.userId, stats.guildId, stats);
+    static update(stats) {
+        return statsDAO.update(stats.userId, stats.guildId, stats);
     }
 
-    static async setInitialStats(attributes) {
-        const currentStats = await this.get(attributes.userId, attributes.guildId);
+    static setInitialStats(attributes) {
+        const currentStats = this.get(attributes.userId, attributes.guildId);
 
         const maxHP = Constants.BASE_HP + calculateAttributeMod(attributes.CON);
         currentStats.maxHP = maxHP;
@@ -43,7 +43,8 @@ class StatsService {
         currentStats.baseDEF = Constants.BASE_DEF;
         currentStats.baseInitiative = Constants.BASE_INITIATIVE;
 
-        await this.update(currentStats);
+        console.log(currentStats);
+        this.update(currentStats);
     }
 }
 

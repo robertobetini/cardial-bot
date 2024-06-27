@@ -24,3 +24,5 @@ for (const user of users) {
     const attributes = AttributesService.get(user.guildId, user.userId);
     setInitialStats(attributes);
 }
+
+console.log("Finished: fixInitialValues.js");

@@ -17,11 +17,10 @@ const Constants = {
     BASE_MAX_FP_PER_LEVEL: 2,
     BASE_MAX_SP_PER_LEVEL: 0,
     INITIAL_GOLD: 1000,
-    // INITIAL_AVAILABLE_ATTRIBUTES: 25,
-    INITIAL_AVAILABLE_ATTRIBUTES: 4, // testing purposes
+    INITIAL_AVAILABLE_ATTRIBUTES: parseInt(process.env.INITIAL_AVAILABLE_ATTRIBUTES),
     ATTRIBUTE_PER_LEVEL: 1,
     COMMAND_MAX_USERS: 6,
-    EPHEMERAL_COMMANDS: ["ficha", "atualizastatus"],
+    EPHEMERAL_COMMANDS: ["ficha", "atualizastatus", "atualizanickname"],
     attributes: [
         { label: "Força", value: "FOR" },
         { label: "Destreza", value: "DEX" },

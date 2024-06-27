@@ -22,10 +22,17 @@ class UserDAO extends Sqlite3DAO {
             + " LEFT JOIN ATTRIBUTES as a ON u.userId = a.userId AND u.guildId = a.guildId"
             + " LEFT JOIN SKILLS as sk ON u.userId = sk.userId AND u.guildId = sk.guildId";
         }
+
         query += " WHERE u.guildId = " + guildId;
-        query += " ORDER BY st." + orderby + " DESC"
-            + " LIMIT " + limit.toString()
-            + " OFFSET " + skip.toString();
+        if (orderby) {
+            query += " ORDER BY st." + orderby + " DESC";
+        }
+        if (limit) {
+            query += " LIMIT " + limit.toString();
+        }
+        if (skip) {
+            query += " OFFSET " + skip.toString();
+        }
 
         const users = db.prepare(query).all();
 

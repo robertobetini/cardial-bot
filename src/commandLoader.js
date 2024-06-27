@@ -41,7 +41,7 @@ module.exports = {
             
             const applicationId = process.env.APPLICATION_ID;
             const debugGuildId = process.env.DEBUG_GUILD_ID;
-            const commandDeployRoute = process.env.DEBUG 
+            const commandDeployRoute = debugGuildId
                 ? Discord.Routes.applicationGuildCommands(applicationId, debugGuildId) 
                 : Discord.Routes.applicationCommands(applicationId);
 

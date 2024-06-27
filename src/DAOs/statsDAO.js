@@ -13,7 +13,6 @@ class StatsDAO extends Sqlite3DAO {
         const db = this.getConnection();
         const query = "SELECT * FROM STATS WHERE userId = ? AND guildId = ?";
         const stat = db.prepare(query).get(userId, guildId);
-        console.log(stat);
 
         return Stats.fromDTO(stat);
     }

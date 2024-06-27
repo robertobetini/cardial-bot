@@ -14,24 +14,6 @@ const data = new Discord.SlashCommandBuilder()
 
 addMultipleUserOptions(data, Constants.COMMAND_MAX_USERS, 1);
 
-const parseDiceString = (dice) => {
-    const result = /^(\d+)d(\d+)(\+\d*|-\d*)?$/.exec(dice);
-    if (!result) {
-        throw new Error("Invalid dice pattern");
-    }
-
-    const diceCount = result[1];
-    const diceSides = result[2];
-    const mod = Number(result[3] ?? 0);
-
-    let total = 0;
-    for (let i = 0; i < diceCount; i++) {
-        total += Math.floor(Math.random() * diceSides + 1);
-    }
-
-    return total + mod;
-} 
-
 const buildActionRow = (guildId, userId, combatId) => {
     const addMobbutton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:initiativeCommand:addMobModal:${combatId}`)
@@ -46,7 +28,7 @@ module.exports = {
     execute: async (interaction) => {
         const guildId = interaction.guild.id;
         const userId = interaction.user.id;
-        const users = getUsersFromInput(interaction, Constants.COMMAND_MAX_USERS);
+        const { users } = getUsersFromInput(interaction, Constants.COMMAND_MAX_USERS);
         const combatId = randomId(10);
         
         users[0].selected = true;
@@ -71,13 +53,7 @@ module.exports = {
                 .setCustomId("name")
                 .setLabel("Nome")
                 .setStyle(Discord.TextInputStyle.Short)
-                .setRequired(true),
-            // new Discord.TextInputBuilder()
-            //     .setCustomId("dice")
-            //     .setLabel("Dado de iniciativa")
-            //     .setPlaceholder("Ex.: 1d20+2")
-            //     .setStyle(Discord.TextInputStyle.Short)
-            //     .setRequired(true)
+                .setRequired(true)
         ];
 
         const actionRows = [];
@@ -92,7 +68,6 @@ module.exports = {
     },
     addMob: async (interaction, guildId, memberId, combatId) => {
         const name = interaction.fields.getTextInputValue("name");
-        // const dice = interaction.fields.getTextInputValue("dice");
 
         const monster = {
             playerName: name,
@@ -103,8 +78,7 @@ module.exports = {
                 currentFP: 0,
                 maxFP: 0,
                 tempFP: 0,
-                baseDEF: 0,
-                // baseInitiative: parseDiceString(dice)
+                baseDEF: 0
             }
         };
 

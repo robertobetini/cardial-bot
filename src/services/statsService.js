@@ -45,7 +45,6 @@ class StatsService {
 
         currentStats.gold = Constants.INITIAL_GOLD;
 
-        console.log(currentStats);
         this.update(currentStats);
     }
 }

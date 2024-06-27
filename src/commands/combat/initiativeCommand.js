@@ -7,6 +7,7 @@ const Constants = require("../../constants");
 const { addMultipleUserOptions, getUsersFromInput } = require ("../helpers");
 
 const combats = {};
+const CACHE_LIFETIME = 16 * Constants.MINUTE_IN_MILLIS;
 
 const data = new Discord.SlashCommandBuilder()
     .setName("iniciativa")
@@ -35,6 +36,7 @@ module.exports = {
         combats[combatId] = {
             participants: users
         };
+        setTimeout(() => delete combats[combatId], CACHE_LIFETIME);
         
         const embed = EmbededResponseService.getInitiativeView(users.sort((a, b) => b.stats.baseInitiative - a.stats.baseInitiative), []);
 

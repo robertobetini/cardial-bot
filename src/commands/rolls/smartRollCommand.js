@@ -42,7 +42,10 @@ module.exports = {
 				.setName("rolagem")
 				.setDescription("teste cuja rolagem será feita")
                 .setRequired(true)
-                .addChoices(Constants.skills.map(({ label, value }) => ({ name: label, value })))
+                .addChoices(
+                    ...Constants.skills.map(({ label, value }) => ({ name: label, value })), 
+                    ...Constants.attributes.map(({ label, value }) => ({ name: label, value }))
+                )
         ),
     execute: async (interaction) => {
         const guildId = interaction.guild.id;

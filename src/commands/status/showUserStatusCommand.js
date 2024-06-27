@@ -16,6 +16,7 @@ const Logger = require("../../logger");
 
 const tempAttributes = {};
 const originalInteractions = {};
+const CACHE_LIFETIME = 16 * Constants.MINUTE_IN_MILLIS;
 
 const buildHomeActionRow = (guildId, memberId) => {
     const attributesButton = new Discord.ButtonBuilder()
@@ -211,6 +212,7 @@ const createTempAttributeEntryIfNotExists = (guildId, memberId) => {
     tempAttributes[key].CHA = currentAttributes.CHA;
     tempAttributes[key].availablePoints = currentAttributes.availablePoints;
     tempAttributes[key].firstAttributionDone = currentAttributes.firstAttributionDone;
+    setTimeout(() => delete tempAttributes[key], CACHE_LIFETIME);
 
     return currentAttributes;
 }
@@ -245,6 +247,7 @@ module.exports = {
             }
         }
         originalInteractions[key] = interaction;
+        setTimeout(() => delete originalInteractions[key] && console.log("deleting interaction"), CACHE_LIFETIME);
 
         await interaction.editReply({
             embeds: [embed],

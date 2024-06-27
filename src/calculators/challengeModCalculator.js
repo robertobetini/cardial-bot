@@ -14,7 +14,12 @@ const SKILL_TO_ATTRIBUTE_MAP = {
     "deception": "CHA",
     "intimidation": "CHA",
     "performance": "CHA",
-    "persuasion": "CHA"
+    "persuasion": "CHA",
+    "FOR": "FOR",
+    "DEX": "DEX",
+    "CON": "CON",
+    "WIS": "WIS",
+    "CHA": "CHA"
 };
 
 const PROFICIENCY_LEVEL_MULTIPLIERS = {
@@ -28,7 +33,7 @@ module.exports = {
         const proficiencyBonus = calculateProficiencyBonus(user.stats.lvl);
         const attribute = SKILL_TO_ATTRIBUTE_MAP[challenge];
         const attributeMod = calculateAttributeMod(user.attributes[attribute]);
-        const proficiencyMod = proficiencyBonus * PROFICIENCY_LEVEL_MULTIPLIERS[user.skills[challenge]];
+        const proficiencyMod = proficiencyBonus * PROFICIENCY_LEVEL_MULTIPLIERS[user.skills[challenge]] || 0;
         return attributeMod + proficiencyMod;
     }
 }

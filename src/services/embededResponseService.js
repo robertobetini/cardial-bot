@@ -116,8 +116,8 @@ class EmbededResponseService {
         const attributesTableRows = [
             ["Força", attributes.FOR.toString(), `${forMod >= 0 ? "+" : ""}${forMod}`],
             ["Destreza", attributes.DEX.toString(), `${dexMod >= 0 ? "+" : ""}${dexMod}`],
-            ["Constituição", attributes.CON.toString(), `${conMod >= 0 ? "+" : ""}${chaMod}`],
-            ["Conhecimento", attributes.WIS.toString(), `${wisMod >= 0 ? "+" : ""}${chaMod}`],
+            ["Constituição", attributes.CON.toString(), `${conMod >= 0 ? "+" : ""}${conMod}`],
+            ["Conhecimento", attributes.WIS.toString(), `${wisMod >= 0 ? "+" : ""}${wisMod}`],
             ["Carisma", attributes.CHA.toString(), `${chaMod >= 0 ? "+" : ""}${chaMod}`],
         ];
         const attributesTable = EmbededResponseService.createTable(attributesTableColumns, attributesTableRows);

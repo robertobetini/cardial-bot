@@ -208,9 +208,6 @@ class EmbededResponseService {
             `\`\`\`ansi\n${Colors.BOLD}${total}${Colors.RESET} <- [${Colors.GREEN}${diceValue}${Colors.RESET}] ${modsDiscriminator}\`\`\``;
 
         const challengeLabel = Constants.challenges.find(s => s.value === challenge)?.label;
-        if (!challengeLabel) {
-
-        }
 
         return new Discord.EmbedBuilder()
             .setColor(0xbbbbbb)

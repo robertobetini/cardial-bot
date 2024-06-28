@@ -83,9 +83,18 @@ class Constants {
         { label: "Proficiente", value: "Proficient" },
         { label: "Especialista", value: "Specialist" },
     ];
-    static challenges = [...Constants.skills, ...Constants.attributes];
+    static emojiMap = {
+        "FOR": "💪🏼",
+        "DEX": "🎯",
+        "CON": "❤️",
+        "WIS": "🧠",
+        "CHA": "😎"
+    }
+    static challenges = [
+        ...Constants.skills,
+        ...Constants.attributes
+    ]
+    .map(({ label, value }) => ({ label: `${Constants.emojiMap[Constants.CHALLENGE_TO_ATTRIBUTE_MAP[value]]} ${label}`, value }));
 };
-
-console.log(Constants.challenges);
 
 module.exports = Constants;

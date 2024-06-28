@@ -125,7 +125,7 @@ class EmbededResponseService {
         const fields = [
             { name: "> Status"      , value: statsView1     , inline: true  }, 
             { name: "> Informações" , value: statsView2     , inline: true  }, 
-            { name: "> Atributos"   , value: attributesTable, inline: false }
+            { name: `> Atributos (${attributes.availablePoints > 0 ? "+" : ""}${attributes.availablePoints})`   , value: attributesTable, inline: false }
         ];
 
         return new Discord.EmbedBuilder()

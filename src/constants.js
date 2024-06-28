@@ -88,13 +88,12 @@ class Constants {
         "DEX": "🎯",
         "CON": "❤️",
         "WIS": "🧠",
-        "CHA": "😎"
+        "CHA": "🎭"
     }
     static challenges = [
-        ...Constants.skills,
-        ...Constants.attributes
-    ]
-    .map(({ label, value }) => ({ label: `${Constants.emojiMap[Constants.CHALLENGE_TO_ATTRIBUTE_MAP[value]]} ${label}`, value }));
+        ...Constants.skills.map(({ label, value }) => ({ label: `${Constants.emojiMap[Constants.CHALLENGE_TO_ATTRIBUTE_MAP[value]]} ${label}`, value })),
+        ...Constants.attributes.map(({ label, value }) => ({ label: `[Atributo] ${Constants.emojiMap[Constants.CHALLENGE_TO_ATTRIBUTE_MAP[value]]} ${label}`, value }))
+    ];
 };
 
 module.exports = Constants;

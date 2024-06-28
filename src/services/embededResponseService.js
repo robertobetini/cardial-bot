@@ -213,18 +213,25 @@ class EmbededResponseService {
     }
 
     static getInitiativeView(players, monsters) {
+        const nameSize = 14;
+        let headerWhiteSpaces = "";
+        for (let i = 0; i < nameSize - "Nome".length; i++) {
+            headerWhiteSpaces += " ";
+        }
+
         const response = 
-            "```ansi\n" + 
-            players.reduce((text, p) => text += EmbededResponseService.createInitiativeLine(p), "") + 
-            "─────────────────────────────────\n" + 
-            monsters.reduce((text, m) => text += EmbededResponseService.createInitiativeLine(m, true), "") + 
+            "```ansi\n" +
+            `  👤${Colors.BOLD}Nome` + headerWhiteSpaces + " 🔵FP    " + ` 🔴HP ${Colors.RESET}\n` +
+            players.reduce((text, p) => text += EmbededResponseService.createInitiativeLine(p, false, nameSize), "") + 
+            "  ────────────────────────────────\n" + 
+            monsters.reduce((text, m) => text += EmbededResponseService.createInitiativeLine(m, true, nameSize), "") + 
             "\n```";
 
         return new Discord.EmbedBuilder()
             .setColor(0xbbbbbb)
-            .setTitle("Iniciativa")     
+            .setTitle("Iniciativa")
             .setDescription(response)
-            .setFooter({ text: DEFAULT_FOOTER });
+            .setFooter({ text: SHORT_FOOTER });
     }
 
     static createInitiativeLine(combatEntity, isEnemy = false, nameSize = 14, separator = " ") {

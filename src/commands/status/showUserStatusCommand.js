@@ -243,7 +243,7 @@ module.exports = {
             try {
                 await originalInteractions[key].deleteReply();
             } catch {
-                Logger.warn("Tried to delet non-existing interaction message");
+                Logger.warn("Tried to delete non-existing interaction message");
             }
         }
         originalInteractions[key] = interaction;

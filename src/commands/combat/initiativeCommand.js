@@ -17,13 +17,31 @@ const data = new Discord.SlashCommandBuilder()
 
 addMultipleUserOptions(data, Constants.COMMAND_MAX_USERS, 1);
 
-const buildActionRow = (guildId, userId, combatId) => {
-    const addMobbutton = new Discord.ButtonBuilder()
+const buildActionRows = (guildId, userId, combatId) => {
+    const { participants, mobs } = combats[combatId];
+
+    const addMobButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:initiativeCommand:addMobModal:${combatId}`)
         .setLabel("Adicionar Mob")
         .setStyle(Discord.ButtonStyle.Success);
+    
+    const setNextPlayerButton = new Discord.ButtonBuilder()
+        .setCustomId(`${guildId}:${userId}:initiativeCommand:setNextPlayer:${combatId}`)
+        .setLabel("Próximo")
+        .setStyle(Discord.ButtonStyle.Secondary);
 
-    return new Discord.ActionRowBuilder().addComponents(addMobbutton);
+    const select = new Discord.StringSelectMenuBuilder()
+        .setCustomId(`${guildId}:${userId}:initiativeCommand:removeEntity:${combatId}`)
+        .setPlaceholder("Remover")
+        .setOptions(
+            ...participants.map(({ playerName, userId }) => new Discord.StringSelectMenuOptionBuilder().setLabel(playerName).setValue(userId)),
+            ...mobs.map(({ name }) => new Discord.StringSelectMenuOptionBuilder().setLabel(name).setValue(name))
+        );
+
+    return [ 
+        new Discord.ActionRowBuilder().addComponents(addMobButton, setNextPlayerButton),
+        new Discord.ActionRowBuilder().addComponents(select)
+    ];
 }
 
 module.exports = {
@@ -33,24 +51,25 @@ module.exports = {
         const userId = interaction.user.id;
         const { users } = getUsersFromInput(interaction, Constants.COMMAND_MAX_USERS);
         const combatId = randomId(10);
-        
-        combats[combatId] = {
-            participants: users,
-            enemies: []
-        };
+
+        combats[combatId] = { participants: users, mobs: [], gm: null };
         setTimeout(() => delete combats[combatId], CACHE_LIFETIME);
         
-        users.sort((a, b) => -1);
+        users.sort(() => -1);
         users[0].selected = true;
-        const embed = EmbededResponseService.getInitiativeView(users, combats[combatId].enemies);
-
+        const embed = EmbededResponseService.getInitiativeView(users, combats[combatId].mobs);
         await interaction.editReply({
+            content: `Turno de ${Discord.userMention(users[0].userId)}`,
             embeds: [embed],
-            components: [buildActionRow(guildId, userId, combatId)]
+            components: buildActionRows(guildId, userId, combatId)
         });
     },
     addMobModal: async (interaction, guildId, memberId, combatId) => {
-        RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member, true);
+        if (!combats[combatId]) {
+            return;
+        }
+
+        RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
 
         const modal = new Discord.ModalBuilder()
 			.setCustomId(`${guildId}:${memberId}:initiativeCommand:addMob:${combatId}`)
@@ -62,6 +81,15 @@ module.exports = {
                 .setLabel("Nome")
                 .setStyle(Discord.TextInputStyle.Short)
                 .setMaxLength(Constants.MOBILE_LINE_SIZE)
+                .setRequired(true),
+            new Discord.TextInputBuilder()
+                .setCustomId("quantity")
+                .setLabel("Quantidade")
+                .setStyle(Discord.TextInputStyle.Short)
+                .setMaxLength(1)
+                .setMinLength(1)
+                .setPlaceholder("Quantidade de 1 a 9")
+                .setValue("1")
                 .setRequired(true)
         ];
 
@@ -76,27 +104,111 @@ module.exports = {
         await interaction.showModal(modal);
     },
     addMob: async (interaction, guildId, memberId, combatId) => {
-        const name = interaction.fields.getTextInputValue("name");
+        if (!combats[combatId]) {
+            return;
+        }
 
-        const monster = {
-            playerName: name,
-            stats: {
-                currentHP: 0,
-                maxHP: 0,
-                tempHP: 0,
-                currentFP: 0,
-                maxFP: 0,
-                tempFP: 0,
-                baseDEF: 0,
-                baseInitiative: 0
+        const mobName = interaction.fields.getTextInputValue("name");
+        const quantity = parseInt(interaction.fields.getTextInputValue("quantity"));
+        if (quantity === 0) {
+            await interaction.deferUpdate();
+            return;
+        }
+
+        const isMobTurn = combats[combatId].mobs.filter(mob => mob.selected).length > 0;
+        if (quantity === 1) {
+            combats[combatId].mobs.push({ name: mobName, selected: isMobTurn });
+        } else {
+            for (let i = 0; i < quantity; i++) {
+                combats[combatId].mobs.push({ name: mobName + ` ${i+1}`, selected: isMobTurn });
             }
-        };
+        }
+        combats[combatId].gm = interaction.member.id;
 
-        combats[combatId].enemies.push(monster);
-
-        const embed = EmbededResponseService.getInitiativeView(combats[combatId].participants.sort((a, b) => -1), combats[combatId].enemies);
-        interaction.message.edit({ embeds: [embed] });
+        const embed = EmbededResponseService.getInitiativeView(combats[combatId].participants, combats[combatId].mobs);
+        await interaction.message.edit({ 
+            embeds: [embed],
+            components: buildActionRows(guildId, memberId, combatId)
+        });
 
         await interaction.deferUpdate();
+    },
+    setNextPlayer: async (interaction, guildId, memberId, combatId) => {
+        if (!combats[combatId]) {
+            return;
+        }
+
+        const { participants, mobs, gm } = combats[combatId];
+
+        const selectedIndex = participants.findIndex(p => p.selected);
+        const lastIndex = participants.length - 1;
+        let mention = Discord.userMention();
+        if (selectedIndex < 0) {
+            // scenario: it's mob turn, so next turn should be the first player
+
+            mobs.forEach(enemy => enemy.selected = false);
+            participants[0].selected = true;
+            mention = Discord.userMention(participants[0].userId);
+        } else if(selectedIndex < lastIndex) {
+            // scenario: it's player turn, and the next turn is also a player
+
+            const nextIndex = (selectedIndex + 1) % participants.length;
+            participants[selectedIndex].selected = false;
+            participants[nextIndex].selected = true;
+            mention = Discord.userMention(participants[nextIndex].userId);
+        } else {
+            // scenario: it's the last player turn, so either will be mob turn, if there is any, or the first player again
+
+            participants[lastIndex].selected = false;
+            if (mobs.length > 0 ) {
+                mobs.forEach(enemy => enemy.selected = true);
+                mention = Discord.userMention(gm);
+            } else {
+                participants[0].selected = true;
+                mention = Discord.userMention(participants[0].userId);
+            }
+        }
+        
+        const embed = EmbededResponseService.getInitiativeView(participants, mobs);
+        try {
+            await Promise.all([
+                interaction.message.delete(),
+                interaction.reply({ 
+                    content: `Turno de ${mention}`, 
+                    embeds: [embed],
+                    components: interaction.message.components
+                })
+            ]);
+        } catch {
+            Logger.warn("Tried to delete non-existing interaction message");
+        }
+    },
+    removeEntity: async (interaction, guildId, memberId, combatId) => {
+        if (!combats[combatId]) {
+            return;
+        }
+
+        RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
+
+        const selectedEntity = interaction.values[0];
+        const { participants, mobs } = combats[combatId];
+
+        let selectedIndex = participants.findIndex(p => p.userId === selectedEntity);
+        if (selectedIndex < 0) {
+            selectedIndex = mobs.findIndex(m => m.name != selectedEntity);
+        }
+
+        combats[combatId].participants = participants.filter(p => p.userId != selectedEntity);
+        combats[combatId].mobs = mobs.filter(m => m.name != selectedEntity);
+
+        const embed = EmbededResponseService.getInitiativeView(combats[combatId].participants, combats[combatId].mobs);
+
+        await Promise.all([
+            interaction.deferUpdate(),
+            interaction.message.edit({ 
+                embeds: [embed],
+                components: buildActionRows(guildId, memberId, combatId)
+            })
+        ]);
     }
 }

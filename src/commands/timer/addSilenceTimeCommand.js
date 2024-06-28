@@ -29,7 +29,7 @@ module.exports = {
                 .setDescription("Quantidade de minutos em silêncio")
                 .setMinValue(0)),
     async execute(interaction) {
-        RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);;
+        RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
         
         const target = interaction.options.getUser("user");
         const days = interaction.options.getInteger("dias");
@@ -44,6 +44,11 @@ module.exports = {
         TimerService.addSilenceTime(interaction.guild.id, target, days, hours, minutes);
 
         const role = RoleService.getRole(interaction.guild.id, Role.SILENT_TYPE);
+        if (!role) {
+            await interaction.editReply("O cargo de SILENT ainda não foi definido, o dono do servidor deve defini-lo através do comando `/cargosilent`");
+            return;
+        }
+        
         const updateRoleEndpoint = Discord.Routes.guildMemberRole(interaction.guild.id, target.id, role.roleId);
         const rest = new Discord.REST().setToken(process.env.TOKEN);
         const _data = await rest.put(updateRoleEndpoint);

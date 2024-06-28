@@ -48,33 +48,36 @@ class EmbededResponseService {
         const user = typeof(discordUser) === "string" 
             ? UserService.get(guildId, discordUser, true) 
             : UserService.getOrCreateUser(guildId, discordUser, true);
-            
-        const fields = [
-            { name: "> Perícia",      value: "\n", inline: true },
-            { name: "> Proficiência", value: "\n", inline: true },
-            { name: "> Mod",          value: "\n", inline: true }
-        ];
-
+        
         const translation = {
-            "NoProficiency": "Sem proficiência",
-            "Proficient": "Proficiente",
-            "Specialist": "Especialista"
+            "NoProficiency": "S/Prof.",
+            "Proficient": "Prof.",
+            "Specialist": "Esp.",
+            "FOR": "For",
+            "DEX": "Des",
+            "CON": "Con",
+            "WIS": "Sab",
+            "CHA": "Car",
         }
-        for (let skill of Constants.skills) {
-            fields[0].value += `${skill.label}\n`;
-            fields[1].value += `${translation[user.skills[skill.value]]}\n`;
+        const columns = [ { name: "Perícia", size: 16 }, { name: "Atr", size: 3}, { name: "Prof", size: 7}, { name: "Mod", size: 3 } ];
+        const rows = Constants.skills.map(skill => {
             const challengeMod = challengeModCalculator.calculateChallengeMod(skill.value, user);
-            fields[2].value += `${challengeMod > 0 ? "+" : ""}${challengeMod}\n`
-        }
+            return [
+                skill.label, 
+                translation[Constants.SKILL_TO_ATTRIBUTE_MAP[skill.value]],
+                translation[user.skills[skill.value]], 
+                `${challengeMod >= 0 ? "+" : ""}${challengeMod}`];
+        });
+        const table = EmbededResponseService.createTable(columns, rows);
 
         return new Discord.EmbedBuilder()
             .setColor(0xbbbbbb)
-            .setThumbnail(user.imgUrl)
+            // .setThumbnail(user.imgUrl)
             .setTitle(user.playerName || "<sem_nome>")
-            .setDescription(user.notes || " ")
+            .addFields({ name: " ",  value: user.notes || " "})
+            .setDescription(table)
             .setAuthor({ name: `Personagem de ${user.username}` })
-            .addFields(fields)
-            .setFooter({ text: DEFAULT_FOOTER });
+            .setFooter({ text: SHORT_FOOTER });
     }
 
     static getUserStatus(guildId, discordUser, tempAttributes = null) {
@@ -158,7 +161,7 @@ class EmbededResponseService {
         for (const column of columns) {
             table += `${Colors.BOLD}${column.name.substr(0, column.size)}${EmbededResponseService.generateCharSequence(" ", column.size - column.name.length)}${separator}`;
         }
-        table = table.substring(0, table.length - 2) + "\n";
+        table = table.substring(0, table.length - 1) + "\n";
         table += EmbededResponseService.generateCharSequence("─", Constants.MOBILE_LINE_SIZE) + Colors.RESET  + "\n";
 
         for (const row of rows) {

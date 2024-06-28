@@ -1,26 +1,5 @@
 const { calculateAttributeMod, calculateProficiencyBonus } = require("./modCalculator");
-
-const SKILL_TO_ATTRIBUTE_MAP = {
-    "athletics": "FOR",
-    "acrobatics": "DEX",
-    "jugglery": "DEX",
-    "stealth": "DEX",
-    "animalTraining": "WIS",
-    "intuition": "WIS",
-    "investigation": "WIS",
-    "nature": "WIS",
-    "perception": "WIS",
-    "survivability": "WIS",
-    "deception": "CHA",
-    "intimidation": "CHA",
-    "performance": "CHA",
-    "persuasion": "CHA",
-    "FOR": "FOR",
-    "DEX": "DEX",
-    "CON": "CON",
-    "WIS": "WIS",
-    "CHA": "CHA"
-};
+const Constants = require("../constants");
 
 const PROFICIENCY_LEVEL_MULTIPLIERS = {
     "NoProficiency": 0,
@@ -31,7 +10,7 @@ const PROFICIENCY_LEVEL_MULTIPLIERS = {
 module.exports = {
     calculateChallengeMod(challenge, user) {
         const proficiencyBonus = calculateProficiencyBonus(user.stats.lvl);
-        const attribute = SKILL_TO_ATTRIBUTE_MAP[challenge];
+        const attribute = Constants.SKILL_TO_ATTRIBUTE_MAP[challenge];
         const attributeMod = calculateAttributeMod(user.attributes[attribute]);
         const proficiencyMod = proficiencyBonus * PROFICIENCY_LEVEL_MULTIPLIERS[user.skills[challenge]] || 0;
         return attributeMod + proficiencyMod;

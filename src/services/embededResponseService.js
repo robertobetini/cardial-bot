@@ -19,7 +19,7 @@ class EmbededResponseService {
 
         const table = EmbededResponseService.createTable(
             [ { name: "User", size: 17 }, { name: "Level", size: 7 }, { name: "EXP", size: 7 } ], 
-            users.map(user => [ user.username, user.stats?.lvl.toString(), user.stats?.exp.toString() ]));
+            users.map(user => [ user.playerName, user.stats?.lvl.toString(), user.stats?.exp.toString() ]));
 
         const isEmpty = users.length < 1;
         return [new Discord.EmbedBuilder()
@@ -34,7 +34,7 @@ class EmbededResponseService {
 
         const table = EmbededResponseService.createTable(
             [ { name: "User", size: 22 }, { name: "GOLD", size: 10 } ], 
-            users.map(user => [ user.username, `${user.stats?.gold}` ]));
+            users.map(user => [ user.playerName, `${user.stats?.gold}` ]));
 
         const isEmpty = users.length < 1;
         return [new Discord.EmbedBuilder()

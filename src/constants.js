@@ -1,6 +1,6 @@
 const Constants = {
     MOBILE_LINE_SIZE: 33,
-    PAGE_SIZE: 1,
+    PAGE_SIZE: parseInt(process.env.PAGE_SIZE),
     MILLIS_IN_SECOND: 1000,
     MINUTE_IN_MILLIS: 60 * 1000,
     HOUR_IN_MILLIS: 60 * (60 * 1000),

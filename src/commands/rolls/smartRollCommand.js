@@ -43,8 +43,7 @@ module.exports = {
 				.setDescription("teste cuja rolagem será feita")
                 .setRequired(true)
                 .addChoices(
-                    ...Constants.skills.map(({ label, value }) => ({ name: label, value })), 
-                    ...Constants.attributes.map(({ label, value }) => ({ name: label, value }))
+                    Constants.challenges.map(({ label, value }) => ({ name: label, value }))
                 )
         ),
     execute: async (interaction) => {

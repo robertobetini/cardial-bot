@@ -64,7 +64,7 @@ class EmbededResponseService {
             const challengeMod = challengeModCalculator.calculateChallengeMod(skill.value, user);
             return [
                 skill.label, 
-                translation[Constants.SKILL_TO_ATTRIBUTE_MAP[skill.value]],
+                translation[Constants.CHALLENGE_TO_ATTRIBUTE_MAP[skill.value]],
                 translation[user.skills[skill.value]], 
                 `${challengeMod >= 0 ? "+" : ""}${challengeMod}`];
         });
@@ -72,10 +72,9 @@ class EmbededResponseService {
 
         return new Discord.EmbedBuilder()
             .setColor(0xbbbbbb)
-            // .setThumbnail(user.imgUrl)
             .setTitle(user.playerName || "<sem_nome>")
-            .addFields({ name: " ",  value: user.notes || " "})
-            .setDescription(table)
+            .addFields({ name: "> Perícias",  value: table })
+            .setDescription(user.notes || " ")
             .setAuthor({ name: `Personagem de ${user.username}` })
             .setFooter({ text: SHORT_FOOTER });
     }
@@ -99,51 +98,34 @@ class EmbededResponseService {
         const chaMod = calcMod(attributes.CHA);
 
         const sanityDescription = EmbededResponseService.getSanityDescription(user.stats.currentSP);
-        const embedFields = [
-            { 
-                name: "> Status",
-                inline: true,
-                value: 
-                    `**🔴 HP:** ${hpView}\n` +
-                    `**🔵 FP:** ${fpView}\n` +
-                    `**🟣 SP:** ${spView} (${sanityDescription})\n` +
-                    `**🛡️ CA:** ${user.stats.baseDEF + dexMod}\n` +
-                    `**🎯 B. Proficiência:** +${modCalculator.calculateProficiencyBonus(user.stats.lvl)}\n` +
-                    `**👁️ Iniciativa:** ${user.stats.baseInitiative + dexMod}`
-            },
-            { 
-                name: "> Status", 
-                inline: true,
-                value: 
-                    `**⭐️ Nível:** ${user.stats.lvl} (${expView} exp)\n` +
-                    // `**⚔️ R.Arma:** TODO\n` +
-                    // `**💼 R.Profissão:** TODO\n` +
-                    `**💰 Gold:** ${user.stats.gold}\n`
-            },
-            {
-                name: "\n",
-                value: "\n",
-            },
-            {
-                name: `> Atributos (${attributes.availablePoints > 0 ? "+" : ""}${attributes.availablePoints})`,
-                inline: true,
-                value:
-                    `Força: ${attributes.FOR}\n` +
-                    `Destreza: ${attributes.DEX}\n` +
-                    `Constituição: ${attributes.CON}\n` +
-                    `Conhecimento: ${attributes.WIS}\n` +
-                    `Carisma: ${attributes.CHA}`
-            },
-            {
-                name: `> Mod`,
-                inline: true,
-                value:
-                    `${forMod >= 0 ? "+" : ""}${forMod}\n` +
-                    `${dexMod >= 0 ? "+" : ""}${dexMod}\n` +
-                    `${conMod >= 0 ? "+" : ""}${conMod}\n` +
-                    `${wisMod >= 0 ? "+" : ""}${wisMod}\n` +
-                    `${chaMod >= 0 ? "+" : ""}${chaMod}`
-            }
+
+        const statsView1 = 
+            `**🔴 HP:** ${hpView}\n` +
+            `**🔵 FP:** ${fpView}\n` +
+            `**🟣 SP:** ${spView} (${sanityDescription})\n` +
+            `**🛡️ CA:** ${user.stats.baseDEF + dexMod}\n` +
+            `**🎯 B. Proficiência:** +${modCalculator.calculateProficiencyBonus(user.stats.lvl)}\n` +
+            `**👁️ Iniciativa:** ${user.stats.baseInitiative + dexMod}`;
+        const statsView2 =
+            `**⭐️ Nível:** ${user.stats.lvl} (${expView} exp)\n` +
+            // `**⚔️ R.Arma:** TODO\n` +
+            // `**💼 R.Profissão:** TODO\n` +
+            `**💰 Gold:** ${user.stats.gold}\n`;
+
+        const attributesTableColumns = [{ name: "Atributo", size: 12 }, { name: "Val", size: 4 }, { name: "Mod", size: 3 }];
+        const attributesTableRows = [
+            ["Força", attributes.FOR.toString(), `${forMod >= 0 ? "+" : ""}${forMod}`],
+            ["Destreza", attributes.DEX.toString(), `${dexMod >= 0 ? "+" : ""}${dexMod}`],
+            ["Constituição", attributes.CON.toString(), `${conMod >= 0 ? "+" : ""}${chaMod}`],
+            ["Conhecimento", attributes.WIS.toString(), `${wisMod >= 0 ? "+" : ""}${chaMod}`],
+            ["Carisma", attributes.CHA.toString(), `${chaMod >= 0 ? "+" : ""}${chaMod}`],
+        ];
+        const attributesTable = EmbededResponseService.createTable(attributesTableColumns, attributesTableRows);
+
+        const fields = [
+            { name: "> Status"      , value: statsView1     , inline: true  }, 
+            { name: "> Informações" , value: statsView2     , inline: true  }, 
+            { name: "> Atributos"   , value: attributesTable, inline: false }
         ];
 
         return new Discord.EmbedBuilder()
@@ -152,17 +134,24 @@ class EmbededResponseService {
             .setThumbnail(user.imgUrl)
             .setDescription(user.notes || " ")
             .setAuthor({ name: `Personagem de ${user.username}` })
-            .addFields(embedFields)
-            .setFooter({ text: DEFAULT_FOOTER });
+            .addFields(fields)
+            .setFooter({ text: SHORTEST_FOOTER });
     }
 
     static createTable(columns, rows, separator = " ") {
+        let totalSize = 0;
         let table = "```ansi\n";
         for (const column of columns) {
             table += `${Colors.BOLD}${column.name.substr(0, column.size)}${EmbededResponseService.generateCharSequence(" ", column.size - column.name.length)}${separator}`;
+            totalSize += column.size;
         }
+        totalSize += columns.length - 1;
+        if (totalSize > Constants.MOBILE_LINE_SIZE) {
+            throw new Error(`Total column size '${totalSize}' exceed MOBILE_LINE_SIZE '${Constants.MOBILE_LINE_SIZE}'!`);
+        }
+        
         table = table.substring(0, table.length - 1) + "\n";
-        table += EmbededResponseService.generateCharSequence("─", Constants.MOBILE_LINE_SIZE) + Colors.RESET  + "\n";
+        table += EmbededResponseService.generateCharSequence("─", totalSize) + Colors.RESET  + "\n";
 
         for (const row of rows) {
             for (let i = 0; i < columns.length; i++) {
@@ -218,7 +207,10 @@ class EmbededResponseService {
             "\n" + 
             `\`\`\`ansi\n${Colors.BOLD}${total}${Colors.RESET} <- [${Colors.GREEN}${diceValue}${Colors.RESET}] ${modsDiscriminator}\`\`\``;
 
-        const challengeLabel = Constants.skills.find(s => s.value === challenge)?.label;
+        const challengeLabel = Constants.challenges.find(s => s.value === challenge)?.label;
+        if (!challengeLabel) {
+
+        }
 
         return new Discord.EmbedBuilder()
             .setColor(0xbbbbbb)
@@ -288,7 +280,7 @@ class EmbededResponseService {
     }
 
     static createStatusSummarizedView(currentValue, maxValue, tempValue) {
-        let view = `${currentValue} / ${maxValue + tempValue}`;
+        let view = `${currentValue}/${maxValue + tempValue}`;
         view += tempValue > 0 ? ` (+${tempValue}) ` : "";
 
         return view;
@@ -301,7 +293,7 @@ class EmbededResponseService {
         for (let i = 1; i <= barSize; i++) {
             bar += progression >= i ? "▬" : " ";
         }
-        bar += `] ${currentValue} / ${maxValue + tempValue} `;
+        bar += `] ${currentValue}/${maxValue + tempValue} `;
         bar += tempValue > 0 ? ` (+${tempValue}) ` : "";
 
         return bar;

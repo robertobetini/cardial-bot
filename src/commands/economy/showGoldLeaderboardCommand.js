@@ -45,14 +45,21 @@ module.exports = {
     previousPage: async (interaction, guildId, memberId) => {
         const messageId = interaction.message.id;
 
-        const currentPage = pages[messageId] || 1;
+        const currentPage = pages[messageId] || 0;
         const newPage = currentPage - 1;
+        
+        if (newPage < 0) {
+            await interaction.deferUpdate();
+            return;
+        }
 
         pages[messageId] = newPage;
         const [leaderboard, _] = EmbededResponseService.getGoldLeaderboard(guildId, newPage);
-        interaction.message.edit({ embeds: [leaderboard] });
 
-        await interaction.deferUpdate();
+        await Promise.all([
+            interaction.message.edit({ embeds: [leaderboard] }),
+            interaction.deferUpdate()
+        ]);
     },
     nextPage: async (interaction, guildId, memberId) => {
         const messageId = interaction.message.id;
@@ -61,12 +68,13 @@ module.exports = {
         const newPage = currentPage + 1;
         
         const [leaderboard, isEmpty] = EmbededResponseService.getGoldLeaderboard(guildId, newPage);
+        const promises = [interaction.deferUpdate()];
         if (!isEmpty) {
             pages[interaction.message.id] = newPage;
-            interaction.message.edit({ embeds: [leaderboard] });
+            promises.push(interaction.message.edit({ embeds: [leaderboard] }));
         }
-        
-        await interaction.deferUpdate();
+
+        await Promise.all(promises);
     }
 }
 

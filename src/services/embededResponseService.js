@@ -17,31 +17,31 @@ class EmbededResponseService {
     static getExpLeaderboard(guildId, page) {
         const users = UserService.getAllFromGuild(guildId, "totalExp", page * Constants.PAGE_SIZE, Constants.PAGE_SIZE);
 
-        const fields = this.createTable(
-            [ "User", "Level", "EXP" ], 
+        const table = EmbededResponseService.createTable(
+            [ { name: "User", size: 17 }, { name: "Level", size: 7 }, { name: "EXP", size: 7 } ], 
             users.map(user => [ user.username, user.stats?.lvl.toString(), user.stats?.exp.toString() ]));
 
-        const isEmpty = fields[0].value.trim().length < 1;
+        const isEmpty = users.length < 1;
         return [new Discord.EmbedBuilder()
             .setColor(0xbbbbbb)
             .setTitle("Placar de nível")
-            .setFields(fields)
-            .setFooter({ text: DEFAULT_FOOTER }), isEmpty];
+            .setDescription(table)
+            .setFooter({ text: SHORT_FOOTER }), isEmpty];
     }
 
     static getGoldLeaderboard(guildId, page) {
         const users = UserService.getAllFromGuild(guildId, "gold", page * Constants.PAGE_SIZE, Constants.PAGE_SIZE);
 
-        let fields = this.createTable(
-            [ "User", "GOLD" ], 
-            users.map(user => [ user.username, `$${user.stats?.gold}` ]));
+        const table = EmbededResponseService.createTable(
+            [ { name: "User", size: 22 }, { name: "GOLD", size: 10 } ], 
+            users.map(user => [ user.username, `${user.stats?.gold}` ]));
 
-        const isEmpty = fields[0].value.trim().length < 1;
+        const isEmpty = users.length < 1;
         return [new Discord.EmbedBuilder()
             .setColor(0xbbbbbb)
             .setTitle("Placar de gold")
-            .setFields(fields)
-            .setFooter({ text: DEFAULT_FOOTER }), isEmpty];
+            .setDescription(table)
+            .setFooter({ text: SHORT_FOOTER }), isEmpty];
     }
 
     static getUserSkills(guildId, discordUser) {
@@ -153,19 +153,31 @@ class EmbededResponseService {
             .setFooter({ text: DEFAULT_FOOTER });
     }
 
-    static createTable(columnNames, rows) {
-        const fields = [];
-        for (let columnName of columnNames) {
-            fields.push({ name: `> ${columnName}`, value: "\n", inline: true });
+    static createTable(columns, rows, separator = " ") {
+        let table = "```ansi\n";
+        for (const column of columns) {
+            table += `${Colors.BOLD}${column.name.substr(0, column.size)}${EmbededResponseService.generateCharSequence(" ", column.size - column.name.length)}${separator}`;
         }
+        table = table.substring(0, table.length - 2) + "\n";
+        table += EmbededResponseService.generateCharSequence("─", Constants.MOBILE_LINE_SIZE) + Colors.RESET  + "\n";
 
-        for (let i = 0; i < fields.length; i++) {
-            for (let row of rows) {
-                fields[i].value += `${row[i]}   \n`;
+        for (const row of rows) {
+            for (let i = 0; i < columns.length; i++) {
+                table += `${row[i].substr(0, columns[i].size)}${EmbededResponseService.generateCharSequence(" ", columns[i].size - row[i].length)}${separator}`;
             }
+            table = table.substring(0, table.length - 2) + "\n";
         }
+        table += "```";
 
-        return fields;
+        return table;
+    }
+
+    static generateCharSequence(char, count) {
+        let whiteSpaces = "";
+        for (let i = 0; i < count; i++) {
+            whiteSpaces += char;
+        }
+        return whiteSpaces;
     }
 
     static getRollView(dice, results, rerollsSoFar = 0) {

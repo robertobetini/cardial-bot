@@ -28,7 +28,7 @@ module.exports = {
 
         EconomyService.addGold(targets.users, -amount);
 
-        await interaction.editReply(`$${amount} removido de ${targets.mentions}.`);
+        await interaction.editReply(`$${amount} GOLD :coin: removido de ${targets.mentions}.`);
     }
 }
 

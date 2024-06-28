@@ -29,6 +29,6 @@ module.exports = {
 
         EconomyService.addGold(targets.users, amount);
 
-        await interaction.editReply(`${amount} GOLD concedido a ${targets.mentions}.`);
+        await interaction.editReply(`${amount} GOLD :coin: concedido a ${targets.mentions}.`);
     }
 }

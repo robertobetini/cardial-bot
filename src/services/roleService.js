@@ -1,5 +1,6 @@
 const roleDAO = require("../DAOs/roleDAO");
 const Role = require("../models/role");
+const { SilentError } = require("../errors/silentError");
 
 class RoleService {
     static getAllRoles() {
@@ -12,7 +13,7 @@ class RoleService {
 
     static ensureMemberIsAdmOrOwner(guild, discordMemder) { 
         if (!RoleService.isMemberAdm(guild, discordMemder)) {
-            throw new Error("Você não possui cargo de ADM para executar o comando.");
+            throw new SilentError("Você não é GM, parça...");
         }
     }
 

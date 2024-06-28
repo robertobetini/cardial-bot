@@ -14,13 +14,11 @@ class AttributesService {
             const user = UserService.get(attributes.guildId, attributes.userId, true);
     
             const conModDiff = calculateAttributeMod(attributes.CON) - calculateAttributeMod(user.attributes.CON);
-            if (conModDiff === 0) {
-                return;
+            if (conModDiff !== 0) {
+                user.stats.maxHP += conModDiff;
+                user.stats.currentHP += conModDiff;
+                StatsService.update(user.stats);
             }
-            
-            user.stats.maxHP += conModDiff;
-            user.stats.currentHP +=conModDiff;
-            StatsService.update(user.stats);
         }
 
         return attributesDAO.update(attributes.userId, attributes.guildId, attributes);

@@ -13,6 +13,7 @@ const stringSelectMenuHandler = require("./interactions/stringSelectMenuHandler"
 
 const Constants = require("./constants");
 const Logger = require("./logger");
+const { SILENT_ERROR_NAME } = require("./errors/silentError");
 
 const UPDATE_SILENT_USERS_INTERVAL_TIME = Number(process.env.UPDATE_SILENT_USERS_INTERVAL_TIME) * Constants.MILLIS_IN_SECOND ?? 60000;
 
@@ -48,7 +49,20 @@ client.on(Discord.Events.InteractionCreate, async interaction => {
 		}
 	} catch(err) {
 		Logger.error(err);
-		interaction.replied || interaction.deferred ? await interaction.followUp(err.toString()) : await interaction.reply(err.toString());
+
+		let ephemeral = false;
+		switch(err.name) {
+			case SILENT_ERROR_NAME:
+				ephemeral = true;
+				break;
+			default:
+				ephemeral = false;
+				break;
+		}
+
+		interaction.replied || interaction.deferred 
+			? await interaction.followUp({ content: err.message, ephemeral }) 
+			: await interaction.reply({ content: err.message, ephemeral });
 	}
 });
 

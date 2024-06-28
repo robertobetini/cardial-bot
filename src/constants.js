@@ -1,4 +1,5 @@
 const Constants = {
+    MOBILE_LINE_SIZE: 33,
     PAGE_SIZE: 10,
     MILLIS_IN_SECOND: 1000,
     MINUTE_IN_MILLIS: 60 * 1000,

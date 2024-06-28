@@ -213,42 +213,28 @@ class EmbededResponseService {
     }
 
     static getInitiativeView(players, monsters) {
-        // const response = 
-        //     "```ansi\n" + 
-        //     players.reduce((text, p) => text += EmbededResponseService.createInitiativeLine(p), "") + 
-        //     "\n───────────────────────────────────────────────────────\n" + 
-        //     monsters.reduce((text, m) => text += EmbededResponseService.createInitiativeLine(m), "") + 
-        //     "\n```";
-
-        const fields = [
-            {
-                name: `> Nome \n`,
-                inline: true,
-                value: players.reduce((text, p) => text += `${p.playerName ?? p.username}\n`, "") + monsters.reduce((text, m) => text += `${m.name}\n`, "")
-            },
-            {
-                name: `> FP`,
-                inline: true,
-                value: players.reduce((text, p) => text += `${EmbededResponseService.createStatusBar(p.stats.currentFP, p.stats.maxFP, p.stats.tempFP, 4)}\n`, "") + monsters.reduce((text, m) => text += `${m.stats.currentFP}/${m.stats.maxFP}\n`, "")
-            },
-            {
-                name: `> HP`,
-                inline: true,
-                value: players.reduce((text, p) => text += `${EmbededResponseService.createStatusBar(p.stats.currentHP, p.stats.maxHP, p.stats.tempHP, 4)}\n`, "") + monsters.reduce((text, m) => text += `${m.stats.currentHP}/${m.stats.maxHP}\n`, "")
-            }
-        ];
+        const response = 
+            "```ansi\n" + 
+            players.reduce((text, p) => text += EmbededResponseService.createInitiativeLine(p), "") + 
+            "─────────────────────────────────\n" + 
+            monsters.reduce((text, m) => text += EmbededResponseService.createInitiativeLine(m, true), "") + 
+            "\n```";
 
         return new Discord.EmbedBuilder()
             .setColor(0xbbbbbb)
             .setTitle("Iniciativa")     
-            // .setDescription(response)
-            .setFields(fields)
+            .setDescription(response)
             .setFooter({ text: DEFAULT_FOOTER });
     }
 
-    static createInitiativeLine(combatEntity, nameSize = 28, separator = " ") {
+    static createInitiativeLine(combatEntity, isEnemy = false, nameSize = 14, separator = " ") {
         let line = combatEntity.selected ? Colors.GREEN : "";
         line += combatEntity.selected ? "> " : "  ";
+
+        if (isEnemy) {
+            return line + (combatEntity.playerName ?? combatEntity.name) + "\n";
+        }
+
         const name = (combatEntity.playerName ?? combatEntity.name).substr(0, nameSize);
         line += name;
 
@@ -257,8 +243,8 @@ class EmbededResponseService {
             line += " ";
         }
 
-        const fpView = EmbededResponseService.createInitiativeStatView(combatEntity.stats.currentFP, combatEntity.stats.maxFP, combatEntity.stats.tempFP, Colors.BLUE);
-        const hpView = EmbededResponseService.createInitiativeStatView(combatEntity.stats.currentHP, combatEntity.stats.maxHP, combatEntity.stats.tempHP, Colors.RED);
+        const fpView = EmbededResponseService.createInitiativeStatView(combatEntity.stats.currentFP, combatEntity.stats.maxFP, combatEntity.stats.tempFP, Colors.BLUE, 2);
+        const hpView = EmbededResponseService.createInitiativeStatView(combatEntity.stats.currentHP, combatEntity.stats.maxHP, combatEntity.stats.tempHP, Colors.RED, 3);
 
         return `${line} ${separator} ${combatEntity.selected ? Colors.RESET : ""}${fpView} ${separator} ${hpView}\n`;
     }

@@ -247,7 +247,7 @@ module.exports = {
             }
         }
         originalInteractions[key] = interaction;
-        setTimeout(() => delete originalInteractions[key] && console.log("deleting interaction"), CACHE_LIFETIME);
+        setTimeout(() => delete originalInteractions[key], CACHE_LIFETIME);
 
         await interaction.editReply({
             embeds: [embed],
@@ -263,7 +263,7 @@ module.exports = {
         const key = guildId + memberId;
         const actionRows = buildAttributesActionRows(guildId, memberId);
         
-        originalInteractions[key]?.editReply({ components: actionRows });
+        await originalInteractions[key]?.editReply({ components: actionRows });
 
         await interaction.deferUpdate();
     },
@@ -349,7 +349,7 @@ module.exports = {
 
         const key = guildId + memberId;
         const updatedEmbed = EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]);
-        originalInteractions[key]?.editReply({ embeds: [updatedEmbed] });
+        await originalInteractions[key]?.editReply({ embeds: [updatedEmbed] });
 
         await interaction.deferUpdate();
     },
@@ -363,7 +363,7 @@ module.exports = {
         const actionRows = buildSkillsActionRow(guildId, memberId);
 
         const key = guildId + memberId;
-        originalInteractions[key]?.editReply({
+        await originalInteractions[key]?.editReply({
             embeds: [embed],
             components: actionRows 
         });
@@ -386,7 +386,7 @@ module.exports = {
         const actionRows = buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability);
         
         const key = guildId + memberId;
-        originalInteractions[key]?.editReply({ components: actionRows });
+        await originalInteractions[key]?.editReply({ components: actionRows });
 
         await interaction.deferUpdate();
     },
@@ -401,7 +401,7 @@ module.exports = {
 
         const updatedEmbed = EmbededResponseService.getUserStatus(guildId, interaction.member);
         const actionRows = buildAttributesActionRows(guildId, memberId);
-        originalInteractions[key]?.editReply({ 
+        await originalInteractions[key]?.editReply({ 
             embeds: [updatedEmbed],
             components: actionRows 
         });
@@ -434,7 +434,6 @@ module.exports = {
             tempAttributes[key].availablePoints,
             true
         );
-        console.log(attributes);
 
         let propagateChangesToStats = true;
         if (!tempAttributes[key].firstAttributionDone) {
@@ -454,7 +453,7 @@ module.exports = {
 
         const updatedEmbed = EmbededResponseService.getUserStatus(guildId, interaction.member);
         const actionRows = buildAttributesActionRows(guildId, memberId);
-        originalInteractions[key]?.editReply({ 
+        await originalInteractions[key]?.editReply({ 
             embeds: [updatedEmbed],
             components: actionRows 
         });
@@ -471,10 +470,10 @@ module.exports = {
             return;
         }
 
-        await changeTempAttributesByAmount(guildId, memberId, selectedAttribute, 1);
+        changeTempAttributesByAmount(guildId, memberId, selectedAttribute, 1);
         
         const attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute, tempAttributes[key].currentAttributes);
-        originalInteractions[key]?.editReply({ 
+        await originalInteractions[key]?.editReply({ 
             embeds: [ EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]) ],
             components: buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability)
         });
@@ -488,10 +487,10 @@ module.exports = {
             return;
         }
 
-        await changeTempAttributesByAmount(guildId, memberId, selectedAttribute, -1);
+        changeTempAttributesByAmount(guildId, memberId, selectedAttribute, -1);
 
         const attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute, tempAttributes[key].currentAttributes);
-        originalInteractions[key]?.editReply({ 
+        await originalInteractions[key]?.editReply({ 
             embeds: [ EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]) ],
             components: buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability), 
         });
@@ -508,7 +507,7 @@ module.exports = {
         const actionRows = buildSelectedSkillActionRows(guildId, memberId, selectedSkill);
 
         const key = guildId + memberId;
-        originalInteractions[key]?.editReply({ components: actionRows });
+        await originalInteractions[key]?.editReply({ components: actionRows });
 
         await interaction.deferUpdate();
     },
@@ -525,7 +524,7 @@ module.exports = {
         const embed = EmbededResponseService.getUserSkills(guildId, interaction.user);
 
         const key = guildId + memberId;
-        originalInteractions[key]?.editReply({ embeds: [embed] });
+        await originalInteractions[key]?.editReply({ embeds: [embed] });
 
         await interaction.deferUpdate();
     },
@@ -548,7 +547,7 @@ module.exports = {
         }
         
         const key = guildId + memberId;
-        originalInteractions[key]?.editReply({ components: interaction.message.components });
+        await originalInteractions[key]?.editReply({ components: interaction.message.components });
 
         await interaction.deferUpdate();
     },
@@ -561,7 +560,7 @@ module.exports = {
         const key = guildId + memberId;
         const embed = EmbededResponseService.getUserStatus(guildId, interaction.user, tempAttributes[key]);
         const actionRow = buildHomeActionRow(guildId, memberId);
-        originalInteractions[key]?.editReply({ 
+        await originalInteractions[key]?.editReply({ 
             embeds: [embed],
             components: [actionRow]
         });

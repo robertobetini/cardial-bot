@@ -1,6 +1,8 @@
 const Discord = require("discord.js");
 const { randomId } = require("../../utils");
+
 const EmbededResponseService = require("../../services/embededResponseService");
+const RoleService = require("../../services/roleService");
 
 const Logger = require("../../logger");
 const Constants = require("../../constants");
@@ -32,13 +34,15 @@ module.exports = {
         const { users } = getUsersFromInput(interaction, Constants.COMMAND_MAX_USERS);
         const combatId = randomId(10);
         
-        users[0].selected = true;
         combats[combatId] = {
-            participants: users
+            participants: users,
+            enemies: []
         };
         setTimeout(() => delete combats[combatId], CACHE_LIFETIME);
         
-        const embed = EmbededResponseService.getInitiativeView(users.sort((a, b) => b.stats.baseInitiative - a.stats.baseInitiative), []);
+        users.sort((a, b) => -1);
+        users[0].selected = true;
+        const embed = EmbededResponseService.getInitiativeView(users, combats[combatId].enemies);
 
         await interaction.editReply({
             embeds: [embed],
@@ -46,6 +50,8 @@ module.exports = {
         });
     },
     addMobModal: async (interaction, guildId, memberId, combatId) => {
+        RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member, true);
+
         const modal = new Discord.ModalBuilder()
 			.setCustomId(`${guildId}:${memberId}:initiativeCommand:addMob:${combatId}`)
 			.setTitle("Novo mob");
@@ -55,6 +61,7 @@ module.exports = {
                 .setCustomId("name")
                 .setLabel("Nome")
                 .setStyle(Discord.TextInputStyle.Short)
+                .setMaxLength(Constants.MOBILE_LINE_SIZE)
                 .setRequired(true)
         ];
 
@@ -80,13 +87,14 @@ module.exports = {
                 currentFP: 0,
                 maxFP: 0,
                 tempFP: 0,
-                baseDEF: 0
+                baseDEF: 0,
+                baseInitiative: 0
             }
         };
 
-        combats[combatId].participants.push(monster);
+        combats[combatId].enemies.push(monster);
 
-        const embed = EmbededResponseService.getInitiativeView(combats[combatId].participants, []);
+        const embed = EmbededResponseService.getInitiativeView(combats[combatId].participants.sort((a, b) => -1), combats[combatId].enemies);
         interaction.message.edit({ embeds: [embed] });
 
         await interaction.deferUpdate();

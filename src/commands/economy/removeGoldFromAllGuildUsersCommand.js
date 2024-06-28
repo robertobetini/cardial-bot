@@ -12,7 +12,7 @@ module.exports = {
         .setName("retirargoldtodos")
         .setDescription("Remove todo o GOLD de todos os usuários através de dupla aprovação"),
     async execute(interaction) {
-        RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
+        RoleService.ensureMemberIsOwner(interaction.guild, interaction.member);
 
         count++;
         const timer = setTimeout(() => count = 0, TIME_WINDOW_IN_MINUTES * Constants.MINUTE_IN_MILLIS);

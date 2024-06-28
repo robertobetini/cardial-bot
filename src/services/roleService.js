@@ -11,8 +11,14 @@ class RoleService {
         return roleDAO.get(guildId, type);
     }
 
-    static ensureMemberIsAdmOrOwner(guild, discordMemder) { 
-        if (!RoleService.isMemberAdm(guild, discordMemder)) {
+    static ensureMemberIsOwner(guild, discordMember) { 
+        if (guild.ownerId !== discordMember.user.id) {
+            throw new SilentError("Você não é o dono do server, parça...");
+        }
+    }
+
+    static ensureMemberIsAdmOrOwner(guild, discordMember) { 
+        if (!RoleService.isMemberAdm(guild, discordMember)) {
             throw new SilentError("Você não é GM, parça...");
         }
     }

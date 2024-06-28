@@ -17,31 +17,37 @@ const data = new Discord.SlashCommandBuilder()
 
 addMultipleUserOptions(data, Constants.COMMAND_MAX_USERS, 1);
 
-const buildActionRows = (guildId, userId, combatId) => {
+const buildActionRows = (guildId, userId, combatId, blockButtons = false) => {
     const { participants, mobs } = combats[combatId];
+    const actionRows = [];
 
     const addMobButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:initiativeCommand:addMobModal:${combatId}`)
         .setLabel("Adicionar Mob")
-        .setStyle(Discord.ButtonStyle.Success);
+        .setStyle(Discord.ButtonStyle.Success)
+        .setDisabled(blockButtons);
     
     const setNextPlayerButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:initiativeCommand:setNextPlayer:${combatId}`)
         .setLabel("Próximo")
-        .setStyle(Discord.ButtonStyle.Secondary);
+        .setStyle(Discord.ButtonStyle.Secondary)
+        .setDisabled(blockButtons);
 
-    const select = new Discord.StringSelectMenuBuilder()
-        .setCustomId(`${guildId}:${userId}:initiativeCommand:removeEntity:${combatId}`)
-        .setPlaceholder("Remover")
-        .setOptions(
-            ...participants.map(({ playerName, userId }) => new Discord.StringSelectMenuOptionBuilder().setLabel(playerName).setValue(userId)),
-            ...mobs.map(({ name }) => new Discord.StringSelectMenuOptionBuilder().setLabel(name).setValue(name))
-        );
+    actionRows.push(new Discord.ActionRowBuilder().addComponents(addMobButton, setNextPlayerButton))
 
-    return [ 
-        new Discord.ActionRowBuilder().addComponents(addMobButton, setNextPlayerButton),
-        new Discord.ActionRowBuilder().addComponents(select)
-    ];
+    if (!blockButtons) {
+        const select = new Discord.StringSelectMenuBuilder()
+            .setCustomId(`${guildId}:${userId}:initiativeCommand:removeEntity:${combatId}`)
+            .setPlaceholder("Remover")
+            .setOptions(
+                ...participants.map(({ playerName, userId }) => new Discord.StringSelectMenuOptionBuilder().setLabel(playerName).setValue(userId)),
+                ...mobs.map(({ name }) => new Discord.StringSelectMenuOptionBuilder().setLabel(name).setValue(name))
+            );
+        
+        actionRows.push(new Discord.ActionRowBuilder().addComponents(select));
+    } 
+
+    return actionRows;
 }
 
 module.exports = {
@@ -202,12 +208,13 @@ module.exports = {
         combats[combatId].mobs = mobs.filter(m => m.name != selectedEntity);
 
         const embed = EmbededResponseService.getInitiativeView(combats[combatId].participants, combats[combatId].mobs);
+        const mustBlockButtons = combats[combatId].participants.length < 1;
 
         await Promise.all([
             interaction.deferUpdate(),
             interaction.message.edit({ 
                 embeds: [embed],
-                components: buildActionRows(guildId, memberId, combatId)
+                components: buildActionRows(guildId, memberId, combatId, mustBlockButtons)
             })
         ]);
     }

@@ -329,7 +329,7 @@ module.exports = {
         await interaction.showModal(modal);
     },
     updateCharacter: async (interaction, guildId, memberId) => {
-        const user = UserService.get(memberId, guildId, false);
+        const user = UserService.get(guildId, memberId, false);
         
         let name = null;
         if (!user.playerName) {

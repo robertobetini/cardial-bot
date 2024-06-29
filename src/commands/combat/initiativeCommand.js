@@ -61,7 +61,7 @@ module.exports = {
         combats[combatId] = { participants: users, mobs: [], gm: null };
         setTimeout(() => delete combats[combatId], CACHE_LIFETIME);
         
-        users.sort(() => -1);
+        users.sort((a, b) => b.stats.baseInitiative - a.stats.baseInitiative);
         users[0].selected = true;
         const embed = EmbededResponseService.getInitiativeView(users, combats[combatId].mobs);
         await interaction.editReply({

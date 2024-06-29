@@ -342,7 +342,9 @@ module.exports = {
         const imgUrl = interaction.fields.getTextInputValue("imgUrl");
         const notes = interaction.fields.getTextInputValue("notes");
 
-        user.imgUrl = imgUrl;
+        if (/https?:\/\/.*/.match) {
+            user.imgUrl = imgUrl;
+        }
         user.notes = notes;
 
         userDAO.update(user, false);
@@ -354,11 +356,6 @@ module.exports = {
         await interaction.deferUpdate();
     },
     showSkillsRow: async (interaction, guildId, memberId) => {
-        if (interaction.user.id != memberId) {
-            await interaction.deferUpdate();
-            return;
-        }
-
         const embed = EmbededResponseService.getUserSkills(guildId, memberId);
         const actionRows = buildSkillsActionRow(guildId, memberId);
 

@@ -1,17 +1,15 @@
 const Discord = require("discord.js");
 
-const userDAO = require("../../DAOs/userDAO");
-
 const RoleService = require("../../services/roleService");
 const EmbededResponseService = require("../../services/embededResponseService");
 const AttributesService = require("../../services/attributesService");
 const StatsService = require("../../services/statsService");
 const SkillsService = require("../../services/skillService");
+const UserService = require("../../services/userService");
 
 const Attributes = require("../../models/attributes");
 
 const Constants = require("../../constants");
-const UserService = require("../../services/userService");
 const Logger = require("../../logger");
 
 const tempAttributes = {};
@@ -331,7 +329,7 @@ module.exports = {
         await interaction.showModal(modal);
     },
     updateCharacter: async (interaction, guildId, memberId) => {
-        const user = userDAO.get(memberId, guildId, false);
+        const user = UserService.get(memberId, guildId, false);
         
         let name = null;
         if (!user.playerName) {
@@ -342,12 +340,18 @@ module.exports = {
         const imgUrl = interaction.fields.getTextInputValue("imgUrl");
         const notes = interaction.fields.getTextInputValue("notes");
 
-        if (/https?:\/\/.*/.match) {
+        if (/https?:\/\/.*/.test(imgUrl)) {
             user.imgUrl = imgUrl;
         }
         user.notes = notes;
 
-        userDAO.update(user, false);
+        try {
+            UserService.upsert(user, false);
+        } catch(err) {
+            if (!/URL_TYPE_INVALID_URL/.test(err.message)) {
+                throw err;
+            }
+        }
 
         const key = guildId + memberId;
         const updatedEmbed = EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]);

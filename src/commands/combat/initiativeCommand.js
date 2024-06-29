@@ -7,6 +7,7 @@ const RoleService = require("../../services/roleService");
 const Logger = require("../../logger");
 const Constants = require("../../constants");
 const { addMultipleUserOptions, getUsersFromInput } = require ("../helpers");
+const { calculateAttributeMod } = require("../../calculators/modCalculator");
 
 const combats = {};
 const CACHE_LIFETIME = 16 * Constants.MINUTE_IN_MILLIS;
@@ -61,7 +62,8 @@ module.exports = {
         combats[combatId] = { participants: users, mobs: [], gm: null };
         setTimeout(() => delete combats[combatId], CACHE_LIFETIME);
         
-        users.sort((a, b) => b.stats.baseInitiative - a.stats.baseInitiative);
+        users.sort((a, b) => 
+            (b.stats.baseInitiative + calculateAttributeMod(b.attributes.DEX)) - (a.stats.baseInitiative + calculateAttributeMod(a.attributes.DEX)));
         users[0].selected = true;
         const embed = EmbededResponseService.getInitiativeView(users, combats[combatId].mobs);
         await interaction.editReply({

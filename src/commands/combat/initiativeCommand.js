@@ -51,6 +51,30 @@ const buildActionRows = (guildId, userId, combatId, blockButtons = false) => {
     return actionRows;
 }
 
+const setCombatOrder = (a, b) => {
+    // TODO: extract it to a separate module or class
+    // TODO: break the single rules into single functions like: orderByInitiative(a, b), orderByAttribute(a, b, attribute), etc...
+    
+    bInitiative = b.stats.baseInitiative + calculateAttributeMod(a.attributes.DEX);
+    aInitiative = a.stats.baseInitiative + calculateAttributeMod(b.attributes.DEX);
+
+    if (bInitiative === aInitiative) {
+        aDex = a.attributes.DEX;
+        bDex = b.attributes.DEX;
+
+        if (bDex === aDex) {
+            aStr = a.attributes.FOR;
+            bSTr = b.attributes.FOR;
+
+            return bStr - aStr;
+        }
+
+        return bDex - aDex;
+    }
+
+    return bInitiative - aInitiative;
+}
+
 module.exports = {
     data,
     execute: async (interaction) => {
@@ -62,8 +86,7 @@ module.exports = {
         combats[combatId] = { participants: users, mobs: [], gm: null };
         setTimeout(() => delete combats[combatId], CACHE_LIFETIME);
         
-        users.sort((a, b) => 
-            (b.stats.baseInitiative + calculateAttributeMod(b.attributes.DEX)) - (a.stats.baseInitiative + calculateAttributeMod(a.attributes.DEX)));
+        users.sort((a, b) => setCombatOrder(a, b));
         users[0].selected = true;
         const embed = EmbededResponseService.getInitiativeView(users, combats[combatId].mobs);
         await interaction.editReply({

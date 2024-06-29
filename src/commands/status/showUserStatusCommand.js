@@ -12,6 +12,8 @@ const Attributes = require("../../models/attributes");
 const Constants = require("../../constants");
 const Logger = require("../../logger");
 
+const { isValidUrl } = require("../../utils");
+
 const tempAttributes = {};
 const originalInteractions = {};
 const CACHE_LIFETIME = 16 * Constants.MINUTE_IN_MILLIS;
@@ -339,23 +341,31 @@ module.exports = {
 
         const imgUrl = interaction.fields.getTextInputValue("imgUrl");
         const notes = interaction.fields.getTextInputValue("notes");
+        const oldImgUrl = user.imgUrl;
 
-        if (/https?:\/\/.*/.test(imgUrl)) {
+        if (isValidUrl(imgUrl)) {
             user.imgUrl = imgUrl;
         }
         user.notes = notes;
 
-        try {
-            UserService.upsert(user, false);
-        } catch(err) {
-            if (!/URL_TYPE_INVALID_URL/.test(err.message)) {
-                throw err;
-            }
-        }
+        UserService.upsert(user, false);
 
         const key = guildId + memberId;
         const updatedEmbed = EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]);
-        await originalInteractions[key]?.editReply({ embeds: [updatedEmbed] });
+
+        try {
+            await originalInteractions[key]?.editReply({ embeds: [updatedEmbed] });
+        } catch(err) {
+            if (/URL_TYPE_INVALID_URL/.test(err.message)) {
+                user.imgUrl = oldImgUrl;
+                UserService.upsert(user, false);
+                await interaction.reply({
+                    content: `A url ${imgUrl} não é válida!`,
+                    ephemeral: true
+                });
+                return
+            }
+        }
 
         await interaction.deferUpdate();
     },

@@ -55,16 +55,16 @@ const setCombatOrder = (a, b) => {
     // TODO: extract it to a separate module or class
     // TODO: break the single rules into single functions like: orderByInitiative(a, b), orderByAttribute(a, b, attribute), etc...
     
-    bInitiative = b.stats.baseInitiative + calculateAttributeMod(a.attributes.DEX);
-    aInitiative = a.stats.baseInitiative + calculateAttributeMod(b.attributes.DEX);
+    const bInitiative = b.stats.baseInitiative + calculateAttributeMod(a.attributes.DEX);
+    const aInitiative = a.stats.baseInitiative + calculateAttributeMod(b.attributes.DEX);
 
     if (bInitiative === aInitiative) {
-        aDex = a.attributes.DEX;
-        bDex = b.attributes.DEX;
+        const aDex = a.attributes.DEX;
+        const bDex = b.attributes.DEX;
 
         if (bDex === aDex) {
-            aStr = a.attributes.FOR;
-            bSTr = b.attributes.FOR;
+            const aStr = a.attributes.FOR;
+            const bStr = b.attributes.FOR;
 
             return bStr - aStr;
         }

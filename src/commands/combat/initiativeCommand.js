@@ -7,7 +7,6 @@ const RoleService = require("../../services/roleService");
 const Logger = require("../../logger");
 const Constants = require("../../constants");
 const { addMultipleUserOptions, getUsersFromInput } = require ("../helpers");
-const { calculateAttributeMod } = require("../../calculators/modCalculator");
 
 const combats = {};
 const CACHE_LIFETIME = 16 * Constants.MINUTE_IN_MILLIS;

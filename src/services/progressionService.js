@@ -12,6 +12,18 @@ class ProgressionService {
 
         UserService.batchUpsert(users, true);
     }
+
+    static addMasteryExp(users, expAmount) {
+        for (let user of users) {
+            if (!user) {
+                throw new Error(`Existem jogadores sem ficha ou com ficha incompleta.`);
+            }
+
+            user.addMasteryExp(expAmount);
+        }
+
+        UserService.batchUpsert(users, true);
+    }
 }
 
 module.exports = ProgressionService;

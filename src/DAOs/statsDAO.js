@@ -19,12 +19,12 @@ class StatsDAO extends Sqlite3DAO {
 
     insert(userId, guildId, stats, transactionDb = null) {
         const db = transactionDb || this.getConnection();
-        const query = "INSERT INTO STATS (userId, guildId, totalExp, gold, currentHP, maxHP, tempHP, currentFP, maxFP, tempFP, currentSP, maxSP, tempSP, baseDEF, baseInitiative) "
-         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        const query = "INSERT INTO STATS (userId, guildId, totalExp, totalMasteryExp, gold, currentHP, maxHP, tempHP, currentFP, maxFP, tempFP, currentSP, maxSP, tempSP, baseDEF, baseInitiative) "
+         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         db.prepare(query).run(
             userId, guildId, 
-            stats.totalExp, stats.gold, 
+            stats.totalExp, stats.totalMasteryExp, stats.gold, 
             stats.currentHP, stats.maxHP, stats.tempHP, 
             stats.currentFP, stats.maxFP, stats.tempFP, 
             stats.currentSP, stats.maxSP, stats.tempSP, 
@@ -34,7 +34,7 @@ class StatsDAO extends Sqlite3DAO {
 
     update(userId, guildId, stats, transactionDb = null) {
         const db = transactionDb || this.getConnection();
-        const query = "UPDATE STATS SET totalExp = ?, gold = ?," 
+        const query = "UPDATE STATS SET totalExp = ?, totalMasteryExp = ?, gold = ?," 
             + " currentHP = ?, maxHP = ?, tempHP = ?," 
             + " currentFP = ?, maxFP = ?, tempFP = ?," 
             + " currentSP = ?, maxSP = ?, tempSP = ?,"
@@ -42,7 +42,7 @@ class StatsDAO extends Sqlite3DAO {
             + " WHERE userId = ? AND guildId = ?";
 
         const res = db.prepare(query).run( 
-            stats.totalExp, stats.gold, 
+            stats.totalExp, stats.totalMasteryExp, stats.gold, 
             stats.currentHP, stats.maxHP, stats.tempHP, 
             stats.currentFP, stats.maxFP, stats.tempFP, 
             stats.currentSP, stats.maxSP, stats.tempSP, 

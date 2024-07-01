@@ -6,6 +6,7 @@ class Constants {
     static HOUR_IN_MILLIS = 60 * (60 * 1000);
     static DAY_IN_MILLIS = 24 * (60 * 60 * 1000);
     static MAX_LEVEL = 20;
+    static MAX_MASTERY = 10;
     static MIN_ATTRIBUTE_VALUE = 7;
     static MAX_ATTRIBUTE_VALUE_FOR_FIRST_TIME = 15;
     static MAX_ATTRIBUTE_VALUE = 30;

@@ -1,18 +1,23 @@
-const expCalculator = require("../calculators/expCalculator");
+const playerExpCalculator = require("../calculators/playerExpCalculator");
+const masteryExpCalculator = require("../calculators/masteryExpCalculator");
+
 const Constants = require("../constants");
 const Logger = require("../logger");
 
 class Stats {
-    static maxLvl = Constants.MAX_LEVEL;
+    static maxMastery = Constants.MAX_MASTERY;
 
-    constructor(userId, guildId, totalExp = 0, gold = 0) {
+    constructor(userId, guildId, totalExp = 0, gold = 0, totalMasteryExp = 0) {
         this.userId = userId;
         this.guildId = guildId;
 
         this.totalExp = totalExp;
+        this.totalMasteryExp = totalMasteryExp;
         this.exp = 0;
+        this.masteryExp = 0;
         this.gold = gold;
         this.lvl = 1;
+        this.mastery = 1;
 
         this.currentHP = Constants.BASE_HP;
         this.maxHP = Constants.BASE_HP;
@@ -33,17 +38,18 @@ class Stats {
     }
 
     updateExpAndLevel(constrainLevel) {
-        const result = expCalculator.getLevelFromExp(this.totalExp);
+        const result = playerExpCalculator.getLevelFromExp(this.totalExp);
+        const masteryResult = masteryExpCalculator.getLevelFromExp(this.totalMasteryExp);
 
         if (constrainLevel) {
             if (result.lvl > this.lvl) {
                 Logger.warn(`Constraining level up for player (${this.guildId}|${this.userId})`);
-                this.exp = expCalculator.getLevelExp(this.lvl);
-                this.totalExp = expCalculator.getTotalLevelExp(this.lvl) + this.exp;
+                this.exp = playerExpCalculator.getLevelExp(this.lvl);
+                this.totalExp = playerExpCalculator.getTotalLevelExp(this.lvl) + this.exp;
             } else if (result.lvl < this.lvl) {
                 Logger.warn(`Constraining level down for player (${this.guildId}|${this.userId})`);
                 this.exp = 0;
-                this.totalExp = expCalculator.getTotalLevelExp(this.lvl);
+                this.totalExp = playerExpCalculator.getTotalLevelExp(this.lvl);
             } else {
                 this.exp = result.remainingExp;        
             }
@@ -52,6 +58,9 @@ class Stats {
 
         this.lvl = result.lvl;
         this.exp = result.remainingExp;
+
+        this.mastery = masteryResult.lvl;
+        this.masteryExp = masteryResult.remainingExp;
     }
 
     addExp(exp, constrainLevel) {
@@ -59,12 +68,25 @@ class Stats {
 
         if (newTotalExp < 0) {
             newTotalExp = 0;
-        } else if (newTotalExp > expCalculator.getTotalLevelExp(this.maxLvl)) {
-            newTotalExp = expCalculator.getTotalLevelExp(this.maxLvl);
+        } else if (newTotalExp > playerExpCalculator.getTotalLevelExp(Constants.MAX_LEVEL)) {
+            newTotalExp = playerExpCalculator.getTotalLevelExp(Constants.MAX_LEVEL);
         }
 
         this.totalExp = newTotalExp;
         this.updateExpAndLevel(constrainLevel);
+    }
+
+    addMasteryExp(exp) {
+        let newTotalExp = this.totalMasteryExp + exp;
+
+        if (newTotalExp < 0) {
+            newTotalExp = 0;
+        } else if (newTotalExp > masteryExpCalculator.getTotalLevelExp(Constants.MAX_MASTERY)) {
+            newTotalExp = masteryExpCalculator.getTotalLevelExp(Constants.MAX_MASTERY);
+        }
+
+        this.totalMasteryExp = newTotalExp;
+        this.updateExpAndLevel();
     }
 
     tryUpdateGold(amount) {
@@ -76,7 +98,6 @@ class Stats {
 
         this.gold = newAmount;
     }
-
     
     modifyStat(stat, amount) {
         let newValue = this[stat] + amount;
@@ -102,7 +123,8 @@ class Stats {
             fullUserDTO.userId,
             fullUserDTO.guildId,
             fullUserDTO.totalExp,
-            fullUserDTO.gold
+            fullUserDTO.gold,
+            fullUserDTO.totalMasteryExp
         );
 
         stats.currentHP = fullUserDTO.currentHP;

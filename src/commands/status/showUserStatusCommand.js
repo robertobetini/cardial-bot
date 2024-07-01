@@ -273,7 +273,7 @@ module.exports = {
             return;
         }
 
-        const user = StatsService.getUserStats(memberId, guildId);
+        const user = UserService.get(guildId, memberId, false);
 
         const modal = new Discord.ModalBuilder()
 			.setCustomId(`${guildId}:${memberId}:showUserStatusCommand:updateCharacter`)

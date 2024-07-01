@@ -32,6 +32,10 @@ class User {
         }
     }
 
+    addMasteryExp(exp) { 
+        this.stats?.addMasteryExp(exp); 
+    }
+
     tryUpdateGold(amount) {
         this.stats?.tryUpdateGold(amount);
     }

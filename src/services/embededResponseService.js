@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 
-const expCalculator = require("../calculators/expCalculator");
+const expCalculator = require("../calculators/playerExpCalculator");
+const masteryExpCalculator = require("../calculators/masteryExpCalculator");
 const modCalculator = require("../calculators/modCalculator");
 const challengeModCalculator = require("../calculators/challengeModCalculator");
 
@@ -83,11 +84,13 @@ class EmbededResponseService {
         let user = UserService.getOrCreateUser(guildId, discordUser);
         
         const maxLvlExp = expCalculator.getLevelExp(user.stats.lvl);
+        const maxMasteryExp = masteryExpCalculator.getLevelExp(user.stats.mastery);
 
         const hpView = EmbededResponseService.createStatusSummarizedView(user.stats.currentHP, user.stats.maxHP, user.stats.tempHP);
         const fpView = EmbededResponseService.createStatusSummarizedView(user.stats.currentFP, user.stats.maxFP, user.stats.tempFP);
         const spView = EmbededResponseService.createStatusSummarizedView(user.stats.currentSP, user.stats.maxSP, user.stats.tempSP);
         const expView = EmbededResponseService.createStatusSummarizedView(user.stats.exp, maxLvlExp, 0);
+        const masteryExpView = EmbededResponseService.createStatusSummarizedView(user.stats.masteryExp, maxMasteryExp, 0);
 
         const attributes = tempAttributes || user.attributes;
         const calcMod = modCalculator.calculateAttributeMod;
@@ -108,7 +111,7 @@ class EmbededResponseService {
             `**👁️ Iniciativa:** ${user.stats.baseInitiative + dexMod}`;
         const statsView2 =
             `**⭐️ Nível:** ${user.stats.lvl} (${expView} exp)\n` +
-            // `**⚔️ R.Arma:** TODO\n` +
+            `**⚔️ R.Arma:** ${user.stats.mastery} (${masteryExpView} M)\n` +
             // `**💼 R.Profissão:** TODO\n` +
             `**💰 Gold:** ${user.stats.gold}\n`;
 

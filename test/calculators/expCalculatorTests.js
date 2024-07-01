@@ -1,7 +1,7 @@
 const assert = require("assert");
 
 const { test } = require("../testHelper");
-const expCalculator = require("../../src/calculators/expCalculator");
+const expCalculator = require("../../src/calculators/playerExpCalculator");
 const Constants = require("../../src/constants");
 
 const TESTING_MODULE = "Exp calculator";

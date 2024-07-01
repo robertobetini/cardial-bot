@@ -563,14 +563,11 @@ module.exports = {
         await interaction.deferUpdate();
     },
     gotoHomeRow: async (interaction, guildId, memberId) => {
-        if (interaction.user.id != memberId) {
-            await interaction.deferUpdate();
-            return;
-        }
-
         const key = guildId + memberId;
-        const embed = EmbededResponseService.getUserStatus(guildId, interaction.user, tempAttributes[key]);
+        const member = await interaction.guild.members.fetch(memberId);
+        const embed = EmbededResponseService.getUserStatus(guildId, member, tempAttributes[key]);
         const actionRow = buildHomeActionRow(guildId, memberId);
+        
         await originalInteractions[key]?.editReply({ 
             embeds: [embed],
             components: [actionRow]

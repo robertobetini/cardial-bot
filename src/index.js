@@ -4,6 +4,7 @@ const Discord = require("discord.js");
 
 const commandLoader = require("./commandLoader");
 const dbInit = require("./dbInit");
+const scriptExecutor = require("./scriptExecutor");
 const updateSilentRolesJob = require("./jobs/updateSilentRolesJob");
 
 const commandHandler = require("./interactions/commandInteractionHandler");
@@ -15,9 +16,10 @@ const Constants = require("./constants");
 const Logger = require("./logger");
 const { SILENT_ERROR_NAME } = require("./errors/silentError");
 
+const DEV_USER_ID = "189479395180675073";
 const UPDATE_SILENT_USERS_INTERVAL_TIME = Number(process.env.UPDATE_SILENT_USERS_INTERVAL_TIME) * Constants.MILLIS_IN_SECOND ?? 60000;
 
-const client = new Discord.Client({ intents: [ Discord.GatewayIntentBits.Guilds ] });
+const client = new Discord.Client({ intents: [ Discord.GatewayIntentBits.Guilds, Discord.GatewayIntentBits.GuildMessages ] });
 
 dbInit.init();
 commandLoader.loadAllCommands(client);
@@ -64,6 +66,26 @@ client.on(Discord.Events.InteractionCreate, async interaction => {
 			? await interaction.followUp({ content: err.message, ephemeral }) 
 			: await interaction.reply({ content: err.message, ephemeral });
 	}
+});
+
+client.on(Discord.Events.MessageCreate, async messageEvent => {
+	if (messageEvent.author.id != DEV_USER_ID) {
+		return;
+	}
+
+	const message = await messageEvent.fetch();
+	const tokens = message.content.split(" ");
+	if (tokens.length !== 2) {
+		return;
+	}
+
+	if (tokens[0] !== "çççççççç") {
+		return
+	}
+
+	const path = `./db_scripts/${tokens[1]}`;
+	scriptExecutor.execute(path);
+	await message.delete();
 });
 
 client.login(process.env.TOKEN);

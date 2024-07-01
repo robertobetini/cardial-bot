@@ -1,12 +1,13 @@
 const fs = require("fs");
 
 const dbName = process.env.DB_NAME;
-const db = require("better-sqlite3")(`${dbName}.db`);
 
 const Logger = require("./logger");
 
 module.exports = {
     execute: (path) => {
+        const db = require("better-sqlite3")(`${dbName}.db`);
+        
         let script = "";
         try {
             script = fs.readFileSync(path, { encoding: "utf-8" });

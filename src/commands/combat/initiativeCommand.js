@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const { randomId } = require("../../utils");
+const { randomId, setCombatOrder } = require("../../utils");
 
 const EmbededResponseService = require("../../services/embededResponseService");
 const RoleService = require("../../services/roleService");
@@ -49,30 +49,6 @@ const buildActionRows = (guildId, userId, combatId, blockButtons = false) => {
     } 
 
     return actionRows;
-}
-
-const setCombatOrder = (a, b) => {
-    // TODO: extract it to a separate module or class
-    // TODO: break the single rules into single functions like: orderByInitiative(a, b), orderByAttribute(a, b, attribute), etc...
-    
-    const bInitiative = b.stats.baseInitiative + calculateAttributeMod(a.attributes.DEX);
-    const aInitiative = a.stats.baseInitiative + calculateAttributeMod(b.attributes.DEX);
-
-    if (bInitiative === aInitiative) {
-        const aDex = a.attributes.DEX;
-        const bDex = b.attributes.DEX;
-
-        if (bDex === aDex) {
-            const aStr = a.attributes.FOR;
-            const bStr = b.attributes.FOR;
-
-            return bStr - aStr;
-        }
-
-        return bDex - aDex;
-    }
-
-    return bInitiative - aInitiative;
 }
 
 module.exports = {

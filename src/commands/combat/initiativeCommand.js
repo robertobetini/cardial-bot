@@ -3,6 +3,7 @@ const { randomId, setCombatOrder } = require("../../utils");
 
 const EmbededResponseService = require("../../services/embededResponseService");
 const RoleService = require("../../services/roleService");
+const StatsService = require("../../services/statsService");
 
 const Logger = require("../../logger");
 const Constants = require("../../constants");
@@ -173,6 +174,10 @@ module.exports = {
                 participants[0].selected = true;
                 mention = Discord.userMention(participants[0].userId);
             }
+        }
+
+        for (const user of participants) {
+            user.stats = StatsService.get(user.userId, guildId);
         }
         
         const embed = EmbededResponseService.getInitiativeView(participants, mobs);

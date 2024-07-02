@@ -30,7 +30,7 @@ module.exports = {
         if (!queryName) {
             return;
         }
-
+        
         const choices = ItemService.like(queryName, 25);
         await interaction.respond(
             choices.map(c => ({ name: `[${Constants.TRANSLATION[c.type]}] ${c.name}`, value: c.id }))

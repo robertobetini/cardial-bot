@@ -5,14 +5,14 @@ const ItemService = require("../services/itemService");
 const Item = require("../models/item");
 
 const Logger = require("../logger");
-const { SilentError } = require("../errors/silentError");
 
 const NOT_APPLICABLE_TOKEN = "-";
 const SHEETS = [
-    // "Armas", "Escudos", "Armaduras", 
-    // "Itens Únicos", 
+    "Armas", "Escudos", "Armaduras", 
+    "Acessórios",
+    "Itens Únicos", 
     "Consumíveis", 
-    // "Outros"
+    "Outros"
 ];
 const FETCH_SHEET_URL_TEMPLATE = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID_ITEMS}/values/{SHEET_NAME}?key=${process.env.GOOGLE_API_KEY}`;
 
@@ -45,6 +45,8 @@ class GoogleSheetsService {
                 return GoogleSheetsService.parseShields(data);
             case "Armaduras":
                 return GoogleSheetsService.parseArmors(data);
+            case "Acessórios":
+                return GoogleSheetsService.parseAcessories(data);
             case "Itens Únicos":
                 return GoogleSheetsService.parseUniqueItems(data);
             case "Consumíveis":
@@ -137,10 +139,50 @@ class GoogleSheetsService {
             const CA = Number(values[5]);
             const STR = Number(values[7].trim());
             const stealth = values[8].trim();
+            const dexDebuff = Number(values[9].trim());
 
-            const details = { CA, metal, STR, stealth };
+            const details = { CA, metal, STR, stealth, dexDebuff };
 
             const item = new Item(itemId, name, "armor", description, price, NOT_APPLICABLE_TOKEN, weight, JSON.stringify(details));
+            items.push(item);
+        }
+        
+        return items;
+    }
+
+    static parseAcessories(data) {
+        const skip = 3;
+        const items = [];
+        for (let i = skip; i < data.values.length; i++) {
+            const values = data.values[i];
+            const itemId = `acessory-${i - skip}`;
+
+            if (!values[0]) {
+                continue;
+            }
+
+            const name = values[0].trim();
+            const tier = values[1].trim();
+            const description = values[2].trim();
+            const price = GoogleSheetsService.parsePrice(values[3]);
+            const weight = Number(values[4].trim());
+
+            const acessoryType = values[5].trim();
+            const damage = Number(values[6].trim()) || 0;
+            const slots = Number(values[7].trim()) || 0;
+            const CA = Number(values[8].trim()) || 0;
+            const DEX = Number(values[9].trim()) || 0;
+            const WIS = Number(values[10].trim()) || 0;
+            const STR = Number(values[11].trim()) || 0;
+            const CHA = Number(values[12].trim()) || 0;
+            const CON = Number(values[13].trim()) || 0;
+            const effects = values[14].trim();
+            const disvantage = values[15].trim();
+            const properties = values[16]?.split(",")?.map(v => v.trim());
+
+            const details = { acessoryType, damage, slots, CA, DEX, WIS, STR, CHA, CON, effects, disvantage, properties };
+
+            const item = new Item(itemId, name, "acessory", description, price, tier, weight, JSON.stringify(details));
             items.push(item);
         }
         
@@ -195,6 +237,32 @@ class GoogleSheetsService {
             const description = values[3].trim();
 
             const item = new Item(itemId, name, "other", description, price, NOT_APPLICABLE_TOKEN, weight, "{}");
+            items.push(item);
+        }
+        
+        return items;
+    }
+
+    static parseUniqueItems(data) {
+        const skip = 3;
+        const items = [];
+        for (let i = skip; i < data.values.length; i++) {
+            const values = data.values[i];
+            const itemId = `unique-${i - skip}`;
+
+            if (!values[0]) {
+                continue;
+            }
+            
+            const name = values[0].trim();
+            const itemType = values[1].trim();
+            const tier = values[2].trim();
+            const description = values[3].trim();
+
+            const runes = [values[4].trim(), values[5].trim(), values[6].trim(), values[7].trim()];
+            const details = { itemType, runes };
+
+            const item = new Item(itemId, name, "unique", description, null, tier, NOT_APPLICABLE_TOKEN, JSON.stringify(details));
             items.push(item);
         }
         

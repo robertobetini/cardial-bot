@@ -116,9 +116,21 @@ class EmbededResponseService {
         const attributesTable = EmbededResponseService.createTable(attributesTableColumns, attributesTableRows);
 
         const fields = [
-            { name: "> Status"      , value: statsView1     , inline: true  }, 
-            { name: "> Informações" , value: statsView2     , inline: true  }, 
-            { name: `> Atributos (${attributes.availablePoints > 0 ? "+" : ""}${attributes.availablePoints})`   , value: attributesTable, inline: false }
+            { 
+                name: "> Status", 
+                value: statsView1.substring(0, Constants.EMBED_FIELD_MAX_LENGTH), 
+                inline: true
+            }, 
+            { 
+                name: "> Informações", 
+                value: statsView2.substring(0, Constants.EMBED_FIELD_MAX_LENGTH), 
+                inline: true
+            }, 
+            { 
+                name: `> Atributos (${attributes.availablePoints > 0 ? "+" : ""}${attributes.availablePoints})`,
+                value: attributesTable.substring(0, Constants.EMBED_FIELD_MAX_LENGTH), 
+                inline: false 
+            }
         ];
 
         return new Discord.EmbedBuilder()
@@ -270,7 +282,7 @@ class EmbededResponseService {
     }
 
     static getItemView(item) {
-        const detailsKeys = Object.keys(item.details);
+        const detailsKeys = Object.keys(item.details).filter(key => key !== "runes"); // runes are extense, its view must be different
         let detailsText = "```\n";
         for (const key of detailsKeys) {
             const value = item.details[key];
@@ -292,9 +304,9 @@ class EmbededResponseService {
                 name: "> Info",
                 value: 
                     "```\n" +
-                    `Tipo:  ${Constants.TRANSLATION[item.type]}\n` +
+                    `Categoria: ${Constants.TRANSLATION[item.type]}\n` +
                     `Tier:  ${item.tier}\n` +
-                    `Preço: ${item.price} GOLD\n` +
+                    `Preço: ${item.price ? item.price + " 💰" : "-"}\n` +
                     `Peso:  ${item.weight}\n` +
                     "```"
             }
@@ -303,8 +315,19 @@ class EmbededResponseService {
         if (detailsKeys.length > 0) {
             fields.push({
                 name: "> Detalhes",
-                value: detailsText
+                value: detailsText.substring(0, Constants.EMBED_FIELD_MAX_LENGTH)
             });
+        }
+
+        for (const rune of item.details.runes || []) {
+            if (rune === "-") {
+                continue;
+            }
+
+            const text = rune.split("\n");
+            const header = "**" + text[0] + "**\n";
+            const content = text.slice(1).join("\n");
+            fields.push({ name: "> Runa", value: header + content });
         }
         
         return new Discord.EmbedBuilder()

@@ -1,5 +1,6 @@
 class Constants {
     static MOBILE_LINE_SIZE = 33;
+    static EMBED_FIELD_MAX_LENGTH = 1024;
     static PAGE_SIZE = parseInt(process.env.PAGE_SIZE);
     static MILLIS_IN_SECOND = 1000;
     static MINUTE_IN_MILLIS = 60 * 1000;
@@ -101,8 +102,8 @@ class Constants {
         "Specialist": "Esp.",
         "FOR": "For",
         "DEX": "Des",
-        "CON": "Con",
-        "WIS": "Sab",
+        "CON": "Const",
+        "WIS": "Con",
         "CHA": "Car",
         "weapon": "Arma",
         "shield": "Escudo",
@@ -119,7 +120,15 @@ class Constants {
         "STR": "For",
         "stealth": "Furtividade",
         "other": "Outro",
-        "usable": "Consumível"
+        "usable": "Consumível",
+        "itemType": "Tipo de item",
+        "runes": "Runas",
+        "unique": "Único",
+        "dexDebuff": "Desvantagem",
+        "acessory": "Acessório",
+        "acessoryType": "Tipo de acessório",
+        "slots": "Slots",
+        "disvantage": "Desvantagem"
     };
 };
 

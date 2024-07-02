@@ -7,5 +7,6 @@ CREATE TABLE IF NOT EXISTS ITEMS (
     price INT,
     tier VARCHAR(16),
     weight INT,
+    imgUrl VARCHAR(1024),
     details TEXT NOT NULL
 );

@@ -8,7 +8,6 @@ class ItemsDAO extends Sqlite3DAO {
         const query = "SELECT rowid, * FROM ITEMS WHERE id = ?";
         const item = db.prepare(query).get(itemId);
         
-
         return Item.fromDTO(item);
     }
 
@@ -22,14 +21,14 @@ class ItemsDAO extends Sqlite3DAO {
 
     insert(item) {
         const db = this.getConnection();
-        const query = "INSERT INTO ITEMS (id, name, queryName, type, description, price, tier, weight, details) VALUES (?,?,?,?,?,?,?,?,?)";
-        db.prepare(query).run(item.id, item.name, item.queryName, item.type, item.description, item.price, item.tier, item.weight, item.details);
+        const query = "INSERT INTO ITEMS (id, name, queryName, type, description, price, tier, weight, imgUrl, details) VALUES (?,?,?,?,?,?,?,?,?,?)";
+        db.prepare(query).run(item.id, item.name, item.queryName, item.type, item.description, item.price, item.tier, item.weight, item.imgUrl, item.details);
     }
 
     update(item) {
         const db = this.getConnection();
-        const query = "UPDATE ITEMS SET name = ?, queryName = ?, type = ?, description = ?, price = ?, tier = ?, weight = ?, details = ? WHERE id = ?";
-        const res = db.prepare(query).run(item.name, item.queryName, item.type, item.description, item.price, item.tier, item.weight, item.details, item.id);
+        const query = "UPDATE ITEMS SET name = ?, queryName = ?, type = ?, description = ?, price = ?, tier = ?, weight = ?, imgUrl = ?, details = ? WHERE id = ?";
+        const res = db.prepare(query).run(item.name, item.queryName, item.type, item.description, item.price, item.tier, item.weight, item.imgUrl, item.details, item.id);
 
         return res.changes.valueOf() > 0;
     }

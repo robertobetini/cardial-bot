@@ -330,13 +330,15 @@ class EmbededResponseService {
             fields.push({ name: "> Runa", value: header + content });
         }
         
-        return new Discord.EmbedBuilder()
+        const embed = new Discord.EmbedBuilder()
             .setColor(0xbbbbbb)
             .setTitle(item.name)
             .setDescription(item.description)
             .setFields(fields)
             .setAuthor({ name: "Buscador de item" })
             .setFooter({ text: SHORT_FOOTER });
+
+        return item.imgUrl ? embed.setImage(item.imgUrl) : embed;
     }
 
     static createStatusSummarizedView(currentValue, maxValue, tempValue) {

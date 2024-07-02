@@ -1,5 +1,5 @@
 class Item {
-    constructor(id, name, type, description, price, tier, weight, details) {
+    constructor(id, name, type, description, price, tier, weight, imgUrl, details) {
         this.id = id;
         this.name = name;
         this.queryName = name.toUpperCase();
@@ -8,6 +8,7 @@ class Item {
         this.price = price;
         this.tier = tier;
         this.weight = weight;
+        this.imgUrl = imgUrl;
         this.details = details;
     }
 
@@ -20,6 +21,7 @@ class Item {
             itemDTO.price, 
             itemDTO.tier, 
             itemDTO.weight, 
+            itemDTO.imgUrl,
             JSON.parse(itemDTO.details)
         );
     }

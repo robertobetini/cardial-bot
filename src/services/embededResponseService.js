@@ -50,23 +50,13 @@ class EmbededResponseService {
             ? UserService.get(guildId, discordUser, true) 
             : UserService.getOrCreateUser(guildId, discordUser, true);
         
-        const translation = {
-            "NoProficiency": "S/Prof.",
-            "Proficient": "Prof.",
-            "Specialist": "Esp.",
-            "FOR": "For",
-            "DEX": "Des",
-            "CON": "Con",
-            "WIS": "Sab",
-            "CHA": "Car",
-        }
         const columns = [ { name: "Perícia", size: 16 }, { name: "Atr", size: 3}, { name: "Prof", size: 7}, { name: "Mod", size: 3 } ];
         const rows = Constants.skills.map(skill => {
             const challengeMod = challengeModCalculator.calculateChallengeMod(skill.value, user);
             return [
                 skill.label, 
-                translation[Constants.CHALLENGE_TO_ATTRIBUTE_MAP[skill.value]],
-                translation[user.skills[skill.value]], 
+                Constants.TRANSLATION[Constants.CHALLENGE_TO_ATTRIBUTE_MAP[skill.value]],
+                Constants.TRANSLATION[user.skills[skill.value]], 
                 `${challengeMod >= 0 ? "+" : ""}${challengeMod}`];
         });
         const table = EmbededResponseService.createTable(columns, rows);
@@ -277,6 +267,53 @@ class EmbededResponseService {
         }
         
         return firstWhiteSpaces + ansiColor + currentValue + "/" + totalValue + Colors.RESET + secondWhiteSpaces;
+    }
+
+    static getItemView(item) {
+        const detailsKeys = Object.keys(item.details);
+        let detailsText = "```\n";
+        for (const key of detailsKeys) {
+            const value = item.details[key];
+
+            detailsText += `${Constants.TRANSLATION[key]}: `;
+            if (value instanceof(Array)) {
+                detailsText += value.join(", ");
+            } else if (typeof(value) === "string") {
+                detailsText += value;
+            } else if (typeof(value) === "number") {
+                detailsText += value.toString();
+            }
+            detailsText += "\n";
+        }
+        detailsText += "```";
+
+        const fields = [
+            { 
+                name: "> Info",
+                value: 
+                    "```\n" +
+                    `Tipo:  ${Constants.TRANSLATION[item.type]}\n` +
+                    `Tier:  ${item.tier}\n` +
+                    `Preço: ${item.price} GOLD\n` +
+                    `Peso:  ${item.weight}\n` +
+                    "```"
+            }
+        ];
+
+        if (detailsKeys.length > 0) {
+            fields.push({
+                name: "> Detalhes",
+                value: detailsText
+            });
+        }
+        
+        return new Discord.EmbedBuilder()
+            .setColor(0xbbbbbb)
+            .setTitle(item.name)
+            .setDescription(item.description)
+            .setFields(fields)
+            .setAuthor({ name: "Buscador de item" })
+            .setFooter({ text: SHORT_FOOTER });
     }
 
     static createStatusSummarizedView(currentValue, maxValue, tempValue) {

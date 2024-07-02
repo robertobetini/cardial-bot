@@ -1,0 +1,28 @@
+class Item {
+    constructor(id, name, type, description, price, tier, weight, details) {
+        this.id = id;
+        this.name = name;
+        this.queryName = name.toUpperCase();
+        this.type = type;
+        this.description = description;
+        this.price = price;
+        this.tier = tier;
+        this.weight = weight;
+        this.details = details;
+    }
+
+    static fromDTO(itemDTO) {
+        return new Item(
+            itemDTO.id, 
+            itemDTO.name, 
+            itemDTO.type, 
+            itemDTO.description, 
+            itemDTO.price, 
+            itemDTO.tier, 
+            itemDTO.weight, 
+            JSON.parse(itemDTO.details)
+        );
+    }
+}
+
+module.exports = Item;

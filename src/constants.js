@@ -22,7 +22,7 @@ class Constants {
     static INITIAL_AVAILABLE_ATTRIBUTES = parseInt(process.env.INITIAL_AVAILABLE_ATTRIBUTES);
     static ATTRIBUTE_PER_LEVEL = 1;
     static COMMAND_MAX_USERS = 6;
-    static EPHEMERAL_COMMANDS = ["ficha", "atualizastatus", "atualizanickname"];
+    static EPHEMERAL_COMMANDS = ["ficha", "atualizastatus", "atualizanickname", "atualizaitems"];
     static CHALLENGE_TO_ATTRIBUTE_MAP = {
         "athletics": "FOR",
         "acrobatics": "DEX",
@@ -95,6 +95,32 @@ class Constants {
         ...Constants.skills.map(({ label, value }) => ({ label: `${Constants.emojiMap[Constants.CHALLENGE_TO_ATTRIBUTE_MAP[value]]} ${label}`, value })),
         ...Constants.attributes.map(({ label, value }) => ({ label: `[Atributo] ${Constants.emojiMap[Constants.CHALLENGE_TO_ATTRIBUTE_MAP[value]]} ${label}`, value }))
     ];
+    static TRANSLATION = {
+        "NoProficiency": "S/Prof.",
+        "Proficient": "Prof.",
+        "Specialist": "Esp.",
+        "FOR": "For",
+        "DEX": "Des",
+        "CON": "Con",
+        "WIS": "Sab",
+        "CHA": "Car",
+        "weapon": "Arma",
+        "shield": "Escudo",
+        "armor": "Armadura",
+        "damage": "Dano",
+        "damageType": "Tipo de dano",
+        "weaponType": "Tipo de arma",
+        "properties": "Propriedades",
+        "metal": "Metal",
+        "effects": "Efeitos",
+        "strRequirement": "Requisito de força",
+        "CA": "CA",
+        "grip": "Empunhadura",
+        "STR": "For",
+        "stealth": "Furtividade",
+        "other": "Outro",
+        "usable": "Consumível"
+    };
 };
 
 module.exports = Constants;

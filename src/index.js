@@ -11,6 +11,7 @@ const commandHandler = require("./interactions/commandInteractionHandler");
 const buttonHandler = require("./interactions/buttonInteractionHandler");
 const modalHandler = require("./interactions/modalInteractionHandler");
 const stringSelectMenuHandler = require("./interactions/stringSelectMenuHandler");
+const autocompleteHandler = require("./interactions/autocompleteInteractionHandler");
 
 const Constants = require("./constants");
 const Logger = require("./logger");
@@ -46,6 +47,8 @@ client.on(Discord.Events.InteractionCreate, async interaction => {
 		} else if (interaction.isChatInputCommand()) {
 			Logger.debug(`Processing chat interaction (${interaction.commandName})`);
 			await commandHandler.handleAsync(interaction);
+		} else if (interaction.isAutocomplete()) {	
+			await autocompleteHandler.handleAsync(interaction);
 		} else {
 			Logger.info(`Couldn't process interaction of type (${interaction.type})`);
 		}

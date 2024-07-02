@@ -30,7 +30,12 @@ const roll = (guildId, userId, challenge, rerollsSoFar) => {
     const embed = EmbededResponseService.getSmartRollView(challenge, "1d20", roll, [totalMod], rerollsSoFar);
     const actionRow = buildRerollActionRow(guildId, userId, challenge, rerollsSoFar);
 
-    return { content: "", embeds: [embed], components: [actionRow] };
+    return { 
+        content: "", 
+        embeds: [embed], 
+        components: [actionRow],
+        files: [EmbededResponseService.FOOTER_IMAGE]
+    };
 }
 
 module.exports = {

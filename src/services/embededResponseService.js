@@ -10,11 +10,14 @@ const UserService = require("../services/userService");
 const Constants = require("../constants");
 const Colors = require("../colors");
 
-const DEFAULT_FOOTER = "Elysium Systemㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⁣ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⁣";
-const SHORT_FOOTER = "Elysium Systemㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ⁣ㅤㅤㅤ⁣";
-const SHORTEST_FOOTER = "Elysium System";
+const DEFAULT_FOOTER = "Elysium System";
 
 class EmbededResponseService {
+    static FOOTER_IMAGE = new Discord.AttachmentBuilder()
+        .setFile('./assets/logo-elysium.png')
+        .setDescription("Elysium System")
+        .setName("Logo");
+
     static getExpLeaderboard(guildId, page) {
         const users = UserService.getAllFromGuild(guildId, "totalExp", page * Constants.PAGE_SIZE, Constants.PAGE_SIZE);
 
@@ -27,7 +30,7 @@ class EmbededResponseService {
             .setColor(0xbbbbbb)
             .setTitle("Placar de nível")
             .setDescription(table)
-            .setFooter({ text: SHORT_FOOTER }), isEmpty];
+            .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` }), isEmpty];
     }
 
     static getGoldLeaderboard(guildId, page) {
@@ -42,7 +45,7 @@ class EmbededResponseService {
             .setColor(0xbbbbbb)
             .setTitle("Placar de gold")
             .setDescription(table)
-            .setFooter({ text: SHORT_FOOTER }), isEmpty];
+            .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` }), isEmpty];
     }
 
     static getUserSkills(guildId, discordUser) {
@@ -67,7 +70,7 @@ class EmbededResponseService {
             .addFields({ name: "> Perícias",  value: table })
             .setDescription(user.notes || " ")
             .setAuthor({ name: `Personagem de ${user.username}` })
-            .setFooter({ text: SHORT_FOOTER });
+            .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
     }
 
     static getUserStatus(guildId, discordUser, tempAttributes = null) {
@@ -140,7 +143,7 @@ class EmbededResponseService {
             .setDescription(user.notes || " ")
             .setAuthor({ name: `Personagem de ${user.username}` })
             .addFields(fields)
-            .setFooter({ text: SHORTEST_FOOTER });
+            .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
     }
 
     static createTable(columns, rows, separator = " ") {
@@ -199,7 +202,7 @@ class EmbededResponseService {
             .setColor(0xbbbbbb)
             .setTitle(`${results.length}d${dice}${rerollsSoFar > 0 ? ` (${rerollsSoFar})` : ""}`)     
             .setDescription(response)
-            .setFooter({ text: SHORTEST_FOOTER });
+            .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
     }
 
     static getSmartRollView(challenge, dice, diceValue, modValues, rerollsSoFar = 0) {
@@ -218,7 +221,7 @@ class EmbededResponseService {
             .setColor(0xbbbbbb)
             .setTitle(`Teste de ${challengeLabel}${rerollsSoFar > 0 ? ` (${rerollsSoFar})` : ""}`)     
             .setDescription(response)
-            .setFooter({ text: SHORT_FOOTER });
+            .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
     }
 
     static getInitiativeView(players, monsters) {
@@ -240,7 +243,7 @@ class EmbededResponseService {
             .setColor(0xbbbbbb)
             .setTitle("Iniciativa")
             .setDescription(response)
-            .setFooter({ text: SHORT_FOOTER });
+            .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
     }
 
     static createInitiativeLine(combatEntity, isEnemy = false, nameSize = 14, separator = " ") {
@@ -336,7 +339,7 @@ class EmbededResponseService {
             .setDescription(item.description)
             .setFields(fields)
             .setAuthor({ name: "Buscador de item" })
-            .setFooter({ text: SHORT_FOOTER });
+            .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
 
         return item.imgUrl ? embed.setImage(item.imgUrl) : embed;
     }

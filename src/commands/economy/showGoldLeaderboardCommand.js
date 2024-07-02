@@ -37,7 +37,8 @@ module.exports = {
         const message = await interaction.editReply({
             content: "",
             embeds: [leaderboard],
-            components: [actionRow]
+            components: [actionRow],
+            files: [EmbededResponseService.FOOTER_IMAGE]
         });
 
         pages[message.id] = 0;

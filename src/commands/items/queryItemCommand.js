@@ -1,7 +1,7 @@
 const Discord = require("discord.js");
 
 const ItemService = require("../../services/itemService");
-const EmbededService = require("../../services/embededResponseService");
+const EmbededResponseService = require("../../services/embededResponseService");
 
 const Constants = require("../../constants");
 
@@ -19,10 +19,11 @@ module.exports = {
     execute: async (interaction) => {
         const itemId = interaction.options.getString("nome");
         const item = ItemService.get(itemId);
-        const embed = EmbededService.getItemView(item);
+        const embed = EmbededResponseService.getItemView(item);
 
         await interaction.editReply({
-            embeds: [embed]
+            embeds: [embed],
+            files: [EmbededResponseService.FOOTER_IMAGE]
         });
     },
     autocomplete: async (interaction) => {

@@ -68,7 +68,8 @@ module.exports = {
         await interaction.editReply({
             content: `Turno de ${Discord.userMention(users[0].userId)}`,
             embeds: [embed],
-            components: buildActionRows(guildId, userId, combatId)
+            components: buildActionRows(guildId, userId, combatId),
+            files: [EmbededResponseService.FOOTER_IMAGE]
         });
     },
     addMobModal: async (interaction, guildId, memberId, combatId) => {

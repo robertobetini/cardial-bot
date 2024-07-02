@@ -251,7 +251,8 @@ module.exports = {
 
         await interaction.editReply({
             embeds: [embed],
-            components: [actionRow]
+            components: [actionRow],
+            files: [EmbededResponseService.FOOTER_IMAGE]
         });
     },
     showAttributesRow: async (interaction, guildId, memberId) => {

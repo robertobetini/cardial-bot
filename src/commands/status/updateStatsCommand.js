@@ -39,7 +39,7 @@ module.exports = {
 
         const user = UserService.get(guildId, target.id, true);
         if (!user) {
-            await interaction.editReply({ content: "O jogador não possui ficha ainda!" });
+            await interaction.editReply("O jogador não possui ficha ainda!");
             return;
         }
 
@@ -50,6 +50,6 @@ module.exports = {
 
         StatsService.update(user.stats);
 
-        await interaction.editReply({ content: "Status atualizado com sucesso!" });
+        await interaction.editReply("Status atualizado com sucesso!");
     },
 };

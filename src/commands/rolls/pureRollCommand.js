@@ -20,7 +20,12 @@ const roll = (guildId, userId, dice, quantity, rerollsSoFar = 0) => {
     const embed = EmbededResponseService.getRollView(dice, results, rerollsSoFar);
     const actionRow = buildRerollActionRow(guildId, userId, dice, quantity, rerollsSoFar);
 
-    return { content: "", embeds: [embed], components: [actionRow] }
+    return { 
+        content: "", 
+        embeds: [embed], 
+        components: [actionRow],
+        files: [EmbededResponseService.FOOTER_IMAGE]
+    };
 };
 
 module.exports = {

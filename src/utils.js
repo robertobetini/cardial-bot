@@ -36,6 +36,14 @@ module.exports = {
     randomId: (length) => Math.floor(Math.random() * Math.pow(10, length)).toString(),
     isValidUrl: (urlString) => {
         try {
+            if (!urlString) {
+                return false;
+            }
+
+            if (!urlString.startsWith("http://") || !urlString.startsWith("https://")) {
+                return false;
+            }
+
             new URL(urlString);
             return true;
         } catch {

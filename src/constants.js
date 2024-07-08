@@ -39,6 +39,11 @@ class Constants {
         "intimidation": "CHA",
         "performance": "CHA",
         "persuasion": "CHA",
+        "strength": "STR",
+        "dexterity": "DEX",
+        "constitution": "CON",
+        "wisdom": "WIS",
+        "charisma": "CHA",
         "STR": "STR",
         "DEX": "DEX",
         "CON": "CON",
@@ -79,6 +84,11 @@ class Constants {
         { label: "Persuasão", value: "persuasion" },
         { label: "Prestidigitação", value: "jugglery" },
         { label: "Sobrevivência", value: "survivability" },
+        { label: "Força", value: "strength" },
+        { label: "Destreza", value: "dexterity" },
+        { label: "Constituição", value: "constitution" },
+        { label: "Inteligência", value: "wisdom" },
+        { label: "Carisma", value: "charisma" }
     ];
     static possibleSkillValues = [
         { label: "Sem proficiência", value: "NoProficiency" },

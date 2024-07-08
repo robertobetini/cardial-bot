@@ -20,7 +20,7 @@ module.exports = {
 
         const user = new User(target.id, guildId, target.username, target.displayAvatarURL());
         const member = await interaction.guild.members.fetch(target.id);
-        userDAO.update(user, true);
+        userDAO.upsert(user, true);
 
         try {
             await member.setNickname(user.playerName);

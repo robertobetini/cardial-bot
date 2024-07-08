@@ -34,8 +34,6 @@ const loadCommandRefs = () => {
     return commandRefs;
 }
 
-console.log(Object.keys(commandRefs));
-
 module.exports = {
     loadCommandRefs
 };

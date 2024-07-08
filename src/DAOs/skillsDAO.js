@@ -13,8 +13,8 @@ class SkillsDAO extends Sqlite3DAO {
 
     insert(userId, guildId, skills, transactionDb = null) {
         const db = transactionDb || this.getConnection();
-        const query = "INSERT INTO SKILLS (userId, guildId, athletics, acrobatics, jugglery, stealth, animalTraining, intuition, investigation, nature, perception, survivability, deception, intimidation, performance, persuasion) "
-            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        const query = "INSERT INTO SKILLS (userId, guildId, athletics, acrobatics, jugglery, stealth, animalTraining, intuition, investigation, nature, perception, survivability, deception, intimidation, performance, persuasion, strength, dexterity, constitution, wisdom, charisma)"
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         db.prepare(query).run(
             userId, guildId, 
@@ -31,13 +31,19 @@ class SkillsDAO extends Sqlite3DAO {
             skills.deception, 
             skills.intimidation, 
             skills.performance, 
-            skills.persuasion
+            skills.persuasion,
+            skills.strength,
+            skills.dexterity,
+            skills.constitution, 
+            skills.wisdom,
+            skills.charisma
         );
     }
 
     update(userId, guildId, skills, transactionDb = null) {
         const db = transactionDb || this.getConnection();
-        const query = "UPDATE SKILLS SET athletics = ?, acrobatics = ?, jugglery = ?, stealth = ?, animalTraining = ?, intuition = ?, investigation = ?, nature = ?, perception = ?, survivability = ?, deception = ?, intimidation = ?, performance = ?, persuasion = ?"
+        const query = "UPDATE SKILLS SET athletics = ?, acrobatics = ?, jugglery = ?, stealth = ?, animalTraining = ?, intuition = ?, investigation = ?, nature = ?, perception = ?,"
+            + "survivability = ?, deception = ?, intimidation = ?, performance = ?, persuasion = ?, strength = ?, dexterity = ?, constitution = ?, wisdom = ?, charisma = ?"
             + " WHERE userId = ? AND guildId = ?";
 
         const res = db.prepare(query).run(
@@ -55,6 +61,11 @@ class SkillsDAO extends Sqlite3DAO {
             skills.intimidation, 
             skills.performance, 
             skills.persuasion, 
+            skills.strength,
+            skills.dexterity,
+            skills.constitution, 
+            skills.wisdom,
+            skills.charisma,
             userId, guildId
         );
 

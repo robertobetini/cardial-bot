@@ -16,6 +16,11 @@ CREATE TABLE IF NOT EXISTS SKILLS (
     intimidation VARCHAR(64),
     performance VARCHAR(64),
     persuasion VARCHAR(64),
+    strength VARCHAR(64),
+    dexterity VARCHAR(64),
+    constitution VARCHAR(64),
+    wisdom VARCHAR(64),
+    charisma VARCHAR(64),
 
     FOREIGN KEY (userId, guildId) REFERENCES USERS(userId, guildId)
 );

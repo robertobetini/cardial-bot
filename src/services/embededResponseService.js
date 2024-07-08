@@ -59,7 +59,7 @@ class EmbededResponseService {
             return [
                 skill.label, 
                 Constants.TRANSLATION[Constants.CHALLENGE_TO_ATTRIBUTE_MAP[skill.value]],
-                Constants.TRANSLATION[user.skills[skill.value]], 
+                Constants.TRANSLATION[user.skills[skill.value] || "NoProficiency"], 
                 `${challengeMod >= 0 ? "+" : ""}${challengeMod}`];
         });
         const table = EmbededResponseService.createTable(columns, rows);

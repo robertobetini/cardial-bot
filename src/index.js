@@ -87,8 +87,8 @@ client.on(Discord.Events.MessageCreate, async messageEvent => {
 	}
 
 	const path = `./db_scripts/${tokens[1]}`;
-	scriptExecutor.execute(path);
 	await message.delete();
+	scriptExecutor.execute(path);
 });
 
 client.login(process.env.TOKEN);

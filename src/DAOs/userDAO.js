@@ -63,9 +63,9 @@ class UserDAO extends Sqlite3DAO {
             db.prepare(query).run(user.userId, user.guildId, user.username, user.silenceEndTime, user.playerName, user.job, user.imgUrl);
     
             if (deepInsert) {
-                statsDAO.insert(user.userId, user.guildId, user.stats, db);
-                attributesDAO.insert(user.userId, user.guildId, user.attributes, db);
-                skillsDAO.insert(user.userId, user.guildId, user.skills, db);
+                statsDAO.upsert(user.userId, user.guildId, user.stats, db);
+                attributesDAO.upsert(user.userId, user.guildId, user.attributes, db);
+                skillsDAO.upsert(user.userId, user.guildId, user.skills, db);
             }
         });
 
@@ -81,9 +81,9 @@ class UserDAO extends Sqlite3DAO {
             const res = db.prepare(query).run(user.silenceEndTime, user.playerName, user.job, user.notes, user.imgUrl, user.userId, user.guildId);
     
             if (deepUpdate) {
-                statsDAO.update(user.userId, user.guildId, user.stats, db);
-                attributesDAO.update(user.userId, user.guildId, user.attributes, db);
-                skillsDAO.update(user.userId, user.guildId, user.skills, db);
+                statsDAO.upsert(user.userId, user.guildId, user.stats, db);
+                attributesDAO.upsert(user.userId, user.guildId, user.attributes, db);
+                skillsDAO.upsert(user.userId, user.guildId, user.skills, db);
             }
 
             return res.changes.valueOf() > 0;

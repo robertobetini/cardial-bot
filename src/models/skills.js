@@ -17,6 +17,11 @@ class Skills {
         this.intimidation = "NoProficiency";
         this.performance = "NoProficiency";
         this.persuasion = "NoProficiency";
+        this.strength = "NoProficiency";
+        this.dexterity = "NoProficiency";
+        this.constitution = "NoProficiency";
+        this.wisdom = "NoProficiency";
+        this.charisma = "NoProficiency";
     }
 
     static fromDTO(fullUserDTO) {
@@ -40,6 +45,11 @@ class Skills {
         skills.intimidation = fullUserDTO.intimidation;
         skills.performance = fullUserDTO.performance;
         skills.persuasion = fullUserDTO.persuasion;
+        skills.strength = fullUserDTO.strength;
+        skills.dexterity = fullUserDTO.dexterity;
+        skills.constitution = fullUserDTO.constitution;
+        skills.wisdom = fullUserDTO.wisdom;
+        skills.charisma = fullUserDTO.charisma;
 
         return skills;
     }

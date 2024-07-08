@@ -13,6 +13,7 @@ const Constants = require("../../constants");
 const Logger = require("../../logger");
 
 const { isValidUrl } = require("../../utils");
+const Skills = require("../../models/skills");
 
 const tempAttributes = {};
 const originalInteractions = {};
@@ -89,8 +90,7 @@ const buildSkillsActionRow = (guildId, userId, selected) => {
         .setPlaceholder("Selecione uma perícia")
         .setOptions(createSelectOptions(Constants.skills, selected));
 
-    const skills = SkillsService.get(userId, guildId);
-
+    const skills = SkillsService.get(userId, guildId) || new Skills(userId, guildId);
     const skillValuesSelect = new Discord.StringSelectMenuBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:updateSkillLevel`)
         .setPlaceholder("Selecione um nível de proficiência")

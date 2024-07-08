@@ -1,9 +1,6 @@
 const Logger = require("../logger");
 
-const commands = {
-    showUserStatusCommand: require("../commands/status/showUserStatusCommand"),
-    initiativeCommand: require("../commands/combat/initiativeCommand")
-};
+const { loadCommandRefs } = require("../commandRefs");
 
 module.exports = {
     handleAsync: async (interaction) => {
@@ -17,6 +14,6 @@ module.exports = {
         }
 
         Logger.debug(`Processing string select menu handler: ${command}.${actionHandler}`);
-        await commands[command][actionHandler](interaction, guildId, memberId, customArg);
+        await loadCommandRefs()[command][actionHandler](interaction, guildId, memberId, customArg);
     }
 }

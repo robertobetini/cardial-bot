@@ -19,6 +19,6 @@ module.exports = {
         });
 
         Logger.debug(`Executing command: ${interaction.commandName}`);
-        await command.execute(interaction, interaction.token);
+        await command.execute(interaction);
     }
 };

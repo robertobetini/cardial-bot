@@ -66,8 +66,8 @@ class MonsterDropsSyncService {
             const monsterId = `${sheet}-${i - skip}`;
 
             const name = values[0]?.trim();
-            const baseGold= Number(values[6]?.trim());
-            const baseExp = Number(values[7]?.trim());
+            const baseGold= Number(values[5]?.trim());
+            const baseExp = Number(values[6]?.trim());
             const quantity = values[1].trim();
             const gold = Number(values[3].trim());
             const itemName = values[2].trim();
@@ -81,7 +81,7 @@ class MonsterDropsSyncService {
                 monsters.push(monster);
             }
             
-            const [diceMin, diceMax] = values[5].split("-").map(v => Number(v?.trim()));
+            const [diceMin, diceMax] = values[4].split("-").map(v => Number(v?.trim()));
 
             const item = ItemService.like(itemName, 1, true)[0];
             if (!item) {

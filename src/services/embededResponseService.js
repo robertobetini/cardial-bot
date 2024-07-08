@@ -345,6 +345,24 @@ class EmbededResponseService {
     }
 
     static getMonsterView(monster) {
+        const fields = [
+            {
+                name: "> Info", 
+                value: 
+                    `**EXP Base:** ${monster.baseExp}\n` +
+                    `**GOLD Base:** ${monster.baseGold}`
+            }
+        ];
+
+        return new Discord.EmbedBuilder()
+            .setColor(0xbbbbbb)
+            .setTitle(monster.name)
+            .setFields(fields)
+            .setAuthor({ name: "Buscador de mob" })
+            .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
+    }
+
+    static getMonsterDropsView(monster) {
         const fields = [];
         for (const drop of monster.drops) {
             fields.push({ 
@@ -352,7 +370,8 @@ class EmbededResponseService {
                 value:
                     `Quantidade: ${drop.quantity}\n` +
                     `Gold: ${drop.gold}\n` +
-                    `Chance: ${drop.diceMin} - ${drop.diceMax}`
+                    `Chance: ${drop.diceMin} - ${drop.diceMax}`,
+                inline: true
             });
         }
 

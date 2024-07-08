@@ -103,8 +103,8 @@ test(TESTING_MODULE, setCombatOrder,
 
                     assert.equal(true, userDex >= nextUserDex);
                     if (userDex === nextUserDex) {
-                        const userStr = users[i].attributes.FOR;
-                        const nextUserStr = users[i + 1].attributes.FOR;
+                        const userStr = users[i].attributes.STR;
+                        const nextUserStr = users[i + 1].attributes.STR;
                         
                         assert.equal(true, userStr >= nextUserStr);
                     }

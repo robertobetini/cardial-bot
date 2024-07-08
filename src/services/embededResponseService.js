@@ -87,7 +87,7 @@ class EmbededResponseService {
 
         const attributes = tempAttributes || user.attributes;
         const calcMod = modCalculator.calculateAttributeMod;
-        const forMod = calcMod(attributes.FOR);
+        const strMod = calcMod(attributes.STR);
         const dexMod = calcMod(attributes.DEX);
         const conMod = calcMod(attributes.CON);
         const wisMod = calcMod(attributes.WIS);
@@ -110,7 +110,7 @@ class EmbededResponseService {
 
         const attributesTableColumns = [{ name: "Atributo", size: 12 }, { name: "Val", size: 4 }, { name: "Mod", size: 3 }];
         const attributesTableRows = [
-            ["Força", attributes.FOR.toString(), `${forMod >= 0 ? "+" : ""}${forMod}`],
+            ["Força", attributes.STR.toString(), `${strMod >= 0 ? "+" : ""}${strMod}`],
             ["Destreza", attributes.DEX.toString(), `${dexMod >= 0 ? "+" : ""}${dexMod}`],
             ["Constituição", attributes.CON.toString(), `${conMod >= 0 ? "+" : ""}${conMod}`],
             ["Conhecimento", attributes.WIS.toString(), `${wisMod >= 0 ? "+" : ""}${wisMod}`],

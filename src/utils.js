@@ -23,7 +23,7 @@ const setCombatOrder = (a, b) => {
         const dexResult = orderByAttributeComparer(a, b, "DEX", true);
 
         if (dexResult === 0) {
-            return orderByAttributeComparer(a, b, "FOR", true);
+            return orderByAttributeComparer(a, b, "STR", true);
         }
 
         return dexResult;

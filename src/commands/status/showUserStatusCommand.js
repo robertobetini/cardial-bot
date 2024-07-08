@@ -205,7 +205,7 @@ const createTempAttributeEntryIfNotExists = (guildId, memberId) => {
     }
 
     tempAttributes[key] = { currentAttributes };
-    tempAttributes[key].FOR = currentAttributes.FOR;
+    tempAttributes[key].STR = currentAttributes.STR;
     tempAttributes[key].DEX = currentAttributes.DEX;
     tempAttributes[key].CON = currentAttributes.CON;
     tempAttributes[key].WIS = currentAttributes.WIS;
@@ -438,7 +438,7 @@ module.exports = {
 
         const attributes = new Attributes(
             memberId, guildId, 
-            tempAttributes[key].FOR, 
+            tempAttributes[key].STR, 
             tempAttributes[key].DEX, 
             tempAttributes[key].CON, 
             tempAttributes[key].WIS, 

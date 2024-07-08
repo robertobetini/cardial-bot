@@ -17,7 +17,7 @@ class AttributesDAO extends Sqlite3DAO {
         const firstAttributionDone = attributes.firstAttributionDone ? 1 : 0;
         db
             .prepare(query)
-            .run(userId, guildId, attributes.FOR, attributes.DEX, attributes.CON, attributes.WIS, attributes.CHA, attributes.availablePoints, firstAttributionDone);
+            .run(userId, guildId, attributes.STR, attributes.DEX, attributes.CON, attributes.WIS, attributes.CHA, attributes.availablePoints, firstAttributionDone);
     }
 
     update(userId, guildId, attributes, transactionDb = null) {
@@ -26,7 +26,7 @@ class AttributesDAO extends Sqlite3DAO {
         const firstAttributionDone = attributes.firstAttributionDone ? 1 : 0;
         const res = db
             .prepare(query)
-            .run(attributes.FOR, attributes.DEX, attributes.CON, attributes.WIS, attributes.CHA, attributes.availablePoints, firstAttributionDone, userId, guildId);
+            .run(attributes.STR, attributes.DEX, attributes.CON, attributes.WIS, attributes.CHA, attributes.availablePoints, firstAttributionDone, userId, guildId);
 
         return res.changes.valueOf() > 0;
     }

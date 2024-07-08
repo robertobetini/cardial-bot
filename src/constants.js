@@ -25,7 +25,7 @@ class Constants {
     static COMMAND_MAX_USERS = 6;
     static EPHEMERAL_COMMANDS = ["ficha", "atualizastatus", "atualizanickname", "zsync", "buscamob"];
     static CHALLENGE_TO_ATTRIBUTE_MAP = {
-        "athletics": "FOR",
+        "athletics": "STR",
         "acrobatics": "DEX",
         "jugglery": "DEX",
         "stealth": "DEX",
@@ -39,14 +39,14 @@ class Constants {
         "intimidation": "CHA",
         "performance": "CHA",
         "persuasion": "CHA",
-        "FOR": "FOR",
+        "STR": "STR",
         "DEX": "DEX",
         "CON": "CON",
         "WIS": "WIS",
         "CHA": "CHA"
     };
     static attributes = [
-        { label: "Força", value: "FOR" },
+        { label: "Força", value: "STR" },
         { label: "Carisma", value: "CHA" },
         { label: "Destreza", value: "DEX" },
         { label: "Constituição", value: "CON" },
@@ -86,7 +86,7 @@ class Constants {
         { label: "Especialista", value: "Specialist" },
     ];
     static emojiMap = {
-        "FOR": "💪🏼",
+        "STR": "💪🏼",
         "DEX": "🎯",
         "CON": "❤️",
         "WIS": "🧠",
@@ -100,7 +100,7 @@ class Constants {
         "NoProficiency": "S/Prof.",
         "Proficient": "Prof.",
         "Specialist": "Esp.",
-        "FOR": "For",
+        "STR": "For",
         "DEX": "Des",
         "CON": "Const",
         "WIS": "Con",

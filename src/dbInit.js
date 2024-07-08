@@ -14,8 +14,13 @@ module.exports = {
         
         const fileNames = fs.readdirSync(SQL_SCRIPTS_DIR);
         for (let fileName of fileNames) {
-            const tableCreationSql = fs.readFileSync(`${SQL_SCRIPTS_DIR}/${fileName}`, { encoding: "utf-8" });
-            db.prepare(tableCreationSql).run();
+            try {
+                const tableCreationSql = fs.readFileSync(`${SQL_SCRIPTS_DIR}/${fileName}`, { encoding: "utf-8" });
+                db.prepare(tableCreationSql).run();
+            } catch(err) {
+                Logger.error(`Error executing script '${fileName}'`);
+                throw err;
+            }
         }
         db.close();
 

@@ -13,6 +13,10 @@ class Item {
     }
 
     static fromDTO(itemDTO) {
+        if (!itemDTO) {
+            return null;
+        }
+
         return new Item(
             itemDTO.id, 
             itemDTO.name, 

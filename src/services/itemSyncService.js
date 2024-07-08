@@ -1,6 +1,7 @@
 const https = require("https");
 
-const ItemService = require("../services/itemService");
+const ItemService = require("./itemService");
+const MonsterDropsService = require("./monsterDropsService");
 
 const Item = require("../models/item");
 
@@ -9,56 +10,69 @@ const { SilentError } = require("../errors/silentError");
 const { isValidUrl } = require("../utils");
 
 const NOT_APPLICABLE_TOKEN = "-";
-const SHEETS = [
-    "Armas", "Escudos", "Armaduras", 
-    "Acessórios",
-    "Itens Únicos", 
-    "Consumíveis", 
-    "Outros"
-];
+const SHEETS = ["Armas", "Escudos", "Armaduras", "Acessórios","Itens Únicos", "Consumíveis", "Outros"];
 const FETCH_SHEET_URL_TEMPLATE = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID_ITEMS}/values/{SHEET_NAME}?key=${process.env.GOOGLE_API_KEY}`;
 
-class GoogleSheetsService {
-    static syncItems() {
+class ItemSyncService {
+    static async sync() {
+        MonsterDropsService.deleteAll();
+        ItemService.deleteAll();
+
+        const goldItem = new Item("gold", "GOLD", NOT_APPLICABLE_TOKEN, NOT_APPLICABLE_TOKEN, 1, NOT_APPLICABLE_TOKEN, null, null, "{}");
+        ItemService.batchUpsert([goldItem]);
+
+        const promises = [];
         for (const sheet of SHEETS) {
             const url = FETCH_SHEET_URL_TEMPLATE.replace("{SHEET_NAME}", sheet);
-            https.get(url, (res) => {
-                if (res.statusCode == 403) {
-                    throw SilentError("Failed to fetch google sheets with status 'Forbidden'");
-                }
-
-                res.setEncoding('utf8');
-                let rawData = '';
-                res.on('data', (chunk) => rawData += chunk );
-                res.on('end', () => {
-                    try {
-                        const data = JSON.parse(rawData);
-                        const items = GoogleSheetsService.parseItems(sheet, data);
-                        ItemService.batchUpsert(items);
-                    } catch (err) {
-                        Logger.error(err);
+            
+            const promise = new Promise((resolve, reject) => 
+                https.get(url, (res) => {
+                    if (res.statusCode >= 400) {
+                        reject(new SilentError(`Failed to fetch google sheets with status ${res.statusCode}`));
                     }
-                });
-            }).on("error", (err) => Logger.error(err));
+    
+                    res.setEncoding('utf8');
+                    let rawData = '';
+                    res.on('data', (chunk) => rawData += chunk);
+                    res.on('end', () => {
+                        try {
+                            const data = JSON.parse(rawData);
+                            const items = ItemSyncService.parseItems(sheet, data);
+                            ItemService.batchInsert(items);
+                            resolve();
+                        } catch (err) {
+                            Logger.error(err);
+                            reject(err);
+                        }
+                    });
+                }).on("error", (err) => { 
+                    Logger.error(err);
+                    reject(err);
+                })
+            );
+
+            promises.push(promise);
         }
+
+        await Promise.all(promises);
     }
 
     static parseItems(sheet, data) {
         switch(sheet) {
             case "Armas":
-                return GoogleSheetsService.parseWeapons(data);
+                return ItemSyncService.parseWeapons(data);
             case "Escudos":
-                return GoogleSheetsService.parseShields(data);
+                return ItemSyncService.parseShields(data);
             case "Armaduras":
-                return GoogleSheetsService.parseArmors(data);
+                return ItemSyncService.parseArmors(data);
             case "Acessórios":
-                return GoogleSheetsService.parseAcessories(data);
+                return ItemSyncService.parseAcessories(data);
             case "Itens Únicos":
-                return GoogleSheetsService.parseUniqueItems(data);
+                return ItemSyncService.parseUniqueItems(data);
             case "Consumíveis":
-                return GoogleSheetsService.parseUsables(data);
+                return ItemSyncService.parseUsables(data);
             case "Outros":
-                return GoogleSheetsService.parseOthers(data);
+                return ItemSyncService.parseOthers(data);
         }
     }
 
@@ -75,9 +89,9 @@ class GoogleSheetsService {
 
             const name = values[0].trim();
             const description = values[1].trim();
-            const price = GoogleSheetsService.parsePrice(values[2]);
+            const price = ItemSyncService.parsePrice(values[2]);
             const weight = Number(values[3].trim());
-            const imgUrl = GoogleSheetsService.getUrl(values[11]);
+            const imgUrl = ItemSyncService.getUrl(values[11]);
 
             const damage = values[4].toLowerCase().trim();
             const damageType = values[5].trim();
@@ -85,7 +99,7 @@ class GoogleSheetsService {
             const properties = values[7].split(",").map(v => v.trim());
             const metal = values[8].trim();
             const effects = values[9].trim();
-            const strRequirement = values[10].trim();
+            const strRequirement = values[10]?.trim() || NOT_APPLICABLE_TOKEN;
 
             const details = { damage, damageType, weaponType, properties, metal, effects, strRequirement };
 
@@ -109,9 +123,9 @@ class GoogleSheetsService {
 
             const name = values[0].trim();
             const description = values[1].trim();
-            const price = GoogleSheetsService.parsePrice(values[2]);
+            const price = ItemSyncService.parsePrice(values[2]);
             const weight = Number(values[4].trim());
-            const imgUrl = GoogleSheetsService.getUrl(values[8]);
+            const imgUrl = ItemSyncService.getUrl(values[8]);
 
             const CA = Number(values[3]);
             const grip = values[5].trim();
@@ -140,9 +154,9 @@ class GoogleSheetsService {
 
             const name = values[0].trim();
             const description = values[1].trim();
-            const price = GoogleSheetsService.parsePrice(values[2]);
+            const price = ItemSyncService.parsePrice(values[2]);
             const weight = Number(values[3].trim());
-            const imgUrl = GoogleSheetsService.getUrl(values[10]);
+            const imgUrl = ItemSyncService.getUrl(values[10]);
 
             const metal = values[4].trim();
             const CA = Number(values[5]);
@@ -173,9 +187,9 @@ class GoogleSheetsService {
             const name = values[0].trim();
             const tier = values[1].trim();
             const description = values[2].trim();
-            const price = GoogleSheetsService.parsePrice(values[3]);
+            const price = ItemSyncService.parsePrice(values[3]);
             const weight = Number(values[4].trim());
-            const imgUrl = GoogleSheetsService.getUrl(values[17]);
+            const imgUrl = ItemSyncService.getUrl(values[17]);
 
             const acessoryType = values[5].trim();
             const damage = Number(values[6].trim()) || 0;
@@ -217,8 +231,8 @@ class GoogleSheetsService {
             const tier = values[1].trim();
             const description = values[2].trim();
             const weight = Number(values[3].trim());
-            const price = GoogleSheetsService.parsePrice(values[4]);
-            const imgUrl = GoogleSheetsService.getUrl(values[9]);
+            const price = ItemSyncService.parsePrice(values[4]);
+            const imgUrl = ItemSyncService.getUrl(values[9]);
 
             const effects = [ values[5], values[6], values[7], values[8] ];
 
@@ -243,12 +257,13 @@ class GoogleSheetsService {
             }
             
             const name = values[0]?.trim();
-            const price = GoogleSheetsService.parsePrice(values[1]);
-            const weight = Number(values[2]?.trim());
-            const description = values[3]?.trim();
-            const imgUrl = GoogleSheetsService.getUrl(values[4]);
+            const tier = values[1]?.trim();
+            const price = ItemSyncService.parsePrice(values[2]);
+            const weight = Number(values[3]?.trim());
+            const description = values[4]?.trim();
+            const imgUrl = ItemSyncService.getUrl(values[5]);
 
-            const item = new Item(itemId, name, "other", description, price, NOT_APPLICABLE_TOKEN, weight, imgUrl, "{}");
+            const item = new Item(itemId, name, "other", description, price, tier, weight, imgUrl, "{}");
             items.push(item);
         }
         
@@ -270,7 +285,7 @@ class GoogleSheetsService {
             const itemType = values[1]?.trim();
             const tier = values[2]?.trim();
             const description = values[3]?.trim();
-            const imgUrl = GoogleSheetsService.getUrl(values[9]);
+            const imgUrl = ItemSyncService.getUrl(values[9]);
 
             const runes = [ values[4]?.trim(), values[5]?.trim(), values[6]?.trim(), values[7]?.trim(), values[8]?.trim() ];
             const details = { itemType, runes };
@@ -305,13 +320,13 @@ class GoogleSheetsService {
     }
 
     static getUrl(str) {
-        if (!str) {
+        if (!str || str === NOT_APPLICABLE_TOKEN) {
             return "";
         }
         
         const url = str.trim();
         if(isValidUrl(url)) {
-            return str.trim();
+            return url;
         }
 
         Logger.warn(`${str} is not a valid URL`);
@@ -319,4 +334,4 @@ class GoogleSheetsService {
     }
 }
 
-module.exports = GoogleSheetsService;
+module.exports = ItemSyncService;

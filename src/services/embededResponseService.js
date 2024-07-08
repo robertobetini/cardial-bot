@@ -344,6 +344,26 @@ class EmbededResponseService {
         return item.imgUrl ? embed.setImage(item.imgUrl) : embed;
     }
 
+    static getMonsterView(monster) {
+        const fields = [];
+        for (const drop of monster.drops) {
+            fields.push({ 
+                name: "> Drop: " + drop.item.name, 
+                value:
+                    `Quantidade: ${drop.quantity}\n` +
+                    `Gold: ${drop.gold}\n` +
+                    `Chance: ${drop.diceMin} - ${drop.diceMax}`
+            });
+        }
+
+        return new Discord.EmbedBuilder()
+            .setColor(0xbbbbbb)
+            .setTitle(monster.name)
+            .setFields(fields)
+            .setAuthor({ name: "Buscador de mob" })
+            .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
+    }
+
     static createStatusSummarizedView(currentValue, maxValue, tempValue) {
         let view = `${currentValue}/${maxValue + tempValue}`;
         view += tempValue > 0 ? ` (+${tempValue}) ` : "";

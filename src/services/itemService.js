@@ -5,12 +5,20 @@ class ItemService {
         return itemsDAO.get(itemId);
     }
 
-    static like(name, limit = 25) {
-        return itemsDAO.like(name, limit);
+    static like(name, limit = 25, includeGold = false) {
+        return itemsDAO.like(name, limit, includeGold);
     }
 
     static batchUpsert(items) {
         itemsDAO.batchUpsert(items);
+    }
+
+    static batchInsert(items) {
+        itemsDAO.batchInsert(items);
+    }
+
+    static deleteAll() {
+        itemsDAO.deleteAll();
     }
 }
 

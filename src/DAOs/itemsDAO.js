@@ -11,9 +11,13 @@ class ItemsDAO extends Sqlite3DAO {
         return Item.fromDTO(item);
     }
 
-    like(name, limit = 25) {
+    like(name, limit = 25, includeGold = false) {
         const db = this.getConnection();
-        const query = "SELECT rowid, * FROM ITEMS WHERE queryName LIKE ? LIMIT " + limit.toString();
+        let query = "SELECT rowid, * FROM ITEMS WHERE "
+        if (!includeGold) {
+            query += "queryName != 'GOLD' AND "
+        }
+        query += "queryName LIKE ? LIMIT " + limit.toString();
         const items = db.prepare(query).all("%" + name.toUpperCase() + "%");
 
         return items.map(item => Item.fromDTO(item));
@@ -45,6 +49,18 @@ class ItemsDAO extends Sqlite3DAO {
         const db = this.getConnection();
         const execute = db.transaction((items) => items.map(item => this.upsert(item)));
         execute(items);
+    }
+
+    batchInsert(items) {
+        const db = this.getConnection();
+        const execute = db.transaction((items) => items.map(item => this.insert(item)));
+        execute(items);
+    }
+
+    deleteAll() {
+        const db = this.getConnection();
+        const query = "DELETE FROM ITEMS";
+        db.prepare(query).run();
     }
 }
 

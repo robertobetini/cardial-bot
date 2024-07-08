@@ -21,11 +21,12 @@ const loadCommandRefs = () => {
     
         const commandsPath = path.join(foldersPath, folder);
         const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-    
+        
         for (const file of commandFiles) {
             const filePath = path.join(commandsPath, file);
             const command = require(filePath);
-    
+            Logger.info("Command found: " + filePath, Object.keys(commandRefs).length);
+            
             if ('data' in command && 'execute' in command) {
                 const pathTokens = filePath.split("\\");
                 const commandName = pathTokens[pathTokens.length - 1].replace(".js", "");

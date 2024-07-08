@@ -1,6 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 
+const Logger = require("./logger");
+
 const commandRefs = {};
 
 const loadCommandRefs = () => {
@@ -9,6 +11,7 @@ const loadCommandRefs = () => {
     }
 
     const foldersPath = path.join(__dirname, 'commands');
+    Logger.info("Command folder found: " + foldersPath);
     const commandFolders = fs.readdirSync(foldersPath);
     
     for (const folder of commandFolders) {

@@ -28,8 +28,7 @@ const loadCommandRefs = () => {
             Logger.info("Command found: " + filePath, Object.keys(commandRefs).length);
             
             if ('data' in command && 'execute' in command) {
-                const pathTokens = filePath.split("\\");
-                const commandName = pathTokens[pathTokens.length - 1].replace(".js", "");
+                const commandName = path.basename(filePath).replace(".js", "");
                 commandRefs[commandName] = command;
             }
         }

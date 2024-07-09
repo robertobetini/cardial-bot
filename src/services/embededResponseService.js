@@ -347,16 +347,36 @@ class EmbededResponseService {
     static getMonsterView(monster) {
         const fields = [
             {
-                name: "> Info", 
+                name: "> Info",
                 value: 
-                    `**EXP Base:** ${monster.baseExp}\n` +
-                    `**GOLD Base:** ${monster.baseGold}`
+                    `**Quantidade:** ${monster.quantity}\n` +
+                    `**Acertos:** ${monster.hits}\n` +
+                    `**Exp:** ${monster.baseExp}\n` +
+                    `**GOLD:** ${monster.baseGold}\n`,
+                inline: true
+            },
+            {
+                name: "> Info",
+                value: 
+                    `**Nível:** ${monster.level}\n` +
+                    `**HP:** ${monster.HP}\n` +
+                    `**CA:** ${monster.CA}\n`,
+                inline: true
+            },
+            {
+                name: "> Info",
+                value: 
+                    `**Vulnerabilidade:** ${monster.vulnerability || "Nenhuma"}\n` +
+                    `**Resistência:** ${monster.resistance || "Nenhuma"}\n` +
+                    `**Imunidade:** ${monster.immunity || "Nenhuma"}\n`,
+                inline: true
             }
         ];
 
         return new Discord.EmbedBuilder()
             .setColor(0xbbbbbb)
             .setTitle(monster.name)
+            .setDescription(monster.description)
             .setFields(fields)
             .setAuthor({ name: "Buscador de mob" })
             .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
@@ -366,7 +386,7 @@ class EmbededResponseService {
         const fields = [];
         for (const drop of monster.drops) {
             fields.push({ 
-                name: "> Drop: " + drop.item.name, 
+                name: "> " + drop.item.name, 
                 value:
                     `Quantidade: ${drop.quantity}\n` +
                     `Gold: ${drop.gold}\n` +
@@ -374,10 +394,11 @@ class EmbededResponseService {
                 inline: true
             });
         }
+        fields.sort((a, b) => a.name - b.name);
 
         return new Discord.EmbedBuilder()
             .setColor(0xbbbbbb)
-            .setTitle(monster.name)
+            .setTitle(monster.name + " - Drops")
             .setFields(fields)
             .setAuthor({ name: "Buscador de mob" })
             .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });

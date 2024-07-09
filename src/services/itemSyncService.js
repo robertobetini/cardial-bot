@@ -15,12 +15,15 @@ const FETCH_SHEET_URL_TEMPLATE = `https://sheets.googleapis.com/v4/spreadsheets/
 
 class ItemSyncService {
     static async sync() {
+        Logger.info("Clearing items");
         MonsterDropsService.deleteAll();
         ItemService.deleteAll();
 
+        Logger.info("Inserting default GOLD item");
         const goldItem = new Item("gold", "GOLD", NOT_APPLICABLE_TOKEN, NOT_APPLICABLE_TOKEN, 1, NOT_APPLICABLE_TOKEN, null, null, "{}");
         ItemService.batchUpsert([goldItem]);
 
+        Logger.info("Fetching and updating items");
         const promises = [];
         for (const sheet of SHEETS) {
             const url = FETCH_SHEET_URL_TEMPLATE.replace("{SHEET_NAME}", sheet);

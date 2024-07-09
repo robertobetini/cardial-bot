@@ -1,6 +1,11 @@
+const crypto = require("crypto");
 const URL = require("url").URL;
 
 const { calculateAttributeMod } = require("./calculators/modCalculator");
+
+const hashText = (text) => {
+    return crypto.hash("md5", text);
+}
 
 const orderByInitiativeComparer = (a, b, desc = false) => {
     const bInitiative = b.stats.baseInitiative + calculateAttributeMod(b.attributes.DEX);
@@ -34,6 +39,7 @@ const setCombatOrder = (a, b) => {
 
 module.exports = {
     randomId: (length) => Math.floor(Math.random() * Math.pow(10, length)).toString(),
+    hashText,
     isValidUrl: (urlString) => {
         try {
             if (!urlString) {

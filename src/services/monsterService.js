@@ -17,6 +17,10 @@ class MonsterService {
         monsterDAO.batchInsert(monsters);
     }
 
+    static batchUpdate(monsters) {
+        monsterDAO.batchUpdate(monsters);
+    }
+
     static deleteAll() {
         monsterDAO.deleteAll();
     }

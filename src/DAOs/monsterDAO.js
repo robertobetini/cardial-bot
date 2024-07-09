@@ -28,14 +28,16 @@ class MonsterDAO extends Sqlite3DAO {
 
     insert(monster) {
         const db = this.getConnection();
-        const query = "INSERT INTO MONSTERS (id, name, queryName, baseGold, baseExp) VALUES (?,?,?,?,?)";
-        db.prepare(query).run(monster.id, monster.name, monster.queryName.toUpperCase(), monster.baseGold, monster.baseExp);
+        const query = "INSERT INTO MONSTERS (id, name, queryName, description, level, quantity, HP, CA, hits, vulnerability, resistance, immunity, baseGold, baseExp) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        db.prepare(query).run(
+            monster.id, monster.name, monster.queryName.toUpperCase(), monster.description, monster.level, monster.quantity, 
+            monster.HP, monster.CA, monster.hits, monster.vulnerability, monster.resistance, monster.immunity, monster.baseGold, monster.baseExp);
     }
 
     update(monster) {
         const db = this.getConnection();
-        const query = "UPDATE MONSTERS SET name = ?, queryName = ?, baseGold = ?, baseExp = ? WHERE id = ?";
-        const res = db.prepare(query).run(monster.name, monster.queryName, monster.baseGold, monster.baseExp, monster.id);
+        const query = "UPDATE MONSTERS SET baseGold = ?, baseExp = ? WHERE id = ?";
+        const res = db.prepare(query).run(monster.baseGold, monster.baseExp, monster.id);
 
         return res.changes.valueOf() > 0;
     }
@@ -57,6 +59,12 @@ class MonsterDAO extends Sqlite3DAO {
     batchInsert(monsters) {
         const db = this.getConnection();
         const execute = db.transaction((monsters) => monsters.map(monster => this.insert(monster)));
+        execute(monsters);
+    }
+
+    batchUpdate(monsters) {
+        const db = this.getConnection();
+        const execute = db.transaction((monsters) => monsters.map(monster => this.update(monster)));
         execute(monsters);
     }
 

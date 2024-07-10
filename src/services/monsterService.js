@@ -5,6 +5,10 @@ class MonsterService {
         return monsterDAO.get(monsterId, fullMonster);
     }
 
+    static getAll(fullMonster = true) {
+        return monsterDAO.getAll(fullMonster);
+    }
+
     static like(name, limit = 25) {
         return monsterDAO.like(name, limit);
     }

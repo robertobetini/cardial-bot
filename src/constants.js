@@ -23,6 +23,8 @@ class Constants {
     static INITIAL_AVAILABLE_ATTRIBUTES = parseInt(process.env.INITIAL_AVAILABLE_ATTRIBUTES);
     static ATTRIBUTE_PER_LEVEL = 1;
     static COMMAND_MAX_USERS = 6;
+    static COMMAND_MAX_MOBS = 6;
+    static GOLD_ITEM_ID = "gold";
     static EPHEMERAL_COMMANDS = ["ficha", "atualizastatus", "atualizanickname", "zsync", "buscamob"];
     static CHALLENGE_TO_ATTRIBUTE_MAP = {
         "athletics": "STR",

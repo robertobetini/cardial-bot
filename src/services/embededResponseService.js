@@ -12,6 +12,8 @@ const Colors = require("../colors");
 
 const DEFAULT_FOOTER = "Elysium System";
 
+const { loadMonsterIdToNameMap } = require("../utils");
+
 class EmbededResponseService {
     static FOOTER_IMAGE = new Discord.AttachmentBuilder()
         .setFile('./assets/logo-elysium.png')
@@ -285,7 +287,7 @@ class EmbededResponseService {
     }
 
     static getItemView(item) {
-        const detailsKeys = Object.keys(item.details).filter(key => key !== "runes"); // runes are extense, its view must be different
+        const detailsKeys = Object.keys(item.details).filter(key => key !== "runes"); // runes are extense, its view must be apart
         let detailsText = "```\n";
         for (const key of detailsKeys) {
             const value = item.details[key];
@@ -401,6 +403,36 @@ class EmbededResponseService {
             .setTitle(monster.name + " - Drops")
             .setFields(fields)
             .setAuthor({ name: "Buscador de mob" })
+            .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
+    }
+
+    static getLootView(dropResult) {
+        const monsterIdtoNameMap = loadMonsterIdToNameMap();
+
+        let description = "```ansi";
+        let content = "";
+        for (const monsterId of Object.keys(dropResult)) {
+            const lootItems = dropResult[monsterId];
+            if (lootItems.length < 1) {
+                continue;
+            }
+
+            const monsterName = monsterIdtoNameMap[monsterId];
+            content += `\n${monsterName}`;
+            for (const lootItem of lootItems) {
+                content += Colors.YELLOW;
+                content += lootItem.item.id === Constants.GOLD_ITEM_ID ? `\n  ${lootItem.gold} ` : "\n  ";
+                content += lootItem.item.name + Colors.RESET;
+            }
+            content += "\n";
+        }
+        content = content || "\nNada :(";
+        description += content + "\n```";
+
+        return new Discord.EmbedBuilder()
+            .setColor(0xbbbbbb)
+            .setTitle("Loot")
+            .setDescription(description)
             .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
     }
 

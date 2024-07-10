@@ -1,6 +1,8 @@
 const crypto = require("crypto");
 const URL = require("url").URL;
 
+const MonsterService = require("./services/monsterService");
+
 const { calculateAttributeMod } = require("./calculators/modCalculator");
 
 const hashText = (text) => {
@@ -37,6 +39,20 @@ const setCombatOrder = (a, b) => {
     return initiativeResult;
 }
 
+let monsterIdToNameMap = {};
+const loadMonsterIdToNameMap = () => {
+    if (Object.keys(monsterIdToNameMap).length > 0) {
+        return monsterIdToNameMap;
+    }
+
+    const allMonsters = MonsterService.getAll(false);
+    allMonsters.map(m => monsterIdToNameMap[m.id] = m.name);
+
+    return monsterIdToNameMap;
+}
+
+const clearMonsterIdToNameMap = () => monsterIdToNameMap = {};
+
 module.exports = {
     randomId: (length) => Math.floor(Math.random() * Math.pow(10, length)).toString(),
     hashText,
@@ -58,5 +74,7 @@ module.exports = {
     },
     orderByInitiativeComparer,
     orderByAttributeComparer,
-    setCombatOrder
+    setCombatOrder,
+    loadMonsterIdToNameMap,
+    clearMonsterIdToNameMap
 };

@@ -27,6 +27,11 @@ module.exports = {
 
         const monsterId = interaction.options.getString("nome");
         const monster = MonsterService.get(monsterId, false);
+        if (!monster) {
+            await interaction.editReply("Nenhum mob encontrado!");
+            return;
+        }
+        
         const embed = EmbededResponseService.getMonsterView(monster);
 
         originalInteractions[key] = interaction;

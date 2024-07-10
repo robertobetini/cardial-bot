@@ -3,6 +3,7 @@ const Logger = require("../logger");
 const commands = {
     buscaitem: require("../commands/items/queryItemCommand"),
     buscamob: require("../commands/monsters/queryMonsterCommand"),
+    drop: require("../commands/combat/getDropsCommand")
 };
 
 module.exports = {

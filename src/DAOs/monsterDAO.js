@@ -11,11 +11,19 @@ class MonsterDAO extends Sqlite3DAO {
         const monster = db.prepare(query).expand().get(id);
         
         const dto = Monster.fromDTO(monster);
-        if (fullMonster) {
+        if (dto && fullMonster) {
             dto.drops = monsterDropsDAO.get(id);
         }
 
         return dto;
+    }
+
+    getAll(fullMonster = true) {
+        const db = this.getConnection();
+        const query = "SELECT * FROM MONSTERS";
+        const allMonsters = db.prepare(query).expand().all();
+
+        return allMonsters.map(monster => Monster.fromDTO(monster));
     }
 
     like(name, limit = 25) {

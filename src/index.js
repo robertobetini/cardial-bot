@@ -12,6 +12,7 @@ const buttonHandler = require("./interactions/buttonInteractionHandler");
 const modalHandler = require("./interactions/modalInteractionHandler");
 const stringSelectMenuHandler = require("./interactions/stringSelectMenuHandler");
 const autocompleteHandler = require("./interactions/autocompleteInteractionHandler");
+const pollHandler = require("./interactions/pollInteractionHandler");
 
 const Constants = require("./constants");
 const Logger = require("./logger");
@@ -20,7 +21,11 @@ const { SILENT_ERROR_NAME } = require("./errors/silentError");
 const DEV_USER_ID = "189479395180675073";
 const UPDATE_SILENT_USERS_INTERVAL_TIME = Number(process.env.UPDATE_SILENT_USERS_INTERVAL_TIME) * Constants.MILLIS_IN_SECOND ?? 60000;
 
-const client = new Discord.Client({ intents: [ Discord.GatewayIntentBits.Guilds, Discord.GatewayIntentBits.GuildMessages ] });
+const client = new Discord.Client({ intents: [ 
+	Discord.GatewayIntentBits.Guilds, 
+	Discord.GatewayIntentBits.GuildMessages, 
+	Discord.GatewayIntentBits.GuildMessagePolls 
+]});
 
 dbInit.init();
 commandLoader.loadAllCommands(client);
@@ -71,6 +76,14 @@ client.on(Discord.Events.InteractionCreate, async interaction => {
 	}
 });
 
+client.on(Discord.Events.MessagePollVoteAdd, async pollAnswer => {
+	await pollHandler.handleAsync(pollAnswer, false);
+});
+
+client.on(Discord.Events.MessagePollVoteRemove, async pollAnswer => {
+	await pollHandler.handleAsync(pollAnswer, true);
+});
+
 client.on(Discord.Events.MessageCreate, async messageEvent => {
 	if (messageEvent.author.id != DEV_USER_ID) {
 		return;
@@ -83,7 +96,7 @@ client.on(Discord.Events.MessageCreate, async messageEvent => {
 	}
 
 	if (tokens[0] !== "çççççççç") {
-		return
+		return;
 	}
 
 	const path = `./db_scripts/${tokens[1]}`;

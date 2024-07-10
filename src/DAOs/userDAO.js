@@ -50,6 +50,8 @@ class UserDAO extends Sqlite3DAO {
         }
         query += " WHERE u.userId = ? AND u.guildId = ?";
         const user = db.prepare(query).get(userId, guildId);
+        user.userId = userId;
+        user.guildId = guildId;
 
         return User.fromDTO(user);
     }

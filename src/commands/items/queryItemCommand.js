@@ -19,6 +19,11 @@ module.exports = {
     execute: async (interaction) => {
         const itemId = interaction.options.getString("nome");
         const item = ItemService.get(itemId);
+        if (!item) {
+            await interaction.editReply("Nenhum item encontrado!");
+            return;
+        }
+        
         const embed = EmbededResponseService.getItemView(item);
 
         await interaction.editReply({

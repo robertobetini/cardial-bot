@@ -9,6 +9,8 @@ const Constants = require("../../constants");
 
 const { addMultipleUserOptions, addMultipleAutocompletes, getUsersFromInput, getStringsFromInput } = require ("../helpers");
 const { randomId } = require("../../utils");
+const InventoryService = require("../../services/inventoryService");
+const Logger = require("../../logger");
 const AUTOCOMPLETE_OPTION_BASE_NAME = "mob";
 
 const data = new Discord.SlashCommandBuilder()
@@ -78,7 +80,7 @@ module.exports = {
         if (!transients[pollId]) {
             return;
         }
-        
+
         // confirm if isVoteRemove == false, unconfirm if isVoteRemove == true
         const guildId = pollAnswer.poll.message.guildId;
         const voterKeys = (await pollAnswer.fetchVoters()).map(v => guildId + v.id);
@@ -88,6 +90,7 @@ module.exports = {
             }
         }
 
+        console.log(transients[pollId].users);
         // check if all users are confirmed
         for (const user of transients[pollId].users) {
             if (!user.confirmed) {
@@ -95,16 +98,23 @@ module.exports = {
             }
         }
 
-        await pollAnswer.poll.end();
-        await pollAnswer.poll.message.channel.delete();
+        try {
+            await pollAnswer.poll.end();
+        } catch {
+            Logger.warn("Tried to end an expired poll, skippint item distribution because it was already done");
+            return;
+        }
 
         // distribute items
-        // let response = "";
-        // for (const answer of pollAnswer.poll.answers) {
-        //     const voters = await answer.fetchVoters();
-        // }
+        for (const answer of pollAnswer.poll.answers) {
+            const answerData = answer[1];
+            const voterIds = (await answerData.fetchVoters()).map(v => v.id);
+            Logger.info(`Distributing items ${answerData.text} between users: ${voterIds}`);
+            InventoryService.distributeLootEvenly(answerData.text, voterIds, guildId);
+        }
 
-        // update loot message and delete transient
+        // update loot message and delete transient and thread
+        await pollAnswer.poll.message.channel.delete();
         const embed = transients[pollId].originalMessage.embeds[0];
         embed.data.title += " (Concluído)";
         await transients[pollId].originalMessage.edit({ embeds: [embed], attachments: [], files: [] });

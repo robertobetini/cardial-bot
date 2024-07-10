@@ -106,7 +106,6 @@ class MonsterSyncService {
             const resistance = values[10]?.trim();
             const immunity = values[11]?.trim();
             
-            console.log(name, description);
             const monster = new Monster(monsterId, name, description, level, quantity, HP, CA, hits, vulnerability, resistance, immunity);
             monsters.push(monster);
         }

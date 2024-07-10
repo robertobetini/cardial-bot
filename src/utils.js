@@ -5,8 +5,26 @@ const MonsterService = require("./services/monsterService");
 
 const { calculateAttributeMod } = require("./calculators/modCalculator");
 
+const swap = (arr, i, j) => { 
+    const temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+}
+
 const hashText = (text) => {
     return crypto.hash("md5", text);
+}
+
+const shuffle = (arr, times = 100) => {
+    if (!arr) {
+        return arr;
+    }
+
+    for (let i = 0; i < times; i++) {
+        const j = Math.floor(Math.random() * arr.length);
+        const k = Math.floor(Math.random() * arr.length);
+        swap(arr, j, k);
+    }
 }
 
 const orderByInitiativeComparer = (a, b, desc = false) => {
@@ -56,6 +74,7 @@ const clearMonsterIdToNameMap = () => monsterIdToNameMap = {};
 module.exports = {
     randomId: (length) => Math.floor(Math.random() * Math.pow(10, length)).toString(),
     hashText,
+    shuffle,
     isValidUrl: (urlString) => {
         try {
             if (!urlString) {

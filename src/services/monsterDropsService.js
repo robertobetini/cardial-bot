@@ -24,7 +24,7 @@ class MonsterDropsService {
     static generateDrops(monsters) {
         const details = {};
         const summary = {};
-        
+
         for (const monster of monsters) {
             details[monster.id] = details[monster.id] ?? []; 
             const dropResult = DiceService.roll({ dice: 100 });
@@ -39,7 +39,7 @@ class MonsterDropsService {
                 const loot = [];
                 for (let i = 0; i < quantityResult.total; i++) {
                     summary[drop.item.name] = summary[drop.item.name] || 0;
-                    drop.item.name === Constants.GOLD_ITEM_ID ? summary[drop.item.name] += drop.gold : summary[drop.item.name]++;
+                    drop.item.id === Constants.GOLD_ITEM_ID ? summary[drop.item.name] += drop.gold : summary[drop.item.name]++;
     
                     loot.push({
                         item: drop.item,

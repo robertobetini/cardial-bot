@@ -33,10 +33,11 @@ class InventoryService {
         }
         if (item.id === Constants.GOLD_ITEM_ID) {
             InventoryService.distributeGoldEvenly(quantity, userIds, guildId);
-            return;
+            return null;
         }
         Logger.debug(`Found item ${item.name}, ${item.id}`);
 
+        let distributedQuantity = 0;
         for (let i = 0; i < quantity; i++) {
             const index = i % userIds.length;
             if (index === 0) {
@@ -44,15 +45,17 @@ class InventoryService {
             }
 
             const userId = userIds[index];
-            
-            const inventoryItem = inventoryDAO.get(userId, guildId, item.id);
-            if (inventoryItem) {
-                inventoryDAO.update(userId, guildId, item.id, ++inventoryItem.count);
+            const userInventory = inventoryDAO.getFullInventory(userId, guildId);
+            const isItemAddedSuccessfully = userInventory.tryAddItem(item);
+            if (!isItemAddedSuccessfully) {
                 continue;
             }
 
-            inventoryDAO.insert(userId, guildId, item.id, 1);
+            inventoryDAO.upsertFullInventory(userInventory);
+            distributedQuantity++;
         }
+
+        return distributedQuantity === quantity ? null : `${itemName} [x${quantity-distributedQuantity}]`;
     }
 
     static distributeGoldEvenly(quantity, userIds, guildId) {
@@ -73,27 +76,6 @@ class InventoryService {
             remainingQuantity -= evenGoldQuantity;
             StatsService.updateSingleStat(userId, guildId, "gold", newGold);
         }
-    }
-
-    static getInventoryOccupiedSlots(inventory) {
-        let total = 0;
-
-        for (const inventoryItem of inventory) {
-            console.log(inventoryItem);
-            const itemWeight = inventoryItem.item.weight;
-            const slots =  Math.ceil(inventoryItem.count * InventoryService.getSlots(itemWeight));
-            total += slots;
-        }
-
-        return total;
-    }
-
-    static getSlots(weight) {
-        if (weight === 0) {
-            return 0.1;
-        }
-
-        return weight;
     }
 }
 

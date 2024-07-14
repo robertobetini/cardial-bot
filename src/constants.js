@@ -6,6 +6,8 @@ class Constants {
     static MINUTE_IN_MILLIS = 60 * 1000;
     static HOUR_IN_MILLIS = 60 * (60 * 1000);
     static DAY_IN_MILLIS = 24 * (60 * 60 * 1000);
+    static BASE_SLOT_COUNT = parseInt(process.env.BASE_SLOT_COUNT);
+    static ITEMS_PER_POLL = parseInt(process.env.ITEMS_PER_POLL);
     static MAX_LEVEL = 20;
     static MAX_MASTERY = 10;
     static MIN_ATTRIBUTE_VALUE = 7;

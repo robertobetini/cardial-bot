@@ -84,25 +84,26 @@ class ItemSyncService {
         const items = [];
         for (let i = skip; i < data.values.length; i++) {
             const values = data.values[i];
-            const itemId = `weapon-${i - skip}`;
+            const id = values[0];
+            const itemId = `weapon-${id}`;
 
             if (!values[0]) {
                 continue;
             }
 
-            const name = values[0].trim();
-            const description = values[1].trim();
-            const price = ItemSyncService.parsePrice(values[2]);
-            const weight = Number(values[3].trim());
-            const imgUrl = ItemSyncService.getUrl(values[11]);
+            const name = values[1].trim();
+            const description = values[2].trim();
+            const price = ItemSyncService.parsePrice(values[3]);
+            const weight = Number(values[4].trim());
+            const imgUrl = ItemSyncService.getUrl(values[12]);
 
-            const damage = values[4].toLowerCase().trim();
-            const damageType = values[5].trim();
-            const weaponType = values[6].split(",").map(v => v.trim());
-            const properties = values[7].split(",").map(v => v.trim());
-            const metal = values[8].trim();
-            const effects = values[9].trim();
-            const strRequirement = values[10]?.trim() || NOT_APPLICABLE_TOKEN;
+            const damage = values[5].toLowerCase().trim();
+            const damageType = values[6].trim();
+            const weaponType = values[7].split(",").map(v => v.trim());
+            const properties = values[8].split(",").map(v => v.trim());
+            const metal = values[9].trim();
+            const effects = values[10].trim();
+            const strRequirement = values[11]?.trim() || NOT_APPLICABLE_TOKEN;
 
             const details = { damage, damageType, weaponType, properties, metal, effects, strRequirement };
 
@@ -118,22 +119,23 @@ class ItemSyncService {
         const items = [];
         for (let i = skip; i < data.values.length; i++) {
             const values = data.values[i];
-            const itemId = `shield-${i - skip}`;
+            const id = values[0];
+            const itemId = `shield-${id}`;
 
             if (!values[0]) {
                 continue;
             }
 
-            const name = values[0].trim();
-            const description = values[1].trim();
-            const price = ItemSyncService.parsePrice(values[2]);
-            const weight = Number(values[4].trim());
-            const imgUrl = ItemSyncService.getUrl(values[8]);
+            const name = values[1].trim();
+            const description = values[2].trim();
+            const price = ItemSyncService.parsePrice(values[3]);
+            const weight = Number(values[5].trim());
+            const imgUrl = ItemSyncService.getUrl(values[9]);
 
-            const CA = Number(values[3]);
-            const grip = values[5].trim();
-            const properties = values[6].split(",").map(v => v.trim());
-            const metal = values[7].trim();
+            const CA = Number(values[4]);
+            const grip = values[6].trim();
+            const properties = values[7].split(",").map(v => v.trim());
+            const metal = values[8].trim();
 
             const details = { CA, grip, properties, metal };
 
@@ -149,23 +151,24 @@ class ItemSyncService {
         const items = [];
         for (let i = skip; i < data.values.length; i++) {
             const values = data.values[i];
-            const itemId = `armor-${i - skip}`;
+            const id = values[0];
+            const itemId = `armor-${id}`;
 
             if (!values[0]) {
                 continue;
             }
 
-            const name = values[0].trim();
-            const description = values[1].trim();
-            const price = ItemSyncService.parsePrice(values[2]);
-            const weight = Number(values[3].trim());
-            const imgUrl = ItemSyncService.getUrl(values[10]);
+            const name = values[1].trim();
+            const description = values[2].trim();
+            const price = ItemSyncService.parsePrice(values[3]);
+            const weight = Number(values[4].trim());
+            const imgUrl = ItemSyncService.getUrl(values[11]);
 
-            const metal = values[4].trim();
-            const CA = Number(values[5]);
-            const STR = Number(values[7].trim());
-            const stealth = values[8].trim();
-            const dexDebuff = Number(values[9].trim());
+            const metal = values[5].trim();
+            const CA = Number(values[6]);
+            const STR = Number(values[8].trim());
+            const stealth = values[9].trim();
+            const dexDebuff = Number(values[10].trim());
 
             const details = { CA, metal, STR, stealth, dexDebuff };
 
@@ -181,31 +184,32 @@ class ItemSyncService {
         const items = [];
         for (let i = skip; i < data.values.length; i++) {
             const values = data.values[i];
-            const itemId = `acessory-${i - skip}`;
+            const id = values[0];
+            const itemId = `acessory-${id}`;
 
             if (!values[0]) {
                 continue;
             }
 
-            const name = values[0].trim();
-            const tier = values[1].trim();
-            const description = values[2].trim();
-            const price = ItemSyncService.parsePrice(values[3]);
-            const weight = Number(values[4].trim());
-            const imgUrl = ItemSyncService.getUrl(values[17]);
+            const name = values[1].trim();
+            const tier = values[2].trim();
+            const description = values[3].trim();
+            const price = ItemSyncService.parsePrice(values[4]);
+            const weight = Number(values[5].trim());
+            const imgUrl = ItemSyncService.getUrl(values[18]);
 
-            const acessoryType = values[5].trim();
-            const damage = Number(values[6].trim()) || 0;
-            const slots = Number(values[7].trim()) || 0;
-            const CA = Number(values[8].trim()) || 0;
-            const DEX = Number(values[9].trim()) || 0;
-            const WIS = Number(values[10].trim()) || 0;
-            const STR = Number(values[11].trim()) || 0;
-            const CHA = Number(values[12].trim()) || 0;
-            const CON = Number(values[13].trim()) || 0;
-            const effects = values[14].trim();
-            const disvantage = values[15].trim();
-            const properties = values[16]?.split(",")?.map(v => v.trim());
+            const acessoryType = values[6].trim();
+            const damage = Number(values[7].trim()) || 0;
+            const slots = Number(values[8].trim()) || 0;
+            const CA = Number(values[9].trim()) || 0;
+            const DEX = Number(values[10].trim()) || 0;
+            const WIS = Number(values[11].trim()) || 0;
+            const STR = Number(values[12].trim()) || 0;
+            const CHA = Number(values[13].trim()) || 0;
+            const CON = Number(values[14].trim()) || 0;
+            const effects = values[15].trim();
+            const disvantage = values[16].trim();
+            const properties = values[17]?.split(",")?.map(v => v.trim());
 
             const details = { acessoryType, damage, slots, CA, DEX, WIS, STR, CHA, CON, effects, disvantage, properties };
 
@@ -221,7 +225,8 @@ class ItemSyncService {
         const items = [];
         for (let i = skip; i < data.values.length; i++) {
             const values = data.values[i];
-            const itemId = `usable-${i - skip}`;
+            const id = values[0];
+            const itemId = `usable-${id}`;
 
             if (!values[0]) {
                 continue;
@@ -230,14 +235,14 @@ class ItemSyncService {
                 break;
             }
 
-            const name = values[0].trim();
-            const tier = values[1].trim();
-            const description = values[2].trim();
-            const weight = Number(values[3].trim());
-            const price = ItemSyncService.parsePrice(values[4]);
-            const imgUrl = ItemSyncService.getUrl(values[9]);
+            const name = values[1].trim();
+            const tier = values[2].trim();
+            const description = values[3].trim();
+            const weight = Number(values[4].trim());
+            const price = ItemSyncService.parsePrice(values[5]);
+            const imgUrl = ItemSyncService.getUrl(values[10]);
 
-            const effects = [ values[5], values[6], values[7], values[8] ];
+            const effects = [ values[6], values[7], values[8], values[9] ];
 
             const details = { effects: effects.filter(e => e) };
 
@@ -253,18 +258,19 @@ class ItemSyncService {
         const items = [];
         for (let i = skip; i < data.values.length; i++) {
             const values = data.values[i];
-            const itemId = `other-${i - skip}`;
+            const id = values[0];
+            const itemId = `other-${id}`;
 
             if (!values[0]) {
                 continue;
             }
             
-            const name = values[0]?.trim();
-            const tier = values[1]?.trim();
-            const price = ItemSyncService.parsePrice(values[2]);
-            const weight = Number(values[3]?.trim());
-            const description = values[4]?.trim();
-            const imgUrl = ItemSyncService.getUrl(values[5]);
+            const name = values[1]?.trim();
+            const tier = values[2]?.trim();
+            const price = ItemSyncService.parsePrice(values[3]);
+            const weight = Number(values[4]?.trim());
+            const description = values[5]?.trim();
+            const imgUrl = ItemSyncService.getUrl(values[6]);
 
             const item = new Item(itemId, name, "other", description, price, tier, weight, imgUrl, "{}");
             items.push(item);
@@ -278,19 +284,20 @@ class ItemSyncService {
         const items = [];
         for (let i = skip; i < data.values.length; i++) {
             const values = data.values[i];
-            const itemId = `unique-${i - skip}`;
+            const id = values[0];
+            const itemId = `unique-${id}`;
 
             if (!values[0]) {
                 continue;
             }
             
-            const name = values[0]?.trim();
-            const itemType = values[1]?.trim();
-            const tier = values[2]?.trim();
-            const description = values[3]?.trim();
-            const imgUrl = ItemSyncService.getUrl(values[9]);
+            const name = values[1]?.trim();
+            const itemType = values[2]?.trim();
+            const tier = values[3]?.trim();
+            const description = values[4]?.trim();
+            const imgUrl = ItemSyncService.getUrl(values[10]);
 
-            const runes = [ values[4]?.trim(), values[5]?.trim(), values[6]?.trim(), values[7]?.trim(), values[8]?.trim() ];
+            const runes = [ values[5]?.trim(), values[6]?.trim(), values[7]?.trim(), values[8]?.trim(), values[9]?.trim() ];
             const details = { itemType, runes };
 
             const item = new Item(itemId, name, "unique", description, null, tier, NOT_APPLICABLE_TOKEN, imgUrl, JSON.stringify(details));

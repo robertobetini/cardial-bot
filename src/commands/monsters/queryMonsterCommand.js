@@ -11,7 +11,7 @@ const originalInteractions = {};
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
-        .setName("buscamob")
+        .setName("bestiario")
         .setDescription("Busca informações de um mob pelo nome")
         .addStringOption(option =>
             option

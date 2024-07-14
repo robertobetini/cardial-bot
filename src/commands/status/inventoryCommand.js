@@ -22,8 +22,7 @@ module.exports = {
         }
 
         const inventory = InventoryService.getFullInventory(target.id, guildId);
-        const inventoryWeight = InventoryService.getInventoryOccupiedSlots(inventory);
         
-        await interaction.editReply(`Inventário (${inventoryWeight}/10):\`\`\`\n${JSON.stringify(inventory.map(ii => ({ name: ii.item.name, count: ii.count})), null, 2)}\`\`\``);
+        await interaction.editReply(`Inventário (${inventory.getInventoryOccupiedSlots()}/${inventory.getTotalSlots()}):\`\`\`\n${JSON.stringify(inventory.items.map(ii => ({ name: ii.item.name, count: ii.count})), null, 2)}\`\`\``);
     },
 };

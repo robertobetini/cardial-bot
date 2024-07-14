@@ -84,6 +84,10 @@ client.on(Discord.Events.MessagePollVoteRemove, async pollAnswer => {
 	await pollHandler.handleAsync(pollAnswer, true);
 });
 
+client.on(Discord.Events.Poll, async pollAnswer => {
+	await pollHandler.handleAsync(pollAnswer, true);
+});
+
 client.on(Discord.Events.MessageCreate, async messageEvent => {
 	if (messageEvent.author.id != DEV_USER_ID) {
 		return;

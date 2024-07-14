@@ -1,6 +1,7 @@
 const Sqlite3DAO = require("./sqlite3DAO");
 
 const InventoryItem = require("../models/inventoryItem");
+const Inventory = require("../models/inventory");
 
 class InventoryDAO extends Sqlite3DAO {
     get(userId, guildId, itemId) {
@@ -14,7 +15,9 @@ class InventoryDAO extends Sqlite3DAO {
         const query = "SELECT * FROM PLAYER_INVENTORY AS pi LEFT JOIN ITEMS as i ON i.id = pi.itemId WHERE pi.userId = ? AND pi.guildId = ?";
         const inventoryItems = db.prepare(query).expand().all(userId, guildId);
 
-        return inventoryItems.map(ii => InventoryItem.fromDTO(ii));
+        const inventoryItemsDTOs = inventoryItems.map(ii => InventoryItem.fromDTO(ii));
+
+        return new Inventory(userId, guildId, inventoryItemsDTOs);
     }
 
     insert(userId, guildId, itemId, count, transactionDb = null) {
@@ -37,6 +40,12 @@ class InventoryDAO extends Sqlite3DAO {
         if (!updated) {
             this.insert(userId, guildId, itemId, count, transactionDb);
         }
+    }
+
+    upsertFullInventory(inventory) {
+        inventory.items.forEach(ii => {
+            this.upsert(inventory.userId, inventory.guildId, ii.item.id, ii.count);
+        });
     }
 }
 

@@ -28,7 +28,7 @@ module.exports = {
 
         await interaction.editReply({
             embeds: [embed],
-            files: [EmbededResponseService.FOOTER_IMAGE]
+            files: [EmbededResponseService.FOOTER_IMAGE, EmbededResponseService.POTION_IMAGE]
         });
     },
     autocomplete: async (interaction) => {

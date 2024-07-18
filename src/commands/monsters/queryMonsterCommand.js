@@ -2,6 +2,7 @@ const Discord = require("discord.js");
 
 const MonsterService = require("../../services/monsterService");
 const EmbededResponseService = require("../../services/embededResponseService");
+const RoleService = require("../../services/roleService");
 
 const Constants = require("../../constants");
 
@@ -21,6 +22,8 @@ module.exports = {
                 .setRequired(true)
         ),
     execute: async (interaction) => {
+        RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
+        
         const guildId = interaction.guild.id;
         const userId = interaction.user.id;
         const key = guildId + userId;

@@ -10,7 +10,6 @@ const MonsterDrop = require("../models/monsterDrop");
 const Logger = require("../logger");
 const { SilentError } = require("../errors/silentError");
 const { isValidUrl, hashText } = require("../utils");
-const { Console } = require("console");
 
 const DROPS_SHEETS = [ "Mobs-Planices Desoladas" ];
 const BESTIARY_SHEETS = [ 

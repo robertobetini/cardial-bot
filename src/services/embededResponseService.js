@@ -8,6 +8,7 @@ const challengeModCalculator = require("../calculators/challengeModCalculator");
 const UserService = require("../services/userService");
 
 const Constants = require("../constants");
+const ImgUrls = require("../imageUrls");
 const Colors = require("../colors");
 
 const DEFAULT_FOOTER = "Elysium System";
@@ -15,10 +16,8 @@ const DEFAULT_FOOTER = "Elysium System";
 const { loadMonsterIdToNameMap } = require("../utils");
 
 class EmbededResponseService {
-    static FOOTER_IMAGE = new Discord.AttachmentBuilder()
-        .setFile('./assets/logo-elysium.png')
-        .setDescription("Elysium System")
-        .setName("Logo");
+    static FOOTER_IMAGE = new Discord.AttachmentBuilder("./assets/logo-elysium.png").setName("logo-elysium.png");
+    static POTION_IMAGE = new Discord.AttachmentBuilder("./assets/items/3206-red-potion.png").setName("3206-red-potion.png");
 
     static getExpLeaderboard(guildId, page) {
         const users = UserService.getAllFromGuild(guildId, "totalExp", page * Constants.PAGE_SIZE, Constants.PAGE_SIZE);
@@ -334,13 +333,14 @@ class EmbededResponseService {
             const content = text.slice(1).join("\n");
             fields.push({ name: "> Runa", value: header + content });
         }
-        
+
         const embed = new Discord.EmbedBuilder()
             .setColor(0xbbbbbb)
             .setTitle(item.name)
             .setDescription(item.description)
+            .setImage(`attachment://${EmbededResponseService.POTION_IMAGE.name}`)
             .setFields(fields)
-            .setAuthor({ name: "Buscador de item" })
+            .setAuthor({ name: "Buscador de item", iconURL: ImgUrls.SEARCH })
             .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
 
         return item.imgUrl ? embed.setImage(item.imgUrl) : embed;
@@ -380,7 +380,7 @@ class EmbededResponseService {
             .setTitle(monster.name)
             .setDescription(monster.description)
             .setFields(fields)
-            .setAuthor({ name: "Buscador de mob" })
+            .setAuthor({ name: "Buscador de mob", iconURL: ImgUrls.SEARCH })
             .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
     }
 
@@ -402,7 +402,7 @@ class EmbededResponseService {
             .setColor(0xbbbbbb)
             .setTitle(monster.name + " - Drops")
             .setFields(fields)
-            .setAuthor({ name: "Buscador de mob" })
+            .setAuthor({ name: "Buscador de mob", iconURL: ImgUrls.SEARCH })
             .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
     }
 
@@ -419,9 +419,8 @@ class EmbededResponseService {
 
             const monsterName = monsterIdtoNameMap[monsterId];
             content += `\n${monsterName}`;
-            for (const lootItem of lootItems) {
-                content += Colors.YELLOW;
-                content += lootItem.item.id === Constants.GOLD_ITEM_ID ? `\n  ${lootItem.gold} ` : "\n  ";
+            for (const lootItem of lootItems.sort()) {
+                content += lootItem.item.id === Constants.GOLD_ITEM_ID ? `${Colors.YELLOW}\n  ${lootItem.gold} ` : `${Colors.GREEN}\n  `;
                 content += lootItem.item.name + Colors.RESET;
             }
             content += "\n";
@@ -432,6 +431,24 @@ class EmbededResponseService {
         return new Discord.EmbedBuilder()
             .setColor(0xbbbbbb)
             .setTitle("Loot")
+            .setAuthor({ name: "Gerador de loot", iconURL: ImgUrls.LOOT })
+            .setDescription(description)
+            .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
+    }
+
+    static getInventoryView(inventory, user) {
+        let description = "```ansi";
+        let content = "";
+        for (const inventoryItem of inventory.items) {
+            content += `\n${inventoryItem.item.name} [x${inventoryItem.count}]`
+        }
+        content = content || "\nNada :(";
+        description += content + "\n```";
+
+        return new Discord.EmbedBuilder()
+            .setColor(0xbbbbbb)
+            .setTitle(`Slots (${inventory.getInventoryOccupiedSlots()}/${inventory.getTotalSlots()})`)
+            .setAuthor({ name: `Inventário de ${user.displayName}`, iconURL: ImgUrls.INVENTORY })
             .setDescription(description)
             .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
     }

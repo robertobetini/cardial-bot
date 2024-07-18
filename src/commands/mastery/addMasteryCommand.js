@@ -1,6 +1,8 @@
 const Discord = require("discord.js");
+
 const RoleService = require("../../services/roleService");
 const ProgressionService = require("../../services/progressionService");
+const UserService = require("../../services/userService");
 
 const { addMultipleUserOptions, getUsersFromInput } = require ("../helpers");
 const Constants = require("../../constants");
@@ -27,6 +29,7 @@ module.exports = {
         const targets = getUsersFromInput(interaction, Constants.COMMAND_MAX_USERS);
 
         ProgressionService.addMasteryExp(targets.users, amount);
+        UserService.batchUpsert(targets.users, true);
 
         await interaction.editReply(`${amount} Maestria concedido a ${targets.mentions}.`);
     }

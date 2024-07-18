@@ -24,10 +24,11 @@ class Constants {
     static INITIAL_GOLD = 1000;
     static INITIAL_AVAILABLE_ATTRIBUTES = parseInt(process.env.INITIAL_AVAILABLE_ATTRIBUTES);
     static ATTRIBUTE_PER_LEVEL = 1;
+    static NO_EXP_LEVEL_GAP = parseInt(process.env.NO_EXP_LEVEL_GAP);
     static COMMAND_MAX_USERS = 6;
     static COMMAND_MAX_MOBS = 6;
     static GOLD_ITEM_ID = "gold";
-    static EPHEMERAL_COMMANDS = ["ficha", "atualizastatus", "atualizanickname", "zsync", "buscamob"];
+    static EPHEMERAL_COMMANDS = ["ficha", "atualizastatus", "atualizanickname", "zsync", "buscamob", "bestiario"];
     static CHALLENGE_TO_ATTRIBUTE_MAP = {
         "athletics": "STR",
         "acrobatics": "DEX",

@@ -5,6 +5,8 @@ const MonsterService = require("../../services/monsterService");
 const MonsterDropsService = require("../../services/monsterDropsService");
 const EmbededResponseService = require("../../services/embededResponseService");
 const InventoryService = require("../../services/inventoryService");
+const ProgressionService = require("../../services/progressionService");
+const UserService = require("../../services/userService");
 
 const Constants = require("../../constants");
 
@@ -12,6 +14,7 @@ const { addMultipleUserOptions, addMultipleAutocompletes, getUsersFromInput, get
 const { randomId } = require("../../utils");
 
 const Logger = require("../../logger");
+const StatsService = require("../../services/statsService");
 
 const AUTOCOMPLETE_OPTION_BASE_NAME = "mob";
 
@@ -51,6 +54,18 @@ module.exports = {
             return;
         }
 
+        // Exp distribution
+        for (const user of targets) {
+            const totalMobExp = monsters
+                .filter(m => m.level - user.stats.level < Constants.NO_EXP_LEVEL_GAP)
+                .reduce((prev, current) => prev += current.baseExp, 0);
+            const totalMobBaseGold = monsters.reduce((prev, current) => prev += current.baseGold, 0);
+            user.stats.gold += totalMobBaseGold;
+            ProgressionService.addExpAndMastery(user, totalMobExp);
+        }
+        UserService.batchUpsert(targets, true);
+
+        // poll creation handling
         const pollNum = Math.ceil(distinctItems.length / Constants.ITEMS_PER_POLL);
         const pollItems = distinctItems.map(itemName => ({ text: `${itemName} [x${dropSummary[itemName]}]` }));
         const threadChannel = await message.startThread({ name: "drops" });

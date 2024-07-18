@@ -1,5 +1,3 @@
-const UserService = require("../services/userService");
-
 class ProgressionService {
     static addExp(users, expAmount, constrainLevel = false) {
         for (let user of users) {
@@ -9,8 +7,6 @@ class ProgressionService {
 
             user.addExp(expAmount, constrainLevel);
         }
-
-        UserService.batchUpsert(users, true);
     }
 
     static addMasteryExp(users, expAmount) {
@@ -21,8 +17,13 @@ class ProgressionService {
 
             user.addMasteryExp(expAmount);
         }
+    }
 
-        UserService.batchUpsert(users, true);
+    static addExpAndMastery(user, expAmount) {
+        const masteryExp = Math.ceil(expAmount / 2);
+
+        ProgressionService.addExp([user], expAmount);
+        ProgressionService.addMasteryExp([user], masteryExp);
     }
 }
 

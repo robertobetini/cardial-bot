@@ -3,6 +3,7 @@ const Discord = require("discord.js");
 const RoleService = require("../../services/roleService");
 const MonsterSyncService = require("../../services/monsterSyncService");
 const ItemSyncService = require("../../services/itemSyncService");
+const InventoryService = require("../../services/inventoryService");
 
 const { clearMonsterIdToNameMap } = require("../../utils");
 const Lock = require("../../lock");

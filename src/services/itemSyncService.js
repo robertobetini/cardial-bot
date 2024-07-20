@@ -2,6 +2,7 @@ const https = require("https");
 
 const ItemService = require("./itemService");
 const MonsterDropsService = require("./monsterDropsService");
+const InventoryService = require("./inventoryService");
 
 const Item = require("../models/item");
 
@@ -16,6 +17,8 @@ const FETCH_SHEET_URL_TEMPLATE = `https://sheets.googleapis.com/v4/spreadsheets/
 class ItemSyncService {
     static async sync() {
         Logger.info("Clearing items");
+        
+        InventoryService.deleteAll();
         MonsterDropsService.deleteAll();
         ItemService.deleteAll();
 

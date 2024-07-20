@@ -77,6 +77,10 @@ class InventoryService {
             StatsService.updateSingleStat(userId, guildId, "gold", newGold);
         }
     }
+
+    static deleteAll() {
+        inventoryDAO.deleteAll();
+    }
 }
 
 module.exports = InventoryService;

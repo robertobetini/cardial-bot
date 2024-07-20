@@ -47,6 +47,12 @@ class InventoryDAO extends Sqlite3DAO {
             this.upsert(inventory.userId, inventory.guildId, ii.item.id, ii.count);
         });
     }
+
+    deleteAll() {
+        const db = this.getConnection();
+        const query = "DELETE FROM PLAYER_INVENTORY";
+        db.prepare(query).run();
+    }
 }
 
 module.exports = new InventoryDAO();

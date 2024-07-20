@@ -81,7 +81,7 @@ module.exports = {
                 return false;
             }
 
-            if (!urlString.startsWith("http://") || !urlString.startsWith("https://")) {
+            if (!urlString.startsWith("http://") && !urlString.startsWith("https://")) {
                 return false;
             }
 

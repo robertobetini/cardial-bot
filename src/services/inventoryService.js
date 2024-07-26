@@ -7,7 +7,7 @@ const Constants = require("../constants");
 
 const Logger = require("../logger");
 
-const { shuffle } = require("../utils");
+const { shuffle, randomUUID } = require("../utils");
 
 class InventoryService {
     static pollItemRegex = /(.*)\[x(\d+)\]/;
@@ -76,6 +76,14 @@ class InventoryService {
             remainingQuantity -= evenGoldQuantity;
             StatsService.updateSingleStat(userId, guildId, "gold", newGold);
         }
+    }
+
+    static async createBackup() {
+        return await inventoryDAO.createBackup();
+    }
+
+    static async applyBackup(bkpName, itemIds) {
+        inventoryDAO.applyBackup(bkpName, itemIds);
     }
 
     static deleteAll() {

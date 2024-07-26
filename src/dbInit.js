@@ -12,6 +12,10 @@ module.exports = {
     init: () => {
         Logger.info(`Initializing sqlite3 database ${dbName}`);
         
+        if (!fs.existsSync("bkp")) {
+            fs.mkdirSync("bkp");
+        }
+
         const fileNames = fs.readdirSync(SQL_SCRIPTS_DIR);
         for (let fileName of fileNames) {
             try {

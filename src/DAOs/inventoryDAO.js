@@ -53,6 +53,10 @@ class InventoryDAO extends Sqlite3DAO {
         const query = "DELETE FROM PLAYER_INVENTORY";
         db.prepare(query).run();
     }
+
+    applyBackup(bkpName, itemIds) {
+        this.applyTableBackup(bkpName, "PLAYER_INVENTORY", `WHERE itemId IN (${itemIds.join(",")})`);
+    }
 }
 
 module.exports = new InventoryDAO();

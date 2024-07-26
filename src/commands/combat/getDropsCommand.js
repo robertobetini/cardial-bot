@@ -65,7 +65,6 @@ module.exports = {
         }
         UserService.batchUpsert(targets, true);
         //remove this return when inventory is fixed
-        return;
 
         // poll creation handling
         const pollNum = Math.ceil(distinctItems.length / Constants.ITEMS_PER_POLL);

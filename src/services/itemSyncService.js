@@ -8,16 +8,24 @@ const Item = require("../models/item");
 
 const Logger = require("../logger");
 const { SilentError } = require("../errors/silentError");
-const { isValidUrl } = require("../utils");
+const { isValidUrl, unityOfWork } = require("../utils");
 
 const NOT_APPLICABLE_TOKEN = "-";
 const SHEETS = ["Armas", "Escudos", "Armaduras", "Acessórios","Itens Únicos", "Consumíveis", "Outros"];
 const FETCH_SHEET_URL_TEMPLATE = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID_ITEMS}/values/{SHEET_NAME}?key=${process.env.GOOGLE_API_KEY}`;
 
 class ItemSyncService {
+
     static async sync() {
+        await unityOfWork(ItemSyncService.execute);
+    }
+
+    static async execute() {
         Logger.info("Clearing items");
         
+        const bkpName = await InventoryService.createBackup();
+        Logger.info(`Created backup: ${bkpName}`);
+
         InventoryService.deleteAll();
         MonsterDropsService.deleteAll();
         ItemService.deleteAll();
@@ -27,6 +35,7 @@ class ItemSyncService {
         ItemService.batchUpsert([goldItem]);
 
         Logger.info("Fetching and updating items");
+        let itemIds = [];
         const promises = [];
         for (const sheet of SHEETS) {
             const url = FETCH_SHEET_URL_TEMPLATE.replace("{SHEET_NAME}", sheet);
@@ -45,6 +54,7 @@ class ItemSyncService {
                             const data = JSON.parse(rawData);
                             const items = ItemSyncService.parseItems(sheet, data);
                             ItemService.batchInsert(items);
+                            itemIds = itemIds.concat(items.map(item => `'${item.id}'`));
                             resolve();
                         } catch (err) {
                             Logger.error(err);
@@ -61,6 +71,7 @@ class ItemSyncService {
         }
 
         await Promise.all(promises);
+        InventoryService.applyBackup(bkpName, itemIds);
     }
 
     static parseItems(sheet, data) {
@@ -133,7 +144,7 @@ class ItemSyncService {
             const description = values[2].trim();
             const price = ItemSyncService.parsePrice(values[3]);
             const weight = Number(values[5].trim());
-            const imgUrl = ItemSyncService.getUrl(values[9]);
+            const imgUrl = ItemSyncService.getUrl(values[10]);
 
             const CA = Number(values[4]);
             const grip = values[6].trim();

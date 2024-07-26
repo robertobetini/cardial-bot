@@ -49,15 +49,15 @@ const buildRemoveItemActionRows = (guildId, userId, items) => {
 }
 
 module.exports = {
-    // data: new Discord.SlashCommandBuilder()
-    //     .setName("inventario")
-    //     .setDescription("Mostra itens do inventário do usuário")
-    //     .addUserOption(option =>
-	// 		option
-	// 			.setName("user")
-    //             .setDescription("Usuário")
-	// 			.setRequired(false)
-    //     ),
+    data: new Discord.SlashCommandBuilder()
+        .setName("inventario")
+        .setDescription("Mostra itens do inventário do usuário")
+        .addUserOption(option =>
+			option
+				.setName("user")
+                .setDescription("Usuário")
+				.setRequired(false)
+    ),
     execute: async (interaction) => {
         const guildId = interaction.guild.id;
         const target = interaction.options.getUser("user") || interaction.member;

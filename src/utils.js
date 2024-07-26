@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const URL = require("url").URL;
+const Sqlite3DAO = require("./DAOs/sqlite3DAO");
 
 const MonsterService = require("./services/monsterService");
 
@@ -73,6 +74,7 @@ const clearMonsterIdToNameMap = () => monsterIdToNameMap = {};
 
 module.exports = {
     randomId: (length) => Math.floor(Math.random() * Math.pow(10, length)).toString(),
+    randomUUID: () => crypto.randomUUID(),
     hashText,
     shuffle,
     isValidUrl: (urlString) => {
@@ -95,5 +97,17 @@ module.exports = {
     orderByAttributeComparer,
     setCombatOrder,
     loadMonsterIdToNameMap,
-    clearMonsterIdToNameMap
+    clearMonsterIdToNameMap,
+    unityOfWork: (func) => {
+        const execute = Sqlite3DAO.db.transaction(async () => {
+            try {
+                await func();
+            } catch (err) {
+                if (!Sqlite3DAO.db.inTransaction) {
+                    throw err;
+                }
+            }
+        });
+        return execute();
+    }
 };

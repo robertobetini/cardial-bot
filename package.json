@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
-    "script": "node scripts/fixInitialValues.js",
     "test": "npx mocha ./test/**"
   },
   "author": "Roberto Betini Junior",
@@ -16,9 +15,7 @@
     "crypto": "^1.0.1",
     "discord.js": "^14.15.3",
     "dotenv": "^16.4.5",
-    "moment": "^2.30.1",
-    "mysql2": "^3.10.0",
-    "node-cache": "^5.1.2"
+    "moment": "^2.30.1"
   },
   "devDependencies": {
     "mocha": "^10.4.0",

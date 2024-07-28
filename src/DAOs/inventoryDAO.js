@@ -48,6 +48,12 @@ class InventoryDAO extends Sqlite3DAO {
         });
     }
 
+    deleteOne(userId, guildId, itemId) {
+        const db = this.getConnection();
+        const query = "DELETE FROM PLAYER_INVENTORY WHERE userId = ? AND guildId = ? AND itemId = ?";
+        db.prepare(query).run(userId, guildId, itemId);
+    }
+
     deleteAll() {
         const db = this.getConnection();
         const query = "DELETE FROM PLAYER_INVENTORY";

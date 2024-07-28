@@ -12,10 +12,6 @@ const { shuffle, randomUUID } = require("../utils");
 class InventoryService {
     static pollItemRegex = /(.*)\[x(\d+)\]/;
 
-    static getFullInventory(userId, guildId) {
-        return inventoryDAO.getFullInventory(userId, guildId);
-    }
-
     static distributeLootEvenly(pollItem, userIds, guildId) {
         //pollItem has structure -> {item_name} [x{quantity}]
         const match = InventoryService.pollItemRegex.exec(pollItem);
@@ -84,6 +80,16 @@ class InventoryService {
 
     static async applyBackup(bkpName, itemIds) {
         inventoryDAO.applyBackup(bkpName, itemIds);
+    }
+
+    static getFullInventory(userId, guildId) {
+        return inventoryDAO.getFullInventory(userId, guildId);
+    }
+
+    static update(userId, guildId, inventoryItem) {
+        inventoryItem.count > 0
+            ? inventoryDAO.update(userId, guildId, inventoryItem.item.id, inventoryItem.count) 
+            : inventoryDAO.deleteOne(userId, guildId, inventoryItem.item.id);
     }
 
     static deleteAll() {

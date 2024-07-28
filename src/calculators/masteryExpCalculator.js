@@ -2,17 +2,17 @@ const ExpCalculator = require("./expCalculator");
 const Constants = require("../constants");
 
 const minExpForLevel = [
-         0,
-         0,
-       210,
-       630,
-     1_890,
-     4_550,
-     9_800,
-    16_100,
-    23_800,
-    33_600,
-    44_800
+        0,
+        0,
+      300,
+      900,
+    2_700,
+    6_500,
+   14_000,
+   23_000,
+   34_000,
+   48_000,
+   64_000
 ];
 
 module.exports = new ExpCalculator(minExpForLevel, Constants.MAX_MASTERY);

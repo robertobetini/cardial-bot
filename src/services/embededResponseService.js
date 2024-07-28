@@ -338,7 +338,7 @@ class EmbededResponseService {
             .setColor(0xbbbbbb)
             .setTitle(item.name)
             .setDescription(item.description)
-            .setImage(`attachment://${EmbededResponseService.POTION_IMAGE.name}`)
+            // .setImage(`attachment://${EmbededResponseService.POTION_IMAGE.name}`)
             .setFields(fields)
             .setAuthor({ name: "Buscador de item", iconURL: ImgUrls.SEARCH })
             .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });

@@ -28,8 +28,22 @@ module.exports = {
 
         await interaction.editReply({
             embeds: [embed],
-            files: [EmbededResponseService.FOOTER_IMAGE, EmbededResponseService.POTION_IMAGE]
+            files: [EmbededResponseService.FOOTER_IMAGE]
         });
+    },
+    extExecute: async (interaction, guildId, userId, sourceCommand, selectedItemId) => {
+        const item = ItemService.get(selectedItemId);
+        const response = {
+            content: "Nenhum item encontrado!",
+            ephemeral: true
+        };
+
+        if (item) {
+            response.content = "";
+            response.embeds = [ EmbededResponseService.getItemView(item) ];
+        }
+
+        await interaction.reply(response);
     },
     autocomplete: async (interaction) => {
         const queryName = interaction.options.getFocused();

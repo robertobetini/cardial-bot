@@ -14,6 +14,10 @@ class InventoryItem {
             inventoryItemDTO.PLAYER_INVENTORY.count
         );
     }
+
+    toString() {
+        return `${this.item.name} [${this.count}x]`;
+    }
 }
 
 module.exports = InventoryItem;

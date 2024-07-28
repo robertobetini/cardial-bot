@@ -28,7 +28,7 @@ class Constants {
     static COMMAND_MAX_USERS = 6;
     static COMMAND_MAX_MOBS = 6;
     static GOLD_ITEM_ID = "gold";
-    static EPHEMERAL_COMMANDS = ["ficha", "atualizastatus", "atualizanickname", "zsync", "buscamob", "bestiario"];
+    static EPHEMERAL_COMMANDS = ["ficha", "atualizastatus", "atualizanickname", "zsync", "buscamob", "bestiario", "inventario"];
     static CHALLENGE_TO_ATTRIBUTE_MAP = {
         "athletics": "STR",
         "acrobatics": "DEX",

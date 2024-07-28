@@ -8,12 +8,14 @@ const SkillsService = require("../../services/skillService");
 const UserService = require("../../services/userService");
 
 const Attributes = require("../../models/attributes");
+const Skills = require("../../models/skills");
 
 const Constants = require("../../constants");
 const Logger = require("../../logger");
 
 const { isValidUrl } = require("../../utils");
-const Skills = require("../../models/skills");
+
+const eventEmitter = require("../../events");
 
 const tempAttributes = {};
 const originalInteractions = {};
@@ -35,7 +37,12 @@ const buildHomeActionRow = (guildId, memberId) => {
         .setLabel("Personagem")
         .setStyle(Discord.ButtonStyle.Primary);
 
-    return new Discord.ActionRowBuilder().addComponents(attributesButton, skillsButton, characterButton);
+    const inventoryButton = new Discord.ButtonBuilder()
+        .setCustomId(`${guildId}:${memberId}:inventoryCommand:extExecute:showUserStatusCommand`)
+        .setLabel("Inventário")
+        .setStyle(Discord.ButtonStyle.Primary);
+
+    return new Discord.ActionRowBuilder().addComponents(attributesButton, skillsButton, characterButton, inventoryButton);
 }
 
 const buildAttributesActionRows = (guildId, userId, selected) => {
@@ -217,6 +224,19 @@ const createTempAttributeEntryIfNotExists = (guildId, memberId) => {
     return currentAttributes;
 }
 
+const createOriginalMessageCacheEntry = async (interaction) => {
+    const key = interaction.guild.id + interaction.member.id;
+    if (originalInteractions[key]) {
+        try {
+            await originalInteractions[key].deleteReply();
+        } catch {
+            Logger.warn("Tried to delete non-existing interaction message");
+        }
+    }
+    originalInteractions[key] = interaction;
+    setTimeout(() => delete originalInteractions[key], CACHE_LIFETIME);
+}
+
 module.exports = {
     data: new Discord.SlashCommandBuilder()
         .setName("ficha")
@@ -235,20 +255,11 @@ module.exports = {
             return;
         }
 
-        const key = guildId + target.id;
-        const embed = EmbededResponseService.getUserStatus(guildId, target, tempAttributes[key]);
+        const tempAttributesKey = guildId + target.id;
+        const embed = EmbededResponseService.getUserStatus(guildId, target, tempAttributes[tempAttributesKey]);
         const actionRow = buildHomeActionRow(guildId, target.id);
 
-        if (originalInteractions[key]) {
-            try {
-                await originalInteractions[key].deleteReply();
-            } catch {
-                Logger.warn("Tried to delete non-existing interaction message");
-            }
-        }
-        originalInteractions[key] = interaction;
-        setTimeout(() => delete originalInteractions[key], CACHE_LIFETIME);
-
+        await createOriginalMessageCacheEntry(interaction);
         await interaction.editReply({
             embeds: [embed],
             components: [actionRow],
@@ -261,7 +272,7 @@ module.exports = {
             return;
         }
 
-        const key = guildId + memberId;
+        const key = guildId + interaction.member.id;
         const actionRows = buildAttributesActionRows(guildId, memberId);
         
         await originalInteractions[key]?.editReply({ components: actionRows });
@@ -351,7 +362,7 @@ module.exports = {
 
         UserService.upsert(user, false);
 
-        const key = guildId + memberId;
+        const key = guildId + interaction.member.id;
         const updatedEmbed = EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes[key]);
 
         try {
@@ -374,7 +385,7 @@ module.exports = {
         const embed = EmbededResponseService.getUserSkills(guildId, memberId);
         const actionRows = buildSkillsActionRow(guildId, memberId);
 
-        const key = guildId + memberId;
+        const key = guildId + interaction.member.id;
         await originalInteractions[key]?.editReply({
             embeds: [embed],
             components: actionRows 
@@ -397,7 +408,7 @@ module.exports = {
         }
         const actionRows = buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability);
         
-        const key = guildId + memberId;
+        const key = guildId + interaction.member.id;
         await originalInteractions[key]?.editReply({ components: actionRows });
 
         await interaction.deferUpdate();
@@ -408,7 +419,7 @@ module.exports = {
             return;
         }
 
-        const key = guildId + memberId;
+        const key = guildId + interaction.member.id;
         delete tempAttributes[key];
 
         const updatedEmbed = EmbededResponseService.getUserStatus(guildId, interaction.member);
@@ -421,7 +432,7 @@ module.exports = {
         await interaction.deferUpdate();
     },
     saveTempAttributes: async (interaction, guildId, memberId) => {
-        const key = guildId + memberId;
+        const key = guildId + interaction.member.id;
         if (interaction.user.id != memberId || !tempAttributes[key] || tempAttributes[key].availablePoints > 0) {
             await interaction.deferUpdate();
             return;
@@ -476,7 +487,7 @@ module.exports = {
         await interaction.deferUpdate();
     },
     increaseAttribute: async (interaction, guildId, memberId, selectedAttribute) => {
-        const key = guildId + memberId;
+        const key = guildId + interaction.member.id;
         if (interaction.user.id != memberId) {
             await interaction.deferUpdate();
             return;
@@ -493,7 +504,7 @@ module.exports = {
         await interaction.deferUpdate();
     },
     decreaseAttribute: async (interaction, guildId, memberId, selectedAttribute) => {
-        const key = guildId + memberId;
+        const key = guildId + interaction.member.id;
         if (interaction.user.id != memberId) {
             await interaction.deferUpdate();
             return;
@@ -518,7 +529,7 @@ module.exports = {
         const selectedSkill = interaction.values[0];
         const actionRows = buildSelectedSkillActionRows(guildId, memberId, selectedSkill);
 
-        const key = guildId + memberId;
+        const key = guildId + interaction.member.id;
         await originalInteractions[key]?.editReply({ components: actionRows });
 
         await interaction.deferUpdate();
@@ -535,7 +546,7 @@ module.exports = {
         SkillsService.updateSingleSkill(memberId, guildId, selectedSkill, newSkillLevel);
         const embed = EmbededResponseService.getUserSkills(guildId, interaction.user);
 
-        const key = guildId + memberId;
+        const key = guildId + interaction.member.id;
         await originalInteractions[key]?.editReply({ embeds: [embed] });
 
         await interaction.deferUpdate();
@@ -558,22 +569,44 @@ module.exports = {
             selectedOption.default = true;
         }
         
-        const key = guildId + memberId;
+        const key = guildId + interaction.member.id;
         await originalInteractions[key]?.editReply({ components: interaction.message.components });
 
         await interaction.deferUpdate();
     },
     gotoHomeRow: async (interaction, guildId, memberId) => {
-        const key = guildId + memberId;
+        const originalInteractionKey = guildId + interaction.member.id;
+        const tempAttributesKey = guildId + memberId;
         const member = await interaction.guild.members.fetch(memberId);
-        const embed = EmbededResponseService.getUserStatus(guildId, member, tempAttributes[key]);
+        const embed = EmbededResponseService.getUserStatus(guildId, member, tempAttributes[tempAttributesKey]);
         const actionRow = buildHomeActionRow(guildId, memberId);
         
-        await originalInteractions[key]?.editReply({ 
+        await originalInteractions[originalInteractionKey]?.editReply({ 
             embeds: [embed],
             components: [actionRow]
         });
 
         await interaction.deferUpdate();
+    },
+    extGotoHome: async(interaction, guildId, memberId) => {
+        const tempAttributesKey = guildId + memberId;
+        const member = await interaction.guild.members.fetch(memberId);
+        const embed = EmbededResponseService.getUserStatus(guildId, member, tempAttributes[tempAttributesKey]);
+        const actionRow = buildHomeActionRow(guildId, memberId);
+        
+        await createOriginalMessageCacheEntry(interaction);
+        await interaction.reply({ 
+            embeds: [embed],
+            components: [actionRow],
+            ephemeral: true
+        });
+
+        eventEmitter.emit("showUserStatusCommand_extGotoHome", guildId, interaction.member.id);
     }
 }
+
+// events
+eventEmitter.on("inventoryCommand_extExecute", (guildId, userId) => {
+    const key = guildId + userId;
+    originalInteractions[key]?.deleteReply();
+});

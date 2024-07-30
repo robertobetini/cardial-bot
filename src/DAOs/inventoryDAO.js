@@ -16,7 +16,7 @@ class InventoryDAO extends Sqlite3DAO {
         const inventoryItems = db.prepare(query).expand().all(userId, guildId);
 
         const inventoryItemsDTOs = inventoryItems.map(ii => InventoryItem.fromDTO(ii));
-
+        
         return new Inventory(userId, guildId, inventoryItemsDTOs);
     }
 

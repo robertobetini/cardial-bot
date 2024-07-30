@@ -406,7 +406,7 @@ class EmbededResponseService {
             .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
     }
 
-    static getLootView(dropResult) {
+    static getLootView(dropResult, userDetails) {
         const monsterIdtoNameMap = loadMonsterIdToNameMap();
 
         let description = "```ansi";
@@ -428,11 +428,24 @@ class EmbededResponseService {
         content = content || "\nNada :(";
         description += content + "\n```";
 
+        const fields = [];
+        for (const detail of userDetails) {
+            const field = {
+                name: `> ${detail.playerName}`,
+                value: 
+                    `Exp: ${detail.totalMobExp}\n` +
+                    `Gold: ${detail.totalMobBaseGold}\n`,
+                inline: true
+            };
+
+            fields.push(field);
+        }
+
         return new Discord.EmbedBuilder()
             .setColor(0xbbbbbb)
-            .setTitle("Loot")
-            .setAuthor({ name: "Gerador de loot", iconURL: ImgUrls.LOOT })
+            .setAuthor({ name: "Loot", iconURL: ImgUrls.LOOT })
             .setDescription(description)
+            .setFields(fields)
             .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
     }
 

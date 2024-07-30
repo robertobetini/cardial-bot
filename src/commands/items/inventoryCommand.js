@@ -48,7 +48,7 @@ const buildHomeActionRows = (guildId, userId, optionList, selected, externalComm
 
     const buttons = [fetchItemButton, removeItemButton];
 
-    if (optionList.length > 0) {
+    if (optionList?.length > 0) {
         const selectItemMenu = new Discord.StringSelectMenuBuilder()
             .setCustomId(`${guildId}:${userId}:inventoryCommand:selectItem:${externalCommand}`)
             .setPlaceholder("Escolha o item para remover")
@@ -77,7 +77,7 @@ const createOriginalMessageCacheEntry = async (interaction, guildId, userId) => 
     const key = guildId + userId;
     if (originalInteractions[key]) {
         try {
-            await originalInteractions[key].deleteReply();
+            await originalInteractions[key]?.deleteReply();
         } catch {
             Logger.warn("Tried to delete non-existing interaction message");
         }
@@ -110,16 +110,15 @@ module.exports = {
         const components = optionList.length > 0 ? buildHomeActionRows(guildId, target.id, optionList, NULL_SELECTION_TOKEN) : [];
 
         await createOriginalMessageCacheEntry(interaction, guildId, interaction.member.id);
-        await interaction.editReply({
+        return await interaction.editReply({
             embeds: [embed],
             components,
             files: [EmbededResponseService.FOOTER_IMAGE]
         });
     },
     extExecute: async (interaction, guildId, userId, sourceCommand) => {
-        console.log(sourceCommand);
+        await interaction.deferReply({ ephemeral: true });
         const target = await interaction.guild.members.fetch(userId);
-
         if (target.id !== interaction.member.id) {
             RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
         }
@@ -131,37 +130,36 @@ module.exports = {
             ? buildHomeActionRows(guildId, userId, optionList, NULL_SELECTION_TOKEN, sourceCommand) 
             : [ new Discord.ActionRowBuilder().addComponents(backToExternalCommandButton) ];
 
-
         await createOriginalMessageCacheEntry(interaction, guildId, interaction.member.id);
-        await interaction.reply({
+        const message = await interaction.editReply({
             embeds: [embed],
             components,
-            files: [EmbededResponseService.FOOTER_IMAGE],
-            ephemeral: true
+            files: [EmbededResponseService.FOOTER_IMAGE]
         });
 
         eventEmitter.emit(`inventoryCommand_extExecute`, guildId, interaction.member.id);
+        return message;
     },
     removeItem: async (interaction, guildId, userId) => {
+        await interaction.deferUpdate();
         const inventory = InventoryService.getFullInventory(userId, guildId);
         const optionList = buildOptionList(inventory);
         if (optionList.length < 1) {
-            await interaction.deferUpdate();
             return;
         }
 
         const key = guildId + userId;
-        await Promise.all([
-            originalInteractions[key].editReply({
-                components: buildHomeActionRows(guildId, userId, optionList, NULL_SELECTION_TOKEN)
-            }),
-            interaction.deferUpdate()
-        ]);
+        await originalInteractions[key]?.editReply({
+            components: buildHomeActionRows(guildId, userId, optionList, NULL_SELECTION_TOKEN)
+        });
     },
     showConfirmRemovalModal: async (interaction, guildId, userId, selected) => {
-        if (userId !== interaction.member.id || selected === NULL_SELECTION_TOKEN) {
+        if (selected === NULL_SELECTION_TOKEN) {
             await interaction.deferUpdate();
             return;
+        }
+        if (userId !== interaction.member.id) {
+            RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
         }
 
         const item = ItemService.get(selected);
@@ -184,14 +182,13 @@ module.exports = {
         await interaction.showModal(modal);
     },
     confirmRemoval: async (interaction, guildId, userId, selected) => {
+        await interaction.deferUpdate();
         if (userId !== interaction.member.id) {
-            await interaction.deferUpdate();
-            return;
+            RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
         }
 
         const quantity = parseInt(interaction.fields.getTextInputValue("quantity"));
         if (isNaN(quantity) || quantity < 1) {
-            await interaction.deferUpdate();
             return;
         }
 
@@ -201,44 +198,45 @@ module.exports = {
         selectedItem.count -= quantity;
 
         InventoryService.update(userId, guildId, selectedItem);
-        Logger.info(`Player ${interaction.member.displayName} removed item ${selectedItem.item.name} [${quantity}x]`);
+        Logger.info(`Player with ${userId} removed item ${selectedItem.item.name} [${quantity}x]`);
 
         const updatedInventory = InventoryService.getFullInventory(userId, guildId);
         const optionList = buildOptionList(updatedInventory);
-        const embed = EmbededResponseService.getInventoryView(updatedInventory, interaction.member);
 
-        const key = guildId + userId;
-        await Promise.all([
-            originalInteractions[key].editReply({
-                embeds: [embed],
-                components: optionList.length > 0 
-                    ? buildHomeActionRows(guildId, userId, optionList, NULL_SELECTION_TOKEN)
-                    : buildHomeActionRows(guildId, userId)
-            }),
-            interaction.deferUpdate()
-        ]);
+        const target = await interaction.guild.members.fetch(userId);
+        const embed = EmbededResponseService.getInventoryView(updatedInventory, target);        
+
+        const backToSourceCommandButton = interaction.message.components[1].components.find(c => c.data.label === "Voltar");
+        const customId = backToSourceCommandButton?.data?.custom_id || "";
+        const info = customId.split(":");
+        const externalCommand = info.length > 1 ? info[2] : "";
+
+        const key = guildId + interaction.member.id;
+        await originalInteractions[key]?.editReply({
+            embeds: [embed],
+            components: optionList.length > 0 
+                ? buildHomeActionRows(guildId, userId, optionList, NULL_SELECTION_TOKEN, externalCommand)
+                : buildHomeActionRows(guildId, userId)
+        });
     },
     selectItem: async (interaction, guildId, userId, sourceCommand) => {
+        await interaction.deferUpdate();
         if (userId !== interaction.member.id) {
-            await interaction.deferUpdate();
-            return;
+            RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
         }
 
         const inventory = InventoryService.getFullInventory(userId, guildId);
         const optionList = buildOptionList(inventory);
         if (optionList.length < 1) {
-            await interaction.deferUpdate();
             return;
         }
 
         const key = guildId + interaction.member.id;
         const selectedItem = interaction.values[0];
-        await Promise.all([
-            originalInteractions[key].editReply({
-                components: buildHomeActionRows(guildId, userId, optionList, selectedItem, sourceCommand)
-            }),
-            interaction.deferUpdate()
-        ]);
+
+        await originalInteractions[key]?.editReply({
+            components: buildHomeActionRows(guildId, userId, optionList, selectedItem, sourceCommand)
+        });
     },
     extGotoHome: async (interaction, guildId, userId, sourceCommand) => {
         if (userId !== interaction.member.id) {
@@ -259,13 +257,14 @@ module.exports = {
         const components = buildHomeActionRows(guildId, userId, optionList, NULL_SELECTION_TOKEN, backToExternalCommandButton);
 
         await createOriginalMessageCacheEntry(interaction, guildId, interaction.member.id);
-        await interaction.reply({
+        const message = await interaction.reply({
             embeds: [embed],
             components,
             ephemeral: true
         });
 
         eventEmitter.emit(`inventoryCommand_extGotoHome`, guildId, interaction.member.id);
+        return message;
     }
 };
 

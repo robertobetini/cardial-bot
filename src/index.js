@@ -17,6 +17,7 @@ const pollHandler = require("./interactions/pollInteractionHandler");
 const Constants = require("./constants");
 const Logger = require("./logger");
 const { SILENT_ERROR_NAME } = require("./errors/silentError");
+const { randomUUID } = require("./utils");
 
 const DEV_USER_ID = "189479395180675073";
 const UPDATE_SILENT_USERS_INTERVAL_TIME = Number(process.env.UPDATE_SILENT_USERS_INTERVAL_TIME) * Constants.MILLIS_IN_SECOND ?? 60000;
@@ -24,7 +25,7 @@ const UPDATE_SILENT_USERS_INTERVAL_TIME = Number(process.env.UPDATE_SILENT_USERS
 const client = new Discord.Client({ intents: [ 
 	Discord.GatewayIntentBits.Guilds, 
 	Discord.GatewayIntentBits.GuildMessages, 
-	Discord.GatewayIntentBits.GuildMessagePolls 
+	Discord.GatewayIntentBits.GuildMessagePolls
 ]});
 
 dbInit.init();
@@ -32,6 +33,35 @@ commandLoader.loadAllCommands(client);
 commandLoader.deployAllCommands()
     .then()
     .catch(err => Logger.error(err));
+
+const COLLECTOR_LIFETIME = Constants.INTERACTION_COLLECTOR_LIFETIME_IN_HOURS * Constants.HOUR_IN_MILLIS;
+const collectors = {};
+
+const createInteractionCollector = (message, componentType, lifetime, collectHandler, endHandler) => {
+	const collectorId = randomUUID();
+	collectors[collectorId] = message
+		.createMessageComponentCollector({ componentType: componentType, time: lifetime })
+		.on('collect', async interaction => {
+			const newMessage = await collectHandler(interaction);
+			updateInteractionCollectors(newMessage, componentType, lifetime, collectHandler, endHandler);
+		})
+		.on('end', async collected => {
+			Logger.info(`Stopping collecting interactions (total: ${collected.size}) from message: ${message.id}, channel: ${message.channel.id}, guild: ${message.guild.id}`);
+			delete collectors[collectorId];
+			if (endHandler) {
+				await endHandler(collected);
+			}
+		});
+}
+
+const updateInteractionCollectors = (message) => {
+	if (!message) {
+		return;
+	}
+	
+	createInteractionCollector(message, Discord.ComponentType.Button, COLLECTOR_LIFETIME, buttonHandler.handleAsync);
+	createInteractionCollector(message, Discord.ComponentType.StringSelect, COLLECTOR_LIFETIME, stringSelectMenuHandler.handleAsync);
+}
 
 client.on("ready", () => {
 	Logger.info("Bot is ready.");
@@ -41,17 +71,14 @@ client.on("ready", () => {
 client.on(Discord.Events.InteractionCreate, async interaction => {
 	try {
 		if (interaction.isButton()) {
-			Logger.debug(`Processing button interaction (${interaction.customId})`);
-			await buttonHandler.handleAsync(interaction);
+			return;
 		} else if (interaction.isModalSubmit()) {
-			Logger.debug(`Processing modal submit interaction (${interaction.customId})`);
 			await modalHandler.handleAsync(interaction);
 		} else if (interaction.isStringSelectMenu()) {
-			Logger.debug(`Processing string select menu interaction (${interaction.customId})`);
-			await stringSelectMenuHandler.handleAsync(interaction);
+			return;
 		} else if (interaction.isChatInputCommand()) {
-			Logger.debug(`Processing chat interaction (${interaction.commandName})`);
-			await commandHandler.handleAsync(interaction);
+			const message = await commandHandler.handleAsync(interaction);
+			updateInteractionCollectors(message);
 		} else if (interaction.isAutocomplete()) {	
 			await autocompleteHandler.handleAsync(interaction);
 		} else {

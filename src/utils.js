@@ -101,7 +101,7 @@ module.exports = {
     unityOfWork: (func) => {
         const execute = Sqlite3DAO.db.transaction(async () => {
             try {
-                await func();
+                return await func();
             } catch (err) {
                 if (!Sqlite3DAO.db.inTransaction) {
                     throw err;

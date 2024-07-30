@@ -92,6 +92,10 @@ class InventoryService {
             : inventoryDAO.deleteOne(userId, guildId, inventoryItem.item.id);
     }
 
+    static upsertFullInventory(inventory) {
+        inventoryDAO.upsertFullInventory(inventory);
+    }
+
     static deleteAll() {
         inventoryDAO.deleteAll();
     }

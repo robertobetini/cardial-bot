@@ -6,6 +6,7 @@ const Constants = require("../constants");
 module.exports = {
     handleAsync: async (interaction) => {
         const commandName = interaction.commandName;
+        Logger.debug(`Processing chat interaction (${commandName})`);
         const command = interaction.client.commands.get(commandName);
 	
         if (!command) {
@@ -19,6 +20,6 @@ module.exports = {
         });
 
         Logger.debug(`Executing command: ${interaction.commandName}`);
-        await command.execute(interaction);
+        return await command.execute(interaction); // return the replied/edited message
     }
 };

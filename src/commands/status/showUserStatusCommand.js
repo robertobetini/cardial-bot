@@ -228,7 +228,7 @@ const createOriginalMessageCacheEntry = async (interaction) => {
     const key = interaction.guild.id + interaction.member.id;
     if (originalInteractions[key]) {
         try {
-            await originalInteractions[key].deleteReply();
+            await originalInteractions[key]?.deleteReply();
         } catch {
             Logger.warn("Tried to delete non-existing interaction message");
         }
@@ -260,15 +260,15 @@ module.exports = {
         const actionRow = buildHomeActionRow(guildId, target.id);
 
         await createOriginalMessageCacheEntry(interaction);
-        await interaction.editReply({
+        return await interaction.editReply({
             embeds: [embed],
             components: [actionRow],
             files: [EmbededResponseService.FOOTER_IMAGE]
         });
     },
     showAttributesRow: async (interaction, guildId, memberId) => {
+        await interaction.deferUpdate();
         if (interaction.user.id != memberId) {
-            await interaction.deferUpdate();
             return;
         }
 
@@ -276,8 +276,6 @@ module.exports = {
         const actionRows = buildAttributesActionRows(guildId, memberId);
         
         await originalInteractions[key]?.editReply({ components: actionRows });
-
-        await interaction.deferUpdate();
     },
     showCharacterModal: async (interaction, guildId, memberId) => {
         if (interaction.user.id != memberId) {
@@ -375,7 +373,7 @@ module.exports = {
                     content: `A url ${imgUrl} não é válida!`,
                     ephemeral: true
                 });
-                return
+                return;
             }
         }
 
@@ -588,25 +586,28 @@ module.exports = {
 
         await interaction.deferUpdate();
     },
-    extGotoHome: async(interaction, guildId, memberId) => {
+    extGotoHome: async (interaction, guildId, memberId) => {
+        await interaction.deferReply({ ephemeral: true });
         const tempAttributesKey = guildId + memberId;
         const member = await interaction.guild.members.fetch(memberId);
         const embed = EmbededResponseService.getUserStatus(guildId, member, tempAttributes[tempAttributesKey]);
         const actionRow = buildHomeActionRow(guildId, memberId);
         
         await createOriginalMessageCacheEntry(interaction);
-        await interaction.reply({ 
+        const message = await interaction.editReply({ 
             embeds: [embed],
             components: [actionRow],
             ephemeral: true
         });
 
         eventEmitter.emit("showUserStatusCommand_extGotoHome", guildId, interaction.member.id);
+
+        return message;
     }
 }
 
 // events
-eventEmitter.on("inventoryCommand_extExecute", (guildId, userId) => {
+eventEmitter.on("inventoryCommand_extExecute", async (guildId, userId) => {
     const key = guildId + userId;
-    originalInteractions[key]?.deleteReply();
+    await originalInteractions[key]?.deleteReply();
 });

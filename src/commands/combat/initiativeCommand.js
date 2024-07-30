@@ -64,8 +64,9 @@ module.exports = {
         
         users.sort((a, b) => setCombatOrder(a, b));
         users[0].selected = true;
+        
         const embed = EmbededResponseService.getInitiativeView(users, combats[combatId].mobs);
-        await interaction.editReply({
+        return await interaction.editReply({
             content: `Turno de ${Discord.userMention(users[0].userId)}`,
             embeds: [embed],
             components: buildActionRows(guildId, userId, combatId),
@@ -112,6 +113,7 @@ module.exports = {
         await interaction.showModal(modal);
     },
     addMob: async (interaction, guildId, memberId, combatId) => {
+        await interaction.deferUpdate();
         if (!combats[combatId]) {
             return;
         }
@@ -119,7 +121,6 @@ module.exports = {
         const mobName = interaction.fields.getTextInputValue("name");
         const quantity = parseInt(interaction.fields.getTextInputValue("quantity"));
         if (quantity === 0) {
-            await interaction.deferUpdate();
             return;
         }
 
@@ -138,10 +139,9 @@ module.exports = {
             embeds: [embed],
             components: buildActionRows(guildId, memberId, combatId)
         });
-
-        await interaction.deferUpdate();
     },
     setNextPlayer: async (interaction, guildId, memberId, combatId) => {
+        await interaction.deferUpdate();
         if (!combats[combatId]) {
             return;
         }
@@ -183,19 +183,22 @@ module.exports = {
         
         const embed = EmbededResponseService.getInitiativeView(participants, mobs);
         try {
-            await Promise.all([
+            const [_, message] = await Promise.all([
                 interaction.message.delete(),
-                interaction.reply({ 
+                interaction.editReply({ 
                     content: `Turno de ${mention}`, 
                     embeds: [embed],
                     components: interaction.message.components
                 })
             ]);
+
+            return message;
         } catch {
             Logger.warn("Tried to delete non-existing interaction message");
         }
     },
     removeEntity: async (interaction, guildId, memberId, combatId) => {
+        await interaction.deferUpdate();
         if (!combats[combatId]) {
             return;
         }
@@ -217,7 +220,6 @@ module.exports = {
         const mustBlockButtons = combats[combatId].participants.length < 1;
 
         await Promise.all([
-            interaction.deferUpdate(),
             interaction.message.edit({ 
                 embeds: [embed],
                 components: buildActionRows(guildId, memberId, combatId, mustBlockButtons)

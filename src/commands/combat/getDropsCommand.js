@@ -40,10 +40,21 @@ module.exports = {
             .filter(d => d);
         const monsters = monsterIds.map(monsterId => MonsterService.get(monsterId, true));
         const [dropDetails, dropSummary] = MonsterDropsService.generateDrops(monsters);
-
+        console.log(dropSummary);
         const targets = getUsersFromInput(interaction, Constants.COMMAND_MAX_USERS).users;
 
-        const embed = EmbededResponseService.getLootView(dropDetails);
+        // Exp distribution
+        for (const user of targets) {
+            user.totalMobExp = monsters
+                .filter(m => user.stats.lvl - m.level < Constants.NO_EXP_LEVEL_GAP)
+                .reduce((prev, current) => prev += current.baseExp, 0);
+            user.totalMobBaseGold = monsters.reduce((prev, current) => prev += current.baseGold, 0);
+            user.stats.gold += user.totalMobBaseGold;
+            ProgressionService.addExpAndMastery(user, user.totalMobExp);
+        }
+        UserService.batchUpsert(targets, true);
+
+        const embed = EmbededResponseService.getLootView(dropDetails, targets);
         const message = await interaction.editReply({
             embeds: [embed],
             files: [EmbededResponseService.FOOTER_IMAGE]
@@ -53,18 +64,6 @@ module.exports = {
         if (distinctItems.length < 1 || targets.length < 1) {
             return;
         }
-
-        // Exp distribution
-        for (const user of targets) {
-            const totalMobExp = monsters
-                .filter(m => m.level - user.stats.level < Constants.NO_EXP_LEVEL_GAP)
-                .reduce((prev, current) => prev += current.baseExp, 0);
-            const totalMobBaseGold = monsters.reduce((prev, current) => prev += current.baseGold, 0);
-            user.stats.gold += totalMobBaseGold;
-            ProgressionService.addExpAndMastery(user, totalMobExp);
-        }
-        UserService.batchUpsert(targets, true);
-        //remove this return when inventory is fixed
 
         // poll creation handling
         const pollNum = Math.ceil(distinctItems.length / Constants.ITEMS_PER_POLL);
@@ -203,7 +202,7 @@ module.exports = {
         }
 
         const embed = transient.originalMessage.embeds[0];
-        embed.data.title += " (Concluído)";
+        embed.data.author.name += " (Concluído)";
 
         await Promise.all([
             threadChannel.delete(),

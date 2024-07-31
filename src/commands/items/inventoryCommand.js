@@ -71,6 +71,15 @@ const buildHomeActionRows = (guildId, userId, optionList, selected, externalComm
     return actionRows;
 }
 
+const buildBackToExternalCommandRows = (guildId, userId, externalCommand) => {
+    const buildBackToExternalCommandButton = new Discord.ButtonBuilder()
+        .setCustomId(`${guildId}:${userId}:${externalCommand}:extGotoHome`)
+        .setLabel("Voltar")
+        .setStyle(Discord.ButtonStyle.Secondary);
+
+    return [ new Discord.ActionRowBuilder().addComponents(buildBackToExternalCommandButton) ];
+}
+
 const buildOptionList = (inventory) => inventory.items.map(ii => ({ label: ii.item.name, value: ii.item.id }));
 
 const createOriginalMessageCacheEntry = async (interaction, guildId, userId) => {
@@ -128,7 +137,7 @@ module.exports = {
         const optionList = buildOptionList(inventory);
         const components = optionList.length > 0 
             ? buildHomeActionRows(guildId, userId, optionList, NULL_SELECTION_TOKEN, sourceCommand) 
-            : [ new Discord.ActionRowBuilder().addComponents(backToExternalCommandButton) ];
+            : buildBackToExternalCommandRows(guildId, userId, sourceCommand);
 
         await createOriginalMessageCacheEntry(interaction, guildId, interaction.member.id);
         const message = await interaction.editReply({

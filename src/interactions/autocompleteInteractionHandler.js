@@ -4,6 +4,7 @@ const commands = {
     buscaitem: require("../commands/items/queryItemCommand"),
     bestiario: require("../commands/monsters/queryMonsterCommand"),
     drop: require("../commands/combat/getDropsCommand"),
+    drop2: require("../commands/combat/getDropsUniqueCommand"),
     additem: require("../commands/items/addItemToInventoryCommand")
 };
 

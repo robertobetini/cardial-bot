@@ -49,6 +49,25 @@ class EmbededResponseService {
             .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` }), isEmpty];
     }
 
+    static getArmaLeaderboard(guildId, page) {
+        const users = UserService.getAllFromGuild(guildId, "totalMasteryExp", page * Constants.PAGE_SIZE, Constants.PAGE_SIZE);
+
+        const table = this.createTable(
+            [{ name: "User", size: 17 }, { name: "Level", size: 6 }, { name: "Maestria", size: 8 }],
+            users.map(user => [user.playerName, user.stats?.mastery.toString(), user.stats?.totalMasteryExp.toString()])
+        );
+
+        const isEmpty = users.length < 1;
+        return [
+            new Discord.EmbedBuilder()
+                .setColor(0xbbbbbb)
+                .setTitle("Placar de maestria")
+                .setDescription(table)
+                .setFooter({ text: "Elysium System", iconURL: `attachment://${this.FOOTER_IMAGE.name}` }),
+            isEmpty
+        ];
+    }
+
     static getUserSkills(guildId, discordUser) {
         const user = typeof(discordUser) === "string" 
             ? UserService.get(guildId, discordUser, true) 

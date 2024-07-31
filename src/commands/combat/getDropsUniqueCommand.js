@@ -8,7 +8,7 @@ const { drop, computeVote, autocomplete } = require("./getDropsCommand");
 const AUTOCOMPLETE_OPTION_BASE_NAME = "mob";
 
 const data = new Discord.SlashCommandBuilder()
-    .setName("drop2")
+    .setName("dropar")
     .setDescription("Gera uma lista de drops a partir dos mobs escolhidos")
     .addIntegerOption(option =>
         option

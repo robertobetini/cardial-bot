@@ -168,9 +168,8 @@ const computeVote = async (pollAnswer, pollId, isVoteRemove) => {
 
         delete transients[threadChannel.id][pollId];
         setTimeout(() => delete transients[newPollId], CACHE_LIFETIME);
-        return;
     }
-
+    
     transients[threadChannel.id].splice(transientIndex, 1);
     if (transients[threadChannel.id].length > 0) {
         return;

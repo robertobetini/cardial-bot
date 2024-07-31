@@ -51,54 +51,33 @@ module.exports = {
             [leaderboard, _] = EmbededResponseService.getExpLeaderboard(guildId, 0);
         } else if(type === "Arma") {
             [leaderboard, _] = EmbededResponseService.getArmaLeaderboard(guildId, 0);
-            
         }
     
         const actionRow = buildActionRow(guildId, memberId, command, type);
     
-        try {
-            // Verifique se a interação já foi respondida ou adiada
-            if (!interaction.replied && !interaction.deferred) {
-                await interaction.deferReply(); // Adie a resposta
-            }
-    
-            const message = await interaction.editReply({
-                content: "",
-                embeds: [leaderboard],
-                components: [actionRow],
-                files: [EmbededResponseService.FOOTER_IMAGE]
-            });
-    
-            pages[message.id] = 0;
-        } catch (error) {
-            console.error("Error handling interaction:", error);
-            if (interaction.replied || interaction.deferred) {
-                await interaction.editReply({ content: "Ocorreu um erro ao processar seu pedido.", ephemeral: true });
-            } else {
-                await interaction.reply({ content: "Ocorreu um erro ao processar seu pedido.", ephemeral: true });
-            }
+        // Verifique se a interação já foi respondida ou adiada
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.deferReply(); // Adie a resposta
         }
-    },
-    async handleButtonInteraction(interaction) {
-        if (!interaction.isButton()) return;
 
-        const [guildId, memberId, command, action, type] = interaction.customId.split(':');
+        const message = await interaction.editReply({
+            content: "",
+            embeds: [leaderboard],
+            components: [actionRow],
+            files: [EmbededResponseService.FOOTER_IMAGE]
+        });
 
-        if (command !== 'showLeaderboardsCommand') return;
-
-        if (action === 'previousPage') {
-            await this.previousPage(interaction, guildId, memberId, type);
-        } else if (action === 'nextPage') {
-            await this.nextPage(interaction, guildId, memberId, type);
-        }
+        pages[message.id] = 0;
+        return message;
     },
     previousPage: async (interaction, guildId, memberId, type) => {
+        await interaction.deferUpdate();
+
         const messageId = interaction.message.id;
         const currentPage = pages[messageId] || 0;
         const newPage = currentPage - 1;
     
         if (newPage < 0) {
-            await interaction.deferUpdate();
             return;
         }
     
@@ -113,20 +92,11 @@ module.exports = {
             [leaderboard, _] = EmbededResponseService.getArmaLeaderboard(guildId, newPage);
         }
     
-        try {
-            await Promise.all([
-                interaction.message.edit({ embeds: [leaderboard] }),
-                interaction.deferUpdate()
-            ]);
-        } catch (error) {
-            console.error("Error updating message:", error);
-            if (interaction.replied || interaction.deferred) {
-                await interaction.editReply({ content: "Erro ao atualizar o placar.", ephemeral: true });
-            }
-        }
+        await interaction.editReply({ embeds: [leaderboard] });
     },
-    
     nextPage: async (interaction, guildId, memberId, type) => {
+        await interaction.deferUpdate();
+
         const messageId = interaction.message.id;
         const currentPage = pages[messageId] || 0;
         const newPage = currentPage + 1;
@@ -141,17 +111,11 @@ module.exports = {
         }
     
         if (isEmpty) {
-            await interaction.deferUpdate();
-        } else {
-            pages[interaction.message.id] = newPage;
-            try {
-                await interaction.update({ embeds: [leaderboard] });
-            } catch (error) {
-                console.error("Error updating message:", error);
-                if (interaction.replied || interaction.deferred) {
-                    await interaction.editReply({ content: "Erro ao atualizar o placar.", ephemeral: true });
-                }
-            }
+            return;  
         }
+
+        pages[interaction.message.id] = newPage;
+
+        await interaction.editReply({ embeds: [leaderboard] });
     }
 };

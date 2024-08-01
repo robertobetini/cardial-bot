@@ -1,4 +1,4 @@
-const crypto = require("crypto");
+const crypto = require("node:crypto");
 const URL = require("url").URL;
 const Sqlite3DAO = require("./DAOs/sqlite3DAO");
 

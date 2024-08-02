@@ -80,7 +80,8 @@ const drop = async (interaction, monsterIds) => {
             originalMessage: message,
             threadChannel
         });
-        setTimeout(() => delete transients[threadChannel.id][pollId], CACHE_LIFETIME);
+        const threadChannelId = threadChannel.id;
+        setTimeout(() => delete transients[threadChannelId][pollId], CACHE_LIFETIME);
     }
 
     await Promise.all(promises);

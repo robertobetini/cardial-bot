@@ -37,13 +37,35 @@ commandLoader.deployAllCommands()
 const COLLECTOR_LIFETIME = Constants.INTERACTION_COLLECTOR_LIFETIME_IN_HOURS * Constants.HOUR_IN_MILLIS;
 const collectors = {};
 
+const handleError = async (interaction, err) => {
+	Logger.error(err);
+
+	let ephemeral = false;
+	switch(err.name) {
+		case SILENT_ERROR_NAME:
+			ephemeral = true;
+			break;
+		default:
+			ephemeral = false;
+			break;
+	}
+
+	interaction.replied || interaction.deferred 
+		? await interaction.followUp({ content: err.message, ephemeral }) 
+		: await interaction.reply({ content: err.message, ephemeral });
+}
+
 const createInteractionCollector = (message, componentType, lifetime, collectHandler, endHandler) => {
 	const collectorId = randomUUID();
 	collectors[collectorId] = message
 		.createMessageComponentCollector({ componentType: componentType, time: lifetime })
 		.on('collect', async interaction => {
-			const newMessage = await collectHandler(interaction);
-			updateInteractionCollectors(newMessage, componentType, lifetime, collectHandler, endHandler);
+			try { 
+				const newMessage = await collectHandler(interaction);
+				updateInteractionCollectors(newMessage, componentType, lifetime, collectHandler, endHandler);
+			} catch (err) {
+				await  handleError(interaction, err);
+			}
 		})
 		.on('end', async collected => {
 			Logger.info(`Stopping collecting interactions (total: ${collected.size}) from message: ${message.id}, channel: ${message.channel.id}, guild: ${message.guild.id}`);
@@ -85,21 +107,7 @@ client.on(Discord.Events.InteractionCreate, async interaction => {
 			Logger.info(`Couldn't process interaction of type (${interaction.type})`);
 		}
 	} catch(err) {
-		Logger.error(err);
-
-		let ephemeral = false;
-		switch(err.name) {
-			case SILENT_ERROR_NAME:
-				ephemeral = true;
-				break;
-			default:
-				ephemeral = false;
-				break;
-		}
-
-		interaction.replied || interaction.deferred 
-			? await interaction.followUp({ content: err.message, ephemeral }) 
-			: await interaction.reply({ content: err.message, ephemeral });
+		await  handleError(interaction, err);
 	}
 });
 

@@ -141,7 +141,7 @@ module.exports = {
         });
     },
     setNextPlayer: async (interaction, guildId, memberId, combatId) => {
-        await interaction.deferUpdate();
+        await interaction.deferReply();
         if (!combats[combatId]) {
             return;
         }

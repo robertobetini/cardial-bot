@@ -356,7 +356,7 @@ class EmbededResponseService {
         const embed = new Discord.EmbedBuilder()
             .setColor(0xbbbbbb)
             .setTitle(item.name)
-            .setDescription(item.description)
+            .setDescription(item.description || " ")
             // .setImage(`attachment://${EmbededResponseService.POTION_IMAGE.name}`)
             .setFields(fields)
             .setAuthor({ name: "Buscador de item", iconURL: ImgUrls.SEARCH })

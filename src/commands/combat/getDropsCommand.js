@@ -81,7 +81,7 @@ const drop = async (interaction, monsterIds) => {
             threadChannel
         });
         const threadChannelId = threadChannel.id;
-        setTimeout(() => delete transients[threadChannelId][pollId], CACHE_LIFETIME);
+        setTimeout(() => { if (transients[threadChannelId]) delete transients[threadChannelId][pollId] }, CACHE_LIFETIME);
     }
 
     await Promise.all(promises);
@@ -168,7 +168,7 @@ const computeVote = async (pollAnswer, pollId, isVoteRemove) => {
         });
 
         delete transients[threadChannel.id][pollId];
-        setTimeout(() => delete transients[newPollId], CACHE_LIFETIME);
+        setTimeout(() => { if (transient[threadChannel.id]) delete transients[newPollId] }, CACHE_LIFETIME);
     }
     
     transients[threadChannel.id].splice(transientIndex, 1);

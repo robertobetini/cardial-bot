@@ -7,7 +7,7 @@ const Constants = require("../constants");
 
 const Logger = require("../logger");
 
-const { shuffle, randomUUID } = require("../utils");
+const { shuffle } = require("../utils");
 
 class InventoryService {
     static pollItemRegex = /(.*)\[x(\d+)\]/;
@@ -47,7 +47,7 @@ class InventoryService {
                 continue;
             }
 
-            inventoryDAO.upsertFullInventory(userInventory);
+            InventoryService.upsertFullInventory(userInventory);
             distributedQuantity++;
         }
 
@@ -94,6 +94,10 @@ class InventoryService {
 
     static upsertFullInventory(inventory) {
         inventoryDAO.upsertFullInventory(inventory);
+    }
+
+    static clear(userId, guildId) {
+        inventoryDAO.clear(userId, guildId);
     }
 
     static deleteAll() {

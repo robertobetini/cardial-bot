@@ -1,6 +1,10 @@
 const Discord = require("discord.js");
+
 const userDAO = require("../../DAOs/userDAO");
+
 const RoleService = require("../../services/roleService");
+const InventoryService = require("../../services/inventoryService");
+
 const User = require("../../models/user");
 
 module.exports = {
@@ -21,6 +25,7 @@ module.exports = {
         const user = new User(target.id, guildId, target.username, target.displayAvatarURL());
         const member = await interaction.guild.members.fetch(target.id);
         userDAO.upsert(user, true);
+        InventoryService.clear(target.id, guildId);
 
         try {
             await member.setNickname(user.playerName);

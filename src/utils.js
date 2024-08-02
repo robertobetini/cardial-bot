@@ -13,7 +13,7 @@ const swap = (arr, i, j) => {
 }
 
 const hashText = (text) => {
-    return crypto.hash("md5", text);
+    return crypto.createHash('md5').update(text).digest('hex');
 }
 
 const shuffle = (arr, times = 100) => {

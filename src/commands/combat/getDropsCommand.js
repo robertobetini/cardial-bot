@@ -9,6 +9,7 @@ const ProgressionService = require("../../services/progressionService");
 const UserService = require("../../services/userService");
 
 const Constants = require("../../constants");
+const Cache = require("../../cache");
 const Logger = require("../../logger");
 
 const { addMultipleUserOptions, addMultipleAutocompletes, getUsersFromInput, getStringsFromInput } = require ("../helpers");
@@ -16,10 +17,9 @@ const { randomId } = require("../../utils");
 
 const AUTOCOMPLETE_OPTION_BASE_NAME = "mob";
 const NOT_APPLICABLE_TOKEN = "N/A";
-const POLL_DURATION_IN_HOURS = 2;
-const CACHE_LIFETIME = POLL_DURATION_IN_HOURS * Constants.HOUR_IN_MILLIS;
+const CACHE_LIFETIME = Constants.POLL_DURATION_IN_HOURS * Constants.HOUR_IN_MILLIS;
 const POLL_IDENTIFIER = "drop";
-const transients = {};
+const transients_cache = new Cache(CACHE_LIFETIME);
 
 const drop = async (interaction, monsterIds) => {
     RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
@@ -55,14 +55,14 @@ const drop = async (interaction, monsterIds) => {
     const pollNum = Math.ceil(distinctItems.length / Constants.ITEMS_PER_POLL);
     const pollItems = distinctItems.map(itemName => ({ text: `${itemName} [x${dropSummary[itemName]}]` }));
     const threadChannel = await message.startThread({ name: "drops" });
-    transients[threadChannel.id] = [];
+    const transients = transients_cache.set(threadChannel.id, []);
     const promises = [];
     for(let i = 0; i < pollNum; i++) {
         const poll = {
             allowMultiselect: true,
             layoutType: Discord.PollLayoutType.Default,
             question: { text: "Selecione os itens que deseja" },
-            duration: POLL_DURATION_IN_HOURS,
+            duration: Constants.POLL_DURATION_IN_HOURS,
             answers: pollItems
                 .slice(Constants.ITEMS_PER_POLL * i, Constants.ITEMS_PER_POLL * (i + 1))
                 .concat({ text: NOT_APPLICABLE_TOKEN })
@@ -75,14 +75,12 @@ const drop = async (interaction, monsterIds) => {
         });
         promises.push(promise);
 
-        transients[threadChannel.id].push({
+        transients.push({
             pollId,
             users: targets.map(t => ({ key: interaction.guild.id + t.userId, confirmed: false })),
             originalMessage: message,
             threadChannel
         });
-        const threadChannelId = threadChannel.id;
-        setTimeout(() => { if (transients[threadChannelId]) delete transients[threadChannelId][pollId] }, CACHE_LIFETIME);
     }
 
     await Promise.all(promises);
@@ -90,14 +88,15 @@ const drop = async (interaction, monsterIds) => {
 
 const computeVote = async (pollAnswer, pollId, isVoteRemove) => {
     const threadChannel = pollAnswer.poll.message.channel;
-    if (!transients[threadChannel.id]) {
+    const transients = transients_cache.get(threadChannel.id);
+    if (!transients) {
         return;
     }
-    const transientIndex = transients[threadChannel.id].findIndex(p => p.pollId === pollId);
+    const transientIndex = transients.findIndex(p => p.pollId === pollId);
     if (transientIndex < 0) {
         return;
     }
-    const transient = transients[threadChannel.id][transientIndex];
+    const transient = transients[transientIndex];
 
     // confirm if isVoteRemove == false, unconfirm if isVoteRemove == true
     const guildId = pollAnswer.poll.message.guildId;
@@ -156,7 +155,7 @@ const computeVote = async (pollAnswer, pollId, isVoteRemove) => {
         };
 
         const newPollId = randomId(10);
-        transients[threadChannel.id].push({ 
+        transients.push({ 
             pollId: newPollId,
             users: transient.users.map(u => ({ key: u.key, confirmed: false })),
             originalMessage: transient.originalMessage,
@@ -165,15 +164,14 @@ const computeVote = async (pollAnswer, pollId, isVoteRemove) => {
         await transient.threadChannel.send("Um ou mais usuários estão sem slots disponíveis para receber os itens escolhidos... Uma nova enquete será feita.");
         await transient.threadChannel.send({ 
             content: `${POLL_IDENTIFIER}-${newPollId}`,
-            poll 
+            poll
         });
 
-        delete transients[threadChannel.id][pollId];
-        setTimeout(() => { if (transient[threadChannel.id]) delete transients[newPollId] }, CACHE_LIFETIME);
+        transients_cache.set(threadChannel.id, transients);
     }
     
-    transients[threadChannel.id].splice(transientIndex, 1);
-    if (transients[threadChannel.id].length > 0) {
+    transients.splice(transientIndex, 1);
+    if (transients.length > 0) {
         return;
     }
 
@@ -185,7 +183,7 @@ const computeVote = async (pollAnswer, pollId, isVoteRemove) => {
         transient.originalMessage.edit({ embeds: [embed], attachments: [], files: [] })
     ]);
 
-    delete transients[threadChannel.id];
+    transients_cache.unset(threadChannel.id);
 }
 
 const data = new Discord.SlashCommandBuilder()

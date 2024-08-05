@@ -23,7 +23,8 @@ const transients = {};
 
 const drop = async (interaction, monsterIds) => {
     RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
-        
+    
+    Logger.info(`Fetching monsters with ids: ${monsterIds}`);
     const monsters = monsterIds.map(monsterId => MonsterService.get(monsterId, true));
     const [dropDetails, dropSummary] = MonsterDropsService.generateDrops(monsters);
     const targets = getUsersFromInput(interaction, Constants.COMMAND_MAX_USERS).users;

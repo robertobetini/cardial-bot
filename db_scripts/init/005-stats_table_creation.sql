@@ -2,7 +2,8 @@ CREATE TABLE IF NOT EXISTS STATS (
     userId VARCHAR(64) NOT NULL,
     guildId VARCHAR(64) NOT NULL, 
 
-    totalExp INT, 
+    totalExp INT,
+    totalMasteryExp INT,
     gold INT,
     currentHP INT, maxHP INT, tempHP INT,
     currentFP INT, maxFP INT, tempFP INT,

@@ -345,6 +345,8 @@ module.exports = {
         await interaction.showModal(modal);
     },
     updateCharacter: async (interaction, guildId, memberId) => {
+        await interaction.deferUpdate();
+
         const user = UserService.get(guildId, memberId, false);
         
         let name = null;
@@ -373,17 +375,17 @@ module.exports = {
             if (/URL_TYPE_INVALID_URL/.test(err.message)) {
                 user.imgUrl = oldImgUrl;
                 UserService.upsert(user, false);
-                await interaction.reply({
+                await interaction.editReply({
                     content: `A url ${imgUrl} não é válida!`,
                     ephemeral: true
                 });
                 return;
             }
         }
-
-        await interaction.deferUpdate();
     },
     showSkillsRow: async (interaction, guildId, memberId) => {
+        await interaction.deferUpdate();
+
         const embed = EmbededResponseService.getUserSkills(guildId, memberId);
         const actionRows = buildSkillsActionRow(guildId, memberId);
 
@@ -392,12 +394,10 @@ module.exports = {
             embeds: [embed],
             components: actionRows 
         });
-
-        await interaction.deferUpdate();
     },
     selectAttribute: async (interaction, guildId, memberId) => {
+        await interaction.deferUpdate();
         if (interaction.user.id != memberId) {
-            await interaction.deferUpdate();
             return;
         }
 
@@ -412,12 +412,10 @@ module.exports = {
         
         const key = guildId + interaction.member.id;
         await originalInteractions.get(key)?.editReply({ components: actionRows });
-
-        await interaction.deferUpdate();
     },
     clearTempAttributes: async (interaction, guildId, memberId) => {
+        await interaction.deferUpdate();
         if (interaction.user.id != memberId) {
-            await interaction.deferUpdate();
             return;
         }
 
@@ -430,20 +428,19 @@ module.exports = {
             embeds: [updatedEmbed],
             components: actionRows 
         });
-
-        await interaction.deferUpdate();
     },
     saveTempAttributes: async (interaction, guildId, memberId) => {
+        await interaction.deferUpdate();
+
         const key = guildId + interaction.member.id;
         const tempAttribute = tempAttributes.get(key);
         if (interaction.user.id != memberId || !tempAttribute || tempAttribute.availablePoints > 0) {
-            await interaction.deferUpdate();
             return;
         }
 
         const user = UserService.get(guildId, memberId, false);
         if (!user.playerName) {
-            await interaction.reply({ 
+            await interaction.followUp({ 
                 content: "Você precisa escolher um nome para seu personagem antes de terminar a ficha!",
                 ephemeral: true 
             });
@@ -470,7 +467,7 @@ module.exports = {
             try {
                 await interaction.member.setNickname(user.playerName);
             } catch {
-                await interaction.reply({ content: "Não consigo atualizar o seu nickname porque você é o dono do servidor ou tem um cargo maior do que o meu.", ephemeral: true });
+                await interaction.followUp({ content: "Não consigo atualizar o seu nickname porque você é o dono do servidor ou tem um cargo maior do que o meu.", ephemeral: true });
             }
         }
 
@@ -483,16 +480,11 @@ module.exports = {
             embeds: [updatedEmbed],
             components: actionRows 
         });
-
-        if (interaction.replied) {
-            return;
-        }
-        await interaction.deferUpdate();
     },
     increaseAttribute: async (interaction, guildId, memberId, selectedAttribute) => {
+        await interaction.deferUpdate();
         const key = guildId + interaction.member.id;
         if (interaction.user.id != memberId) {
-            await interaction.deferUpdate();
             return;
         }
 
@@ -504,13 +496,11 @@ module.exports = {
             embeds: [ EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttribute) ],
             components: buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability)
         });
-
-        await interaction.deferUpdate();
     },
     decreaseAttribute: async (interaction, guildId, memberId, selectedAttribute) => {
+        await interaction.deferUpdate();
         const key = guildId + interaction.member.id;
         if (interaction.user.id != memberId) {
-            await interaction.deferUpdate();
             return;
         }
 
@@ -522,12 +512,10 @@ module.exports = {
             embeds: [ EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttribute) ],
             components: buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability), 
         });
-
-        await interaction.deferUpdate();
     },
     selectSkill: async (interaction, guildId, memberId) => {
+        await interaction.deferUpdate();
         if (interaction.user.id != memberId) {
-            await interaction.deferUpdate();
             return;
         }
 
@@ -536,12 +524,10 @@ module.exports = {
 
         const key = guildId + interaction.member.id;
         await originalInteractions.get(key)?.editReply({ components: actionRows });
-
-        await interaction.deferUpdate();
     },
     updateSkill: async (interaction, guildId, memberId, selectedSkill) => {
+        await interaction.deferUpdate();
         if (interaction.user.id != memberId) {
-            await interaction.deferUpdate();
             return;
         }
 
@@ -553,12 +539,10 @@ module.exports = {
 
         const key = guildId + interaction.member.id;
         await originalInteractions.get(key)?.editReply({ embeds: [embed] });
-
-        await interaction.deferUpdate();
     },
     updateSkillLevel: async (interaction, guildId, memberId) => {
+        await interaction.deferUpdate();
         if (interaction.user.id != memberId) {
-            await interaction.deferUpdate();
             return;
         }
 
@@ -576,10 +560,10 @@ module.exports = {
         
         const key = guildId + interaction.member.id;
         await originalInteractions.get(key)?.editReply({ components: interaction.message.components });
-
-        await interaction.deferUpdate();
     },
     gotoHomeRow: async (interaction, guildId, memberId) => {
+        await interaction.deferUpdate();
+
         const originalInteractionKey = guildId + interaction.member.id;
         const tempAttributesKey = guildId + memberId;
         const tempAttribute = tempAttributes.get(tempAttributesKey);
@@ -591,8 +575,6 @@ module.exports = {
             embeds: [embed],
             components: [actionRow]
         });
-
-        await interaction.deferUpdate();
     },
     extGotoHome: async (interaction, guildId, memberId) => {
         await interaction.deferReply({ ephemeral: true });

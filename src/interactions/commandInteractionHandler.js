@@ -1,12 +1,10 @@
-const Discord = require("discord.js");
-
 const Logger = require("../logger");
 const Constants = require("../constants");
 
 module.exports = {
     handleAsync: async (interaction) => {
         const commandName = interaction.commandName;
-        Logger.debug(`Processing chat interaction (${commandName})`);
+        Logger.debug(`Processing chat interaction ${interaction.id} (${commandName})`);
         const command = interaction.client.commands.get(commandName);
 	
         if (!command) {

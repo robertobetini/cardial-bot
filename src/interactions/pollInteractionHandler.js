@@ -11,7 +11,7 @@ module.exports = {
             return;
         }
 
-        Logger.debug(`Processing poll handler: ${command}-${pollId}`);
+        Logger.debug(`Processing poll handler ${interaction.id}: ${command}-${pollId}`);
         await commandRefs[command].pollHandler(pollAnswer, pollId, isVoteRemove);
     }
 }

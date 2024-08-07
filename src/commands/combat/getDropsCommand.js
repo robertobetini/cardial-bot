@@ -40,7 +40,7 @@ const drop = async (interaction, monsterIds) => {
     }
     UserService.batchUpsert(targets, true);
 
-    const embed = EmbededResponseService.getLootView(dropDetails, targets);
+    const embed = EmbededResponseService.getLootView(dropDetails, targets, monsters);
     const message = await interaction.editReply({
         embeds: [embed],
         files: [EmbededResponseService.FOOTER_IMAGE]

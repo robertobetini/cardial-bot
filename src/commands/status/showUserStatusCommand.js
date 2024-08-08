@@ -18,9 +18,21 @@ const { isValidUrl } = require("../../utils");
 
 const eventEmitter = require("../../events");
 
-const CACHE_LIFETIME = 16 * Constants.MINUTE_IN_MILLIS;
+const CACHE_LIFETIME = Constants.INTERACTION_COLLECTOR_LIFETIME_IN_HOURS * Constants.HOUR_IN_MILLIS;
 const tempAttributes = new Cache(CACHE_LIFETIME);
 const originalInteractions = new Cache(CACHE_LIFETIME);
+
+const safeEditReply = async (interaction, reply) => {
+    const key = interaction.guild.id + interaction.member.id;
+
+    try {
+        return await originalInteractions.get(key)?.editReply(reply);
+    } catch (err) {
+        Logger.warn(`Sending new reply due to error when editing old interaction: ${err.message}`);
+        await createOriginalMessageCacheEntry(interaction);
+        return await interaction.editReply(reply);
+    }
+}
 
 const buildHomeActionRow = (guildId, memberId) => {
     const attributesButton = new Discord.ButtonBuilder()
@@ -279,7 +291,7 @@ module.exports = {
         const key = guildId + interaction.member.id;
         const actionRows = buildAttributesActionRows(guildId, memberId);
         
-        await originalInteractions.get(key)?.editReply({ components: actionRows });
+        await safeEditReply(interaction, { components: actionRows });
     },
     showCharacterModal: async (interaction, guildId, memberId) => {
         if (interaction.user.id != memberId) {
@@ -370,7 +382,7 @@ module.exports = {
         const updatedEmbed = EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes.get(key));
 
         try {
-            await originalInteractions.get(key)?.editReply({ embeds: [updatedEmbed] });
+            await safeEditReply(interaction, { embeds: [updatedEmbed] });
         } catch(err) {
             if (/URL_TYPE_INVALID_URL/.test(err.message)) {
                 user.imgUrl = oldImgUrl;
@@ -390,7 +402,7 @@ module.exports = {
         const actionRows = buildSkillsActionRow(guildId, memberId);
 
         const key = guildId + interaction.member.id;
-        await originalInteractions.get(key)?.editReply({
+        await safeEditReply(interaction, {
             embeds: [embed],
             components: actionRows 
         });
@@ -411,7 +423,7 @@ module.exports = {
         const actionRows = buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability);
         
         const key = guildId + interaction.member.id;
-        await originalInteractions.get(key)?.editReply({ components: actionRows });
+        await safeEditReply(interaction, { components: actionRows });
     },
     clearTempAttributes: async (interaction, guildId, memberId) => {
         await interaction.deferUpdate();
@@ -424,7 +436,7 @@ module.exports = {
 
         const updatedEmbed = EmbededResponseService.getUserStatus(guildId, interaction.member);
         const actionRows = buildAttributesActionRows(guildId, memberId);
-        await originalInteractions.get(key)?.editReply({ 
+        await safeEditReply(interaction, { 
             embeds: [updatedEmbed],
             components: actionRows 
         });
@@ -476,7 +488,7 @@ module.exports = {
 
         const updatedEmbed = EmbededResponseService.getUserStatus(guildId, interaction.member);
         const actionRows = buildAttributesActionRows(guildId, memberId);
-        await originalInteractions.get(key)?.editReply({ 
+        await safeEditReply(interaction, { 
             embeds: [updatedEmbed],
             components: actionRows 
         });
@@ -492,7 +504,7 @@ module.exports = {
         
         const tempAttribute = tempAttributes.get(key);
         const attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute, tempAttribute.currentAttributes);
-        await originalInteractions.get(key)?.editReply({ 
+        await safeEditReply(interaction, { 
             embeds: [ EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttribute) ],
             components: buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability)
         });
@@ -508,7 +520,7 @@ module.exports = {
 
         const tempAttribute = tempAttributes.get(key);
         const attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute, tempAttribute.currentAttributes);
-        await originalInteractions.get(key)?.editReply({ 
+        await safeEditReply(interaction, { 
             embeds: [ EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttribute) ],
             components: buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability), 
         });
@@ -523,7 +535,7 @@ module.exports = {
         const actionRows = buildSelectedSkillActionRows(guildId, memberId, selectedSkill);
 
         const key = guildId + interaction.member.id;
-        await originalInteractions.get(key)?.editReply({ components: actionRows });
+        await safeEditReply(interaction, { components: actionRows });
     },
     updateSkill: async (interaction, guildId, memberId, selectedSkill) => {
         await interaction.deferUpdate();
@@ -538,7 +550,7 @@ module.exports = {
         const embed = EmbededResponseService.getUserSkills(guildId, interaction.user);
 
         const key = guildId + interaction.member.id;
-        await originalInteractions.get(key)?.editReply({ embeds: [embed] });
+        await safeEditReply(interaction, { embeds: [embed] });
     },
     updateSkillLevel: async (interaction, guildId, memberId) => {
         await interaction.deferUpdate();
@@ -558,8 +570,7 @@ module.exports = {
             selectedOption.default = true;
         }
         
-        const key = guildId + interaction.member.id;
-        await originalInteractions.get(key)?.editReply({ components: interaction.message.components });
+        await safeEditReply(interaction, { components: interaction.message.components });
     },
     gotoHomeRow: async (interaction, guildId, memberId) => {
         await interaction.deferUpdate();
@@ -571,7 +582,7 @@ module.exports = {
         const embed = EmbededResponseService.getUserStatus(guildId, member, tempAttribute);
         const actionRow = buildHomeActionRow(guildId, memberId);
         
-        await originalInteractions.get(originalInteractionKey)?.editReply({ 
+        await safeEditReply(interaction, { 
             embeds: [embed],
             components: [actionRow]
         });
@@ -600,5 +611,9 @@ module.exports = {
 // events
 eventEmitter.on("inventoryCommand_extExecute", async (guildId, userId) => {
     const key = guildId + userId;
-    await originalInteractions.get(key)?.deleteReply();
+    try {
+        await originalInteractions.get(key)?.deleteReply();
+    } catch {
+        return;
+    }
 });

@@ -113,7 +113,7 @@ class Constants {
         ...Constants.attributes.map(({ label, value }) => ({ label: `[Atributo] ${Constants.emojiMap[Constants.CHALLENGE_TO_ATTRIBUTE_MAP[value]]} ${label}`, value }))
     ];
     static TRANSLATION = {
-        "NoProficiency": "S/Prof.",
+        "NoProficiency": "Não",
         "Proficient": "Prof.",
         "Specialist": "Esp.",
         "STR": "For",

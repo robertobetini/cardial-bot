@@ -10,7 +10,7 @@ const commands = {
 
 module.exports = {
     handleAsync: async (interaction) => {
-        Logger.debug(`Processing autocomplete handler: ${interaction.commandName}`);
+        Logger.debug(`Processing autocomplete ${interaction.id}: ${interaction.commandName}`);
         const command = commands[interaction.commandName];
         if (!command) {
             Logger.warn(`Command ${interaction.commandName} autocomplete is not registered`);

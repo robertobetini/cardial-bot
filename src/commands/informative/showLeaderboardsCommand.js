@@ -2,6 +2,9 @@ const Discord = require("discord.js");
 const RoleService = require("./../../services/roleService");
 const EmbededResponseService = require("./../../services/embededResponseService");
 
+const Cache = require("../../cache");
+const Constants = require("../../constants");
+
 const buildActionRow = (guildId, memberId, command, type) => {
     const previousButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:${command}:previousPage:${type}`)
@@ -16,7 +19,9 @@ const buildActionRow = (guildId, memberId, command, type) => {
     return new Discord.ActionRowBuilder().addComponents(previousButton, nextButton);
 }
 
-const pages = {};
+const CACHE_LIFETIME = 5 * Constants.MINUTE_IN_MILLIS;
+const pages = new Cache(CACHE_LIFETIME);
+
 module.exports = {
     data: new Discord.SlashCommandBuilder()
         .setName("placar")
@@ -33,11 +38,6 @@ module.exports = {
         ),
     async execute(interaction) {
         RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
-    
-        if (Object.keys(pages).length > 3) {
-            // Limpe o conteúdo em vez de reatribuir
-            Object.keys(pages).forEach(key => delete pages[key]);
-        }
     
         const guildId = interaction.guild.id;
         const memberId = interaction.member.id;
@@ -67,21 +67,21 @@ module.exports = {
             files: [EmbededResponseService.FOOTER_IMAGE]
         });
 
-        pages[message.id] = 0;
+        pages.set(message.id, 0);
         return message;
     },
     previousPage: async (interaction, guildId, memberId, type) => {
         await interaction.deferUpdate();
 
         const messageId = interaction.message.id;
-        const currentPage = pages[messageId] || 0;
+        const currentPage = pages.get(messageId) || 0;
         const newPage = currentPage - 1;
     
         if (newPage < 0) {
             return;
         }
     
-        pages[messageId] = newPage;
+        pages.set(messageId, newPage);
     
         let leaderboard;
         if (type === "Gold") {
@@ -98,7 +98,7 @@ module.exports = {
         await interaction.deferUpdate();
 
         const messageId = interaction.message.id;
-        const currentPage = pages[messageId] || 0;
+        const currentPage = pages.get(messageId) || 0;
         const newPage = currentPage + 1;
     
         let leaderboard, isEmpty;
@@ -114,7 +114,7 @@ module.exports = {
             return;  
         }
 
-        pages[interaction.message.id] = newPage;
+        pages.set(interaction.message.id, newPage);
 
         await interaction.editReply({ embeds: [leaderboard] });
     }

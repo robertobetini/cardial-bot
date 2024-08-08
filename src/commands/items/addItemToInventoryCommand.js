@@ -7,6 +7,7 @@ const InventoryService = require("../../services/inventoryService");
 const { addMultipleUserOptions, getUsersFromInput } = require ("../helpers");
 const { autocomplete } = require("./queryItemCommand");
 const { unityOfWork } = require("../../utils");
+
 const Constants = require("../../constants");
 
 const data = new Discord.SlashCommandBuilder()

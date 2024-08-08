@@ -425,26 +425,27 @@ class EmbededResponseService {
             .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
     }
 
-    static getLootView(dropResult, userDetails) {
+    static getLootView(dropResult, userDetails, monsters) {
         const monsterIdtoNameMap = loadMonsterIdToNameMap();
 
         let description = "```ansi";
         let content = "";
         for (const monsterId of Object.keys(dropResult)) {
             const lootItems = dropResult[monsterId];
+            
+            const monsterName = monsterIdtoNameMap[monsterId];
+            content += `\n${monsterName} (x${monsters.filter(monster => monster.name === monsterName).length})`;
             if (lootItems.length < 1) {
+                content += `\n  ${Colors.GRAY}Nada :(${Colors.RESET}`;
                 continue;
             }
-
-            const monsterName = monsterIdtoNameMap[monsterId];
-            content += `\n${monsterName}`;
             for (const lootItem of lootItems.sort()) {
                 content += lootItem.item.id === Constants.GOLD_ITEM_ID ? `${Colors.YELLOW}\n  ${lootItem.gold} ` : `${Colors.GREEN}\n  `;
                 content += lootItem.item.name + Colors.RESET;
             }
             content += "\n";
         }
-        content = content || "\nNada :(";
+        // content = content || "\nNada :(";
         description += content + "\n```";
 
         const fields = [];

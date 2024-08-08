@@ -3,7 +3,7 @@ class DiceService {
         const rolls = { times, dice, mod, results: [] };
 
         for (let i = 0; i < times; i++) {
-            const result = Math.floor(Math.random() * dice + 1) + mod;
+            const result = Math.ceil(Math.random() * dice) + mod;
             rolls.results.push(result);
         }
 

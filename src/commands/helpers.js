@@ -4,9 +4,7 @@ const UserService = require("../services/userService");
 
 const Logger = require("../logger");
 
-const capitalize = (name) => {
-    return name[0].toUpperCase() + name.substring(1, name.length);
-}
+const capitalize = (name) => name[0].toUpperCase() + name.substring(1, name.length);
 
 module.exports = {
     addMultipleAutocompletes: (slashCommandBuilder, optionBaseName, optionsCount, requiredOptionsCount) => {
@@ -40,7 +38,7 @@ module.exports = {
             }
             result.mentions.push(Discord.userMention(user.id));
             
-            Logger.debug(`Jogador ${user.username} adicionado à busca de fichas`);
+            Logger.debug(`Player ${user.username} added to fetch list`);
             const u = UserService.get(interaction.guild.id, user.id, true);
             if (u == null || !u.attributes.firstAttributionDone) {
                 throw new Error(`Existem jogadores sem ficha ou com ficha incompleta.`);
@@ -48,7 +46,17 @@ module.exports = {
             result.users.push(u);
         }
 
-        Logger.debug("Consulta de fichas realizada");
+        // check for duplicates
+        const occurences = {};
+        for (const user of result.users) {
+            if (occurences[user.userId]) {
+                throw new Error(`Tu marcou duas vezes a mesma pessoa, aí não, parça...`);
+            }
+
+            occurences[user.userId] = 1;
+        }
+
+        Logger.debug("Character sheet query completed");
         return result;
     },
     getStringsFromInput: (interaction, optionBaseName, inputCount) => {

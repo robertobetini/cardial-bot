@@ -1,8 +1,5 @@
 const crypto = require("node:crypto");
 const URL = require("url").URL;
-const Sqlite3DAO = require("./DAOs/sqlite3DAO");
-
-const MonsterService = require("./services/monsterService");
 
 const { calculateAttributeMod } = require("./calculators/modCalculator");
 
@@ -60,6 +57,8 @@ const setCombatOrder = (a, b) => {
 
 let monsterIdToNameMap = {};
 const loadMonsterIdToNameMap = () => {
+    const MonsterService = require("./services/monsterService");
+    
     if (Object.keys(monsterIdToNameMap).length > 0) {
         return monsterIdToNameMap;
     }
@@ -99,6 +98,7 @@ module.exports = {
     loadMonsterIdToNameMap,
     clearMonsterIdToNameMap,
     unityOfWork: (func) => {
+        const Sqlite3DAO = require("./DAOs/sqlite3DAO");
         const execute = Sqlite3DAO.db.transaction(async () => {
             try {
                 return await func();

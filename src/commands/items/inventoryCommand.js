@@ -7,11 +7,12 @@ const ItemService = require("../../services/itemService");
 
 const Logger = require("../../logger");
 const Constants = require("../../constants");
+const Cache = require("../../cache");
 const eventEmitter = require("../../events");
 
-const originalInteractions = {};
 const CACHE_LIFETIME = 16 * Constants.MINUTE_IN_MILLIS;
 const NULL_SELECTION_TOKEN = "NULL_SELECTION";
+const originalInteractions = new Cache(CACHE_LIFETIME);
 
 const createSelectOptions = (optionList, selected) => {
     const options = [];
@@ -84,15 +85,15 @@ const buildOptionList = (inventory) => inventory.items.map(ii => ({ label: ii.it
 
 const createOriginalMessageCacheEntry = async (interaction, guildId, userId) => {
     const key = guildId + userId;
-    if (originalInteractions[key]) {
+    const originalInteraction = originalInteractions.get(key);
+    if (originalInteraction) {
         try {
-            await originalInteractions[key]?.deleteReply();
+            await originalInteraction?.deleteReply();
         } catch {
             Logger.warn("Tried to delete non-existing interaction message");
         }
     }
-    originalInteractions[key] = interaction;
-    setTimeout(() => delete originalInteractions[key], CACHE_LIFETIME);
+    originalInteractions.set(key, interaction);
 }
 
 module.exports = {
@@ -158,7 +159,7 @@ module.exports = {
         }
 
         const key = guildId + userId;
-        await originalInteractions[key]?.editReply({
+        await originalInteractions.get(key)?.editReply({
             components: buildHomeActionRows(guildId, userId, optionList, NULL_SELECTION_TOKEN)
         });
     },
@@ -221,7 +222,7 @@ module.exports = {
         const externalCommand = info.length > 1 ? info[2] : "";
 
         const key = guildId + interaction.member.id;
-        await originalInteractions[key]?.editReply({
+        await originalInteractions.get(key)?.editReply({
             embeds: [embed],
             components: optionList.length > 0 
                 ? buildHomeActionRows(guildId, userId, optionList, NULL_SELECTION_TOKEN, externalCommand)
@@ -243,7 +244,7 @@ module.exports = {
         const key = guildId + interaction.member.id;
         const selectedItem = interaction.values[0];
 
-        await originalInteractions[key]?.editReply({
+        await originalInteractions.get(key)?.editReply({
             components: buildHomeActionRows(guildId, userId, optionList, selectedItem, sourceCommand)
         });
     },
@@ -280,5 +281,5 @@ module.exports = {
 // events
 eventEmitter.on("showUserStatusCommand_extGotoHome", (guildId, userId) => {
     const key = guildId + userId;
-    originalInteractions[key]?.deleteReply();
+    originalInteractions.get(key)?.deleteReply();
 });

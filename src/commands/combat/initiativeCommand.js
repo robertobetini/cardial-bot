@@ -6,11 +6,12 @@ const RoleService = require("../../services/roleService");
 const StatsService = require("../../services/statsService");
 
 const Logger = require("../../logger");
+const Cache = require("../../cache");
 const Constants = require("../../constants");
 const { addMultipleUserOptions, getUsersFromInput } = require ("../helpers");
 
-const combats = {};
-const CACHE_LIFETIME = 16 * Constants.MINUTE_IN_MILLIS;
+const CACHE_LIFETIME = Constants.INTERACTION_COLLECTOR_LIFETIME_IN_HOURS * Constants.HOUR_IN_MILLIS;
+const combats_cache = new Cache(CACHE_LIFETIME);
 
 const data = new Discord.SlashCommandBuilder()
     .setName("iniciativa")
@@ -19,7 +20,7 @@ const data = new Discord.SlashCommandBuilder()
 addMultipleUserOptions(data, Constants.COMMAND_MAX_USERS, 1);
 
 const buildActionRows = (guildId, userId, combatId, blockButtons = false) => {
-    const { participants, mobs } = combats[combatId];
+    const { participants, mobs } = combats_cache.get(combatId);
     const actionRows = [];
 
     const addMobButton = new Discord.ButtonBuilder()
@@ -59,13 +60,12 @@ module.exports = {
         const { users } = getUsersFromInput(interaction, Constants.COMMAND_MAX_USERS);
         const combatId = randomId(10);
 
-        combats[combatId] = { participants: users, mobs: [], gm: null };
-        setTimeout(() => delete combats[combatId], CACHE_LIFETIME);
+        const combat = combats_cache.set(combatId, { participants: users, mobs: [], gm: null });
         
         users.sort((a, b) => setCombatOrder(a, b));
         users[0].selected = true;
         
-        const embed = EmbededResponseService.getInitiativeView(users, combats[combatId].mobs);
+        const embed = EmbededResponseService.getInitiativeView(users, combat.mobs);
         return await interaction.editReply({
             content: `Turno de ${Discord.userMention(users[0].userId)}`,
             embeds: [embed],
@@ -74,7 +74,7 @@ module.exports = {
         });
     },
     addMobModal: async (interaction, guildId, memberId, combatId) => {
-        if (!combats[combatId]) {
+        if (!combats_cache.get(combatId)) {
             return;
         }
 
@@ -114,7 +114,8 @@ module.exports = {
     },
     addMob: async (interaction, guildId, memberId, combatId) => {
         await interaction.deferUpdate();
-        if (!combats[combatId]) {
+        const combat = combats_cache.get(combatId);
+        if (!combat) {
             return;
         }
 
@@ -124,17 +125,17 @@ module.exports = {
             return;
         }
 
-        const isMobTurn = combats[combatId].mobs.filter(mob => mob.selected).length > 0;
+        const isMobTurn = combat.mobs.filter(mob => mob.selected).length > 0;
         if (quantity === 1) {
-            combats[combatId].mobs.push({ name: mobName, selected: isMobTurn });
+            combat.mobs.push({ name: mobName, selected: isMobTurn });
         } else {
             for (let i = 0; i < quantity; i++) {
-                combats[combatId].mobs.push({ name: mobName + ` ${i+1}`, selected: isMobTurn });
+                combat.mobs.push({ name: mobName + ` ${i+1}`, selected: isMobTurn });
             }
         }
-        combats[combatId].gm = interaction.member.id;
+        combat.gm = interaction.member.id;
 
-        const embed = EmbededResponseService.getInitiativeView(combats[combatId].participants, combats[combatId].mobs);
+        const embed = EmbededResponseService.getInitiativeView(combat.participants, combat.mobs);
         await interaction.message.edit({ 
             embeds: [embed],
             components: buildActionRows(guildId, memberId, combatId)
@@ -142,11 +143,12 @@ module.exports = {
     },
     setNextPlayer: async (interaction, guildId, memberId, combatId) => {
         await interaction.deferReply();
-        if (!combats[combatId]) {
+        const combat = combats_cache.get(combatId);
+        if (!combat) {
             return;
         }
 
-        const { participants, mobs, gm } = combats[combatId];
+        const { participants, mobs, gm } = combat;
 
         const selectedIndex = participants.findIndex(p => p.selected);
         const lastIndex = participants.length - 1;
@@ -199,25 +201,26 @@ module.exports = {
     },
     removeEntity: async (interaction, guildId, memberId, combatId) => {
         await interaction.deferUpdate();
-        if (!combats[combatId]) {
+        const combat = combats_cache.get(combatId);
+        if (!combat) {
             return;
         }
 
         RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
 
         const selectedEntity = interaction.values[0];
-        const { participants, mobs } = combats[combatId];
+        const { participants, mobs } = combat;
 
         let selectedIndex = participants.findIndex(p => p.userId === selectedEntity);
         if (selectedIndex < 0) {
             selectedIndex = mobs.findIndex(m => m.name != selectedEntity);
         }
 
-        combats[combatId].participants = participants.filter(p => p.userId != selectedEntity);
-        combats[combatId].mobs = mobs.filter(m => m.name != selectedEntity);
+        combat.participants = participants.filter(p => p.userId != selectedEntity);
+        combat.mobs = mobs.filter(m => m.name != selectedEntity);
 
-        const embed = EmbededResponseService.getInitiativeView(combats[combatId].participants, combats[combatId].mobs);
-        const mustBlockButtons = combats[combatId].participants.length < 1;
+        const embed = EmbededResponseService.getInitiativeView(combat.participants, combat.mobs);
+        const mustBlockButtons = combat.participants.length < 1;
 
         await Promise.all([
             interaction.message.edit({ 

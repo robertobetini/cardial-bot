@@ -68,7 +68,7 @@ const createInteractionCollector = (message, componentType, lifetime, collectHan
 			}
 		})
 		.on('end', async collected => {
-			Logger.info(`Stopping collecting interactions (total: ${collected.size}) from message: ${message.id}, channel: ${message.channel.id}, guild: ${message.guild.id}`);
+			Logger.info(`Stopping collecting interactions (total: ${collected.size}) from message: ${message?.id}, channel: ${message?.channel?.id}, guild: ${message?.guild?.id}`);
 			delete collectors[collectorId];
 			if (endHandler) {
 				await endHandler(collected);

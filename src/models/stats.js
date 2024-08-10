@@ -104,11 +104,27 @@ class Stats {
         newValue = newValue < 0 ? 0 : newValue;
 
         if (stat === "currentHP") {
-            newValue = newValue > this.maxHP ? this.maxHP : newValue;
+            newValue = newValue > this.maxHP + this.tempHP ? this.maxHP + this.tempHP : newValue;
         } else if (stat === "currentFP") {
-            newValue = newValue > this.maxFP ? this.maxFP : newValue;
+            newValue = newValue > this.maxFP + this.tempFP ? this.maxFP + this.tempHP : newValue;
         } else if (stat === "currentSP") {
-            newValue = newValue > this.maxSP ? this.maxSP : newValue;
+            newValue = newValue > this.maxSP + this.tempSP ? this.maxSP + this.tempSP : newValue;
+        } 
+        
+        else if (stat === "maxHP") {
+            this.currentHP = newValue + this.tempHP < this.currentHP ? newValue + this.tempHP : this.currentHP;
+        } else if (stat === "maxFP") {
+            this.currentFP = newValue + this.tempFP < this.currentFP ? newValue + this.tempFP : this.currentFP;
+        } else if (stat === "maxSP") {
+            this.currentSP = newValue + this.tempSP < this.currentSP ? newValue + this.tempSP : this.currentSP;
+        }
+
+        else if (stat === "tempHP") {
+            this.currentHP = newValue + this.maxHP < this.currentHP ? newValue + this.maxHP : this.currentHP;
+        } else if (stat === "tempFP") {
+            this.currentFP = newValue + this.maxFP < this.currentFP ? newValue + this.maxFP : this.currentFP;
+        } else if (stat === "tempSP") {
+            this.currentSP = newValue + this.maxSP < this.currentSP ? newValue + this.maxSP : this.currentSP;
         }
 
         this[stat] = newValue;

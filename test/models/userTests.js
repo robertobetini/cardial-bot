@@ -15,14 +15,14 @@ test(TESTING_MODULE, Stats.prototype.tryUpdateGold,
             const stats = new Stats(null, null, 0, 0);
             const attributes = new Attributes(null, null, 15, 15, 15, 15, 15, 0, true);
 
-            stats.currentHP = 10;
-            stats.maxHP = 10;
+            stats.HP.current = 10;
+            stats.HP.max = 10;
 
-            stats.currentFP = 2;
-            stats.maxFP = 2;
+            stats.FP.current = 2;
+            stats.FP.max = 2;
 
-            stats.currentSP = 25;
-            stats.maxSP = 25;
+            stats.SP.current = 25;
+            stats.SP.max = 25;
 
             user.stats = stats;
             user.attributes = attributes;
@@ -36,9 +36,9 @@ test(TESTING_MODULE, Stats.prototype.tryUpdateGold,
             
             user.levelUp();
 
-            assert.equal(expected["maxHP"], user.stats.maxHP);
-            assert.equal(expected["maxFP"], user.stats.maxFP);
-            assert.equal(expected["maxSP"], user.stats.maxSP);
+            assert.equal(expected["maxHP"], user.stats.HP.max);
+            assert.equal(expected["maxFP"], user.stats.FP.max);
+            assert.equal(expected["maxSP"], user.stats.SP.max);
             assert.equal(expected["availablePoints"], user.attributes.availablePoints);
         })
 );

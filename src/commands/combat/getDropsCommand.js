@@ -52,6 +52,14 @@ const drop = async (interaction, monsterIds) => {
     }
 
     // poll creation handling
+    if (interaction.channel.isThread()) {
+        createPollInsideThread(interaction, message);
+    } else {
+        createPollInChannelDirectly();
+    }
+}
+
+const createPollInsideThread = async (interaction, message) => {
     const pollNum = Math.ceil(distinctItems.length / Constants.ITEMS_PER_POLL);
     const pollItems = distinctItems.map(itemName => ({ text: `${itemName} [x${dropSummary[itemName]}]` }));
     const threadChannel = await message.startThread({ name: "drops" });

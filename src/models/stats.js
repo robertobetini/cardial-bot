@@ -1,6 +1,7 @@
 const playerExpCalculator = require("../calculators/playerExpCalculator");
 const masteryExpCalculator = require("../calculators/masteryExpCalculator");
 
+const StatsBar = require("./statsBar");
 const Constants = require("../constants");
 const Logger = require("../logger");
 
@@ -19,17 +20,9 @@ class Stats {
         this.lvl = 1;
         this.mastery = 1;
 
-        this.currentHP = Constants.BASE_HP;
-        this.maxHP = Constants.BASE_HP;
-        this.tempHP = 0;
-
-        this.currentFP = Constants.BASE_FP;
-        this.maxFP = Constants.BASE_FP;
-        this.tempFP = 0;
-
-        this.currentSP = Constants.BASE_SP;
-        this.maxSP = Constants.BASE_SP;
-        this.tempSP = 0;
+        this.HP = new StatsBar("HP", Constants.BASE_HP, Constants.BASE_HP);
+        this.FP = new StatsBar("FP", Constants.BASE_FP, Constants.BASE_FP);
+        this.SP = new StatsBar("SP", Constants.BASE_SP, Constants.BASE_SP);
 
         this.baseDEF = Constants.BASE_DEF;
         this.baseInitiative = Constants.BASE_INITIATIVE;
@@ -98,33 +91,27 @@ class Stats {
 
         this.gold = newAmount;
     }
+
+    decreaseCurrentStat() {
+
+    }
     
     modifyStat(stat, amount) {
         let newValue = this[stat] + amount;
         newValue = newValue < 0 ? 0 : newValue;
 
         if (stat === "currentHP") {
-            newValue = newValue > this.maxHP + this.tempHP ? this.maxHP + this.tempHP : newValue;
+            this.HP.increaseCurrent(amount);
         } else if (stat === "currentFP") {
-            newValue = newValue > this.maxFP + this.tempFP ? this.maxFP + this.tempHP : newValue;
+            this.FP.increaseCurrent(amount);
         } else if (stat === "currentSP") {
-            newValue = newValue > this.maxSP + this.tempSP ? this.maxSP + this.tempSP : newValue;
-        } 
-        
-        else if (stat === "maxHP") {
-            this.currentHP = newValue + this.tempHP < this.currentHP ? newValue + this.tempHP : this.currentHP;
+            this.SP.increaseCurrent(amount);
+        } else if (stat === "maxHP") {
+            this.HP.increaseMax(amount);
         } else if (stat === "maxFP") {
-            this.currentFP = newValue + this.tempFP < this.currentFP ? newValue + this.tempFP : this.currentFP;
+            this.FP.increaseMax(amount);
         } else if (stat === "maxSP") {
-            this.currentSP = newValue + this.tempSP < this.currentSP ? newValue + this.tempSP : this.currentSP;
-        }
-
-        else if (stat === "tempHP") {
-            this.currentHP = newValue + this.maxHP < this.currentHP ? newValue + this.maxHP : this.currentHP;
-        } else if (stat === "tempFP") {
-            this.currentFP = newValue + this.maxFP < this.currentFP ? newValue + this.maxFP : this.currentFP;
-        } else if (stat === "tempSP") {
-            this.currentSP = newValue + this.maxSP < this.currentSP ? newValue + this.maxSP : this.currentSP;
+            this.SP.increaseMax(amount);
         }
 
         this[stat] = newValue;
@@ -143,20 +130,9 @@ class Stats {
             fullUserDTO.totalMasteryExp
         );
 
-        stats.currentHP = fullUserDTO.currentHP;
-        stats.maxHP = fullUserDTO.maxHP;
-        stats.tempHP = fullUserDTO.tempHP;
-
-        stats.currentFP = fullUserDTO.currentFP;
-        stats.maxFP = fullUserDTO.maxFP;
-        stats.tempFP = fullUserDTO.tempFP;
-
-        stats.currentSP = fullUserDTO.currentSP;
-        stats.maxSP = fullUserDTO.maxSP;
-        stats.tempSP = fullUserDTO.tempSP;
-
-        stats.baseDEF = fullUserDTO.baseDEF;
-        stats.baseInitiative = fullUserDTO.baseInitiative;
+        stats.HP.set(fullUserDTO.currentHP, fullUserDTO.maxHP, fullUserDTO.tempHP);
+        stats.FP.set(fullUserDTO.currentFP, fullUserDTO.maxFP, fullUserDTO.tempFP);
+        stats.SP.set(fullUserDTO.currentSP, fullUserDTO.maxSP, fullUserDTO.tempSP);
 
         return stats;
     }

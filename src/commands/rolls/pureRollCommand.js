@@ -6,6 +6,7 @@ const buildRerollActionRow = (guildId, userId, dice, quantity, rerollsSoFar) => 
     const button = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:pureRollCommand:reroll:${dice}:${quantity}:${++rerollsSoFar}`)
         .setLabel("Rolar novamente")
+        .setEmoji("🎲")
         .setStyle(Discord.ButtonStyle.Secondary);
 
     return new Discord.ActionRowBuilder().addComponents(button);

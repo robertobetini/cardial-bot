@@ -38,12 +38,14 @@ const buildHomeActionRows = (guildId, userId, optionList, selected, externalComm
     const removeItemButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:inventoryCommand:showConfirmRemovalModal:${selected}`)
         .setLabel("Remover")
+        .setEmoji("🗑️")
         .setStyle(Discord.ButtonStyle.Danger)
         .setDisabled(isNullSelection);
 
     const fetchItemButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:queryItemCommand:extExecute:inventoryCommand:${selected}`)
         .setLabel("Detalhes")
+        .setEmoji("🔎")
         .setStyle(Discord.ButtonStyle.Primary)
         .setDisabled(isNullSelection);
 
@@ -62,6 +64,7 @@ const buildHomeActionRows = (guildId, userId, optionList, selected, externalComm
         const backToExternalCommandButton = new Discord.ButtonBuilder()
             .setCustomId(`${guildId}:${userId}:${externalCommand}:extGotoHome`)
             .setLabel("Voltar")
+            .setEmoji("⬅️")
             .setStyle(Discord.ButtonStyle.Secondary);
 
         buttons.unshift(backToExternalCommandButton);
@@ -76,6 +79,7 @@ const buildBackToExternalCommandRows = (guildId, userId, externalCommand) => {
     const buildBackToExternalCommandButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:${externalCommand}:extGotoHome`)
         .setLabel("Voltar")
+        .setEmoji("⬅️")
         .setStyle(Discord.ButtonStyle.Secondary);
 
     return [ new Discord.ActionRowBuilder().addComponents(buildBackToExternalCommandButton) ];

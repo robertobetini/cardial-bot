@@ -42,6 +42,7 @@ module.exports = {
 
         const dropsButton = new Discord.ButtonBuilder()
             .setLabel("Drops")
+            .setEmoji("📋")
             .setStyle(Discord.ButtonStyle.Secondary)
             .setCustomId(`${guildId}:${userId}:queryMonsterCommand:showDrops:${monsterId}`);
         const actionRow = new Discord.ActionRowBuilder().addComponents(dropsButton);

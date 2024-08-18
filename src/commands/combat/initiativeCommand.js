@@ -26,12 +26,14 @@ const buildActionRows = (guildId, userId, combatId, blockButtons = false) => {
     const addMobButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:initiativeCommand:addMobModal:${combatId}`)
         .setLabel("Adicionar Mob")
+        .setEmoji("🧌")
         .setStyle(Discord.ButtonStyle.Success)
         .setDisabled(blockButtons);
     
     const setNextPlayerButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:initiativeCommand:setNextPlayer:${combatId}`)
         .setLabel("Próximo")
+        .setEmoji("➡️")
         .setStyle(Discord.ButtonStyle.Secondary)
         .setDisabled(blockButtons);
 

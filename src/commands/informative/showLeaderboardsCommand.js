@@ -9,11 +9,13 @@ const buildActionRow = (guildId, memberId, command, type) => {
     const previousButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:${command}:previousPage:${type}`)
         .setLabel("Anterior")
+        .setEmoji("⬅️")
         .setStyle(Discord.ButtonStyle.Secondary);
 
     const nextButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:${command}:nextPage:${type}`)
         .setLabel("Próximo")
+        .setEmoji("➡️")
         .setStyle(Discord.ButtonStyle.Secondary);
 
     return new Discord.ActionRowBuilder().addComponents(previousButton, nextButton);

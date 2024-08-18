@@ -38,21 +38,25 @@ const buildHomeActionRow = (guildId, memberId) => {
     const attributesButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:showUserStatusCommand:showAttributesRow`)
         .setLabel("Atributos")
+        .setEmoji("📊")
         .setStyle(Discord.ButtonStyle.Primary);
 
     const skillsButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:showUserStatusCommand:showSkillsRow`)
         .setLabel("Perícias")
+        .setEmoji("📝")
         .setStyle(Discord.ButtonStyle.Primary);
 
     const characterButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:showUserStatusCommand:showCharacterModal`)
         .setLabel("Personagem")
+        .setEmoji("👤")
         .setStyle(Discord.ButtonStyle.Primary);
 
     const inventoryButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:inventoryCommand:extExecute:showUserStatusCommand`)
         .setLabel("Inventário")
+        .setEmoji("📦")
         .setStyle(Discord.ButtonStyle.Primary);
 
     return new Discord.ActionRowBuilder().addComponents(attributesButton, skillsButton, characterButton, inventoryButton);
@@ -78,24 +82,28 @@ const buildSelectedAttributeActionRows = (guildId, userId, selected, buttonAvail
     const cancelButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:clearTempAttributes`)
         .setLabel("Cancelar")
+        .setEmoji("✖️")
         .setStyle(Discord.ButtonStyle.Danger)
         .setDisabled(!buttonAvailability[0]);
 
     const decreaseButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:decreaseAttribute:${selected}`)
-        .setLabel("-")
+        // .setLabel("-")
+        .setEmoji("➖")
         .setStyle(Discord.ButtonStyle.Primary)
         .setDisabled(!buttonAvailability[1]);
 
     const increaseButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:increaseAttribute:${selected}`)
-        .setLabel("+")
+        // .setLabel("+")
+        .setEmoji("➕")
         .setStyle(Discord.ButtonStyle.Primary)
         .setDisabled(!buttonAvailability[2]);
 
     const confirmButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:saveTempAttributes`)
         .setLabel("Confirmar")
+        .setEmoji("✔️")
         .setStyle(Discord.ButtonStyle.Success)
         .setDisabled(!buttonAvailability[3]);
 
@@ -160,6 +168,7 @@ const buildSelectedSkillActionRows = (guildId, userId, selected) => {
     const updateButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:updateSkill:${selected}`)
         .setLabel("Atualizar")
+        .setEmoji("🔄")
         .setStyle(Discord.ButtonStyle.Success);
 
     actionRows[2] = actionRows[2].addComponents(updateButton);
@@ -203,6 +212,7 @@ const createGotoHomeButton = (guildId, userId) => {
     return new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:gotoHomeRow`)
         .setLabel("Voltar")
+        .setEmoji("⬅️")
         .setStyle(Discord.ButtonStyle.Secondary);
 }
 

@@ -147,16 +147,17 @@ class ItemSyncService {
             const description = values[2].trim();
             const price = ItemSyncService.parsePrice(values[3]);
             const weight = Number(values[5].trim());
-            const imgUrl = ItemSyncService.getUrl(values[11]);
-            const emoji = values[12].trim();
+            const imgUrl = ItemSyncService.getUrl(values[12]);
+            const emoji = values[13].trim();
 
             const CA = Number(values[4]);
             const grip = values[7].trim();
             const properties = values[8].split(",").map(v => v.trim());
             const metal = values[9].trim();
-            const damage = values[10].trim();
+            const damage = values[11].trim();
+            const effects = values[10]?.split(",")?.map(v => v.trim());
 
-            const details = { CA, grip, properties, metal, damage };
+            const details = { CA, grip, properties, metal, damage, effects };
 
             const item = new Item(itemId, name, level, "shield", description, price, NOT_APPLICABLE_TOKEN, weight, imgUrl, emoji, JSON.stringify(details));
             items.push(item);
@@ -182,16 +183,18 @@ class ItemSyncService {
             const description = values[2].trim();
             const price = ItemSyncService.parsePrice(values[3]);
             const weight = Number(values[4].trim());
-            const imgUrl = ItemSyncService.getUrl(values[12]);
-            const emoji = values[13]?.trim();
+            const imgUrl = ItemSyncService.getUrl(values[13]);
+            const emoji = values[14]?.trim();
 
             const metal = values[6].trim();
             const CA = Number(values[7]);
-            const STR = Number(values[9].trim());
-            const stealth = values[10].trim();
-            const dexDebuff = Number(values[11].trim());
+            const stealth = values[8].trim();
+            const STR = Number(values[9].trim()) || 1;
+            const dexDebuff = values[10].trim();
+            const properties = values[11]?.split(",")?.map(v => v.trim());
+            const effects = values[12]?.split("\n")?.map(v => v.trim());
 
-            const details = { CA, metal, STR, stealth, dexDebuff };
+            const details = { CA, metal, STR, stealth, dexDebuff, properties, effects };
 
             const item = new Item(itemId, name, level, "armor", description, price, NOT_APPLICABLE_TOKEN, weight, imgUrl, emoji, JSON.stringify(details));
             items.push(item);

@@ -6,12 +6,12 @@ const commandRefs = {
 
 module.exports = {
     handleAsync: async (pollAnswer, isVoteRemove) => {
-        const [command, pollId] = pollAnswer.poll.message.content.split("-");
-        if (!pollId) {
+        const [command, executionId, pollId] = pollAnswer.poll.message.content.split("-");
+        if (!executionId || !pollId) {
             return;
         }
 
-        Logger.debug(`Processing poll handler: ${command}-${pollId}`);
-        await commandRefs[command].pollHandler(pollAnswer, pollId, isVoteRemove);
+        Logger.debug(`Processing poll handler: ${command}-${executionId}-${pollId}`);
+        await commandRefs[command].pollHandler(pollAnswer, executionId, pollId, isVoteRemove);
     }
 }

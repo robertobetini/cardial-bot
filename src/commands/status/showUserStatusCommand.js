@@ -19,8 +19,8 @@ const { isValidUrl } = require("../../utils");
 const eventEmitter = require("../../events");
 
 const CACHE_LIFETIME = Constants.INTERACTION_COLLECTOR_LIFETIME_IN_HOURS * Constants.HOUR_IN_MILLIS;
-const tempAttributes = new Cache(CACHE_LIFETIME);
-const originalInteractions = new Cache(CACHE_LIFETIME);
+const tempAttributes = new Cache("USER_TEMP_ATTR_CACHE", CACHE_LIFETIME);
+const originalInteractions = new Cache("USER_SHEETS_ORIGINAL_INTERACTION_CACHE", CACHE_LIFETIME);
 
 const safeEditReply = async (interaction, reply) => {
     const key = interaction.guild.id + interaction.member.id;

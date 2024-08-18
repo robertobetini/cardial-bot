@@ -1,7 +1,11 @@
+const Logger = require("./logger");
+
 class Cache {
+    name = "NO_NAME";
     items = {};
 
-    constructor(lifetime = 600_000) {
+    constructor(name, lifetime = 600_000) {
+        this.name = name;
         this.lifetime = lifetime;
     }
 
@@ -9,7 +13,7 @@ class Cache {
         return this.items[key]?.item;
     }
 
-    set(key, item, callback = (item) => { return; }, lifetime = null) {
+    set(key, item, callback = async (item) => { return; }, lifetime = null) {
         const existingItem = this.items[key];
         if (existingItem) {
             existingItem.item = item;
@@ -17,9 +21,11 @@ class Cache {
             return existingItem.item;
         }
 
-        const onDelete = () => {
-            callback(existingItem);
+        const onDelete = async () => {
+            const existingItem = this.items[key];
+            await callback(existingItem.item);
             delete this.items[key];
+            Logger.debug(`Expired item ${item} with key ${key} from cache ${this.name}`);
         };
 
         this.items[key] = {

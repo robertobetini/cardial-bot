@@ -124,10 +124,18 @@ client.on(Discord.Events.Poll, async pollAnswer => {
 });
 
 client.on(Discord.Events.MessageCreate, async messageEvent => {
-	if (messageEvent.author.id != DEV_USER_ID) {
-		return;
-	}
+	const botId = client.user.id;
+	switch (messageEvent.author.id) {
+		case DEV_USER_ID:
+			await handleDevMessage(messageEvent);
+			return;
+		case botId:
+			await handleBotMessage(messageEvent);
+			return;
+	}	
+});
 
+const handleDevMessage = async (messageEvent) => {
 	const message = await messageEvent.fetch();
 	const tokens = message.content.split(" ");
 	if (tokens.length !== 2) {
@@ -141,6 +149,16 @@ client.on(Discord.Events.MessageCreate, async messageEvent => {
 	const path = `./db_scripts/${tokens[1]}`;
 	await message.delete();
 	scriptExecutor.execute(path);
-});
+}
+
+const handleBotMessage = async (messageEvent) => {
+	// message type 46 is POLL_RESULT (not implemented in discord.js v14.15.3)
+	if (messageEvent.type !== 46) {
+		return;
+	}
+
+	Logger.info("Deleting bot poll result message");
+	await messageEvent.delete();
+}
 
 client.login(process.env.TOKEN);

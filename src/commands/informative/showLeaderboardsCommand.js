@@ -20,7 +20,7 @@ const buildActionRow = (guildId, memberId, command, type) => {
 }
 
 const CACHE_LIFETIME = 5 * Constants.MINUTE_IN_MILLIS;
-const pages = new Cache(CACHE_LIFETIME);
+const pages = new Cache("LEADERBOARDS_PAGES_CACHE", CACHE_LIFETIME);
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()

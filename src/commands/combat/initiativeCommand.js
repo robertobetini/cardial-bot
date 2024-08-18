@@ -11,7 +11,7 @@ const Constants = require("../../constants");
 const { addMultipleUserOptions, getUsersFromInput } = require ("../helpers");
 
 const CACHE_LIFETIME = Constants.INTERACTION_COLLECTOR_LIFETIME_IN_HOURS * Constants.HOUR_IN_MILLIS;
-const combats_cache = new Cache(CACHE_LIFETIME);
+const combats_cache = new Cache("INITIATIVE_CACHE", CACHE_LIFETIME);
 
 const data = new Discord.SlashCommandBuilder()
     .setName("iniciativa")

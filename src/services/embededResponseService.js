@@ -313,7 +313,11 @@ class EmbededResponseService {
 
             detailsText += `${Constants.TRANSLATION[key]}: `;
             if (value instanceof(Array)) {
-                detailsText += value.join(", ");
+                if (value.length === 1) {
+                    detailsText += value[0];
+                } else {
+                    detailsText += "\n  " + value.map(text => "> " + text).join("\n  ");
+                }
             } else if (typeof(value) === "string") {
                 detailsText += value;
             } else if (typeof(value) === "number") {
@@ -328,6 +332,7 @@ class EmbededResponseService {
                 name: "> Info",
                 value: 
                     "```\n" +
+                    `Nível: ${item.level ? item.level : 1}\n` +
                     `Categoria: ${Constants.TRANSLATION[item.type]}\n` +
                     `Tier:  ${item.tier}\n` +
                     `Preço: ${item.price ? item.price + " 💰" : "-"}\n` +

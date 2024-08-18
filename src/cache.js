@@ -23,7 +23,7 @@ class Cache {
 
         const onDelete = async () => {
             const existingItem = this.items[key];
-            await callback(existingItem.item);
+            await callback(existingItem?.item);
             delete this.items[key];
             Logger.debug(`Expired item ${item} with key ${key} from cache ${this.name}`);
         };
@@ -37,12 +37,12 @@ class Cache {
     }
 
     unset(key) {
-        const item = this.get(key);
+        const item = this.items[key];
         if (!item) {
             return;
         }
 
-        item.timer?.unref();
+        clearTimeout(item.timer);
         delete this.items[key];
     }
 }

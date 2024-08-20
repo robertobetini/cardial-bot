@@ -72,22 +72,64 @@ class EmbededResponseService {
         const user = typeof(discordUser) === "string" 
             ? UserService.get(guildId, discordUser, true) 
             : UserService.getOrCreateUser(guildId, discordUser, true);
-        
-        const columns = [ { name: "Perícia", size: 16 }, { name: "Atr", size: 3}, { name: "Prof", size: 7}, { name: "Mod", size: 3 } ];
-        const rows = Constants.skills.map(skill => {
-            const challengeMod = challengeModCalculator.calculateChallengeMod(skill.value, user);
+    
+        const skillColumns = [ 
+            { name: "Perícia", size: 16 }, 
+            { name: "Atr", size: 5 }, 
+            { name: "Prof", size: 7 }, 
+            { name: "Mod", size: 3 }
+        ];
+    
+        const attributeColumns = [ 
+            { name: "Atributo", size: 24 },  
+            { name: "Prof", size: 7 },       
+            { name: "Mod", size: 3 }         
+        ];
+    
+        const padColumn = (text, size) => text.padEnd(size, ' ');
+    
+        const skillRows = Constants.skills
+            .filter(skill => !["Força", "Destreza", "Constituição", "Conhecimento", "Carisma"].includes(skill.label))
+            .map(skill => {
+                const challengeMod = challengeModCalculator.calculateChallengeMod(skill.value, user);
+                return [
+                    padColumn(skill.label, skillColumns[0].size),
+                    padColumn(Constants.TRANSLATION[Constants.CHALLENGE_TO_ATTRIBUTE_MAP[skill.value]], skillColumns[1].size),
+                    padColumn(Constants.TRANSLATION[user.skills[skill.value] || "NoProficiency"], skillColumns[2].size),
+                    padColumn(`${challengeMod >= 0 ? "+" : ""}${challengeMod}`, skillColumns[3].size)
+                ].join(" | ");
+            });
+    
+        const attributeRows = [
+            { label: "Força", value: "STR" },
+            { label: "Destreza", value: "DEX" },
+            { label: "Constituição", value: "CON" },
+            { label: "Conhecimento", value: "WIS" },
+            { label: "Carisma", value: "CHA" }
+        ].map(attribute => {
+            const mod = modCalculator.calculateAttributeMod(user.attributes[attribute.value]);
             return [
-                skill.label, 
-                Constants.TRANSLATION[Constants.CHALLENGE_TO_ATTRIBUTE_MAP[skill.value]],
-                Constants.TRANSLATION[user.skills[skill.value] || "NoProficiency"], 
-                `${challengeMod >= 0 ? "+" : ""}${challengeMod}`];
+                padColumn(attribute.label, attributeColumns[0].size),
+                padColumn(Constants.TRANSLATION[user.skills[attribute.value] || "NoProficiency"], attributeColumns[1].size),
+                padColumn(`${mod >= 0 ? "+" : ""}${mod}`, attributeColumns[2].size)
+            ].join(" | ");
         });
-        const table = EmbededResponseService.createTable(columns, rows);
-
+    
+        const skillHeaderRow = skillColumns.map(col => padColumn(col.name, col.size)).join(" | ");
+        const skillSeparatorRow = skillColumns.map(col => "-".repeat(col.size)).join("-|-");
+        const tablePericias = [skillHeaderRow, skillSeparatorRow, ...skillRows].join("\n");
+    
+        const attributeHeaderRow = attributeColumns.map(col => padColumn(col.name, col.size)).join(" | ");
+        const attributeSeparatorRow = attributeColumns.map(col => "-".repeat(col.size)).join("-|-");
+        const tabelaAtributo = [attributeHeaderRow, attributeSeparatorRow, ...attributeRows].join("\n");
+    
         return new Discord.EmbedBuilder()
             .setColor(0xbbbbbb)
             .setTitle(user.playerName || "<sem_nome>")
-            .addFields({ name: "> Perícias",  value: table })
+            .addFields(
+                { name: "> Perícias",  value: `\`\`\`\n${tablePericias}\n\`\`\`` },
+                { name: "> Atributos",  value: `\`\`\`\n${tabelaAtributo}\n\`\`\`` }
+            )
             .setDescription(user.notes || " ")
             .setAuthor({ name: `Personagem de ${user.username}` })
             .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });

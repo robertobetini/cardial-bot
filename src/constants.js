@@ -94,7 +94,7 @@ class Constants {
         { label: "Força", value: "strength" },
         { label: "Destreza", value: "dexterity" },
         { label: "Constituição", value: "constitution" },
-        { label: "Inteligência", value: "wisdom" },
+        { label: "Conhecimento", value: "wisdom" },
         { label: "Carisma", value: "charisma" }
     ];
     static possibleSkillValues = [

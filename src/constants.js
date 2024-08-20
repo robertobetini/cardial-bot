@@ -6,7 +6,7 @@ class Constants {
     static MINUTE_IN_MILLIS = 60 * 1000;
     static HOUR_IN_MILLIS = 60 * (60 * 1000);
     static DAY_IN_MILLIS = 24 * (60 * 60 * 1000);
-    static POLL_DURATION_IN_HOURS = 2;
+    static POLL_DURATION_IN_HOURS = parseInt(process.env.POLL_DURATION_IN_HOURS) || 2;
     static INTERACTION_COLLECTOR_LIFETIME_IN_HOURS = parseInt(process.env.INTERACTION_COLLECTOR_LIFETIME_IN_HOURS);
     static BASE_SLOT_COUNT = parseInt(process.env.BASE_SLOT_COUNT);
     static ITEMS_PER_POLL = parseInt(process.env.ITEMS_PER_POLL);
@@ -30,7 +30,7 @@ class Constants {
     static COMMAND_MAX_USERS = 6;
     static COMMAND_MAX_MOBS = 6;
     static GOLD_ITEM_ID = "gold";
-    static EPHEMERAL_COMMANDS = ["ficha", "atualizastatus", "atualizanickname", "zsync", "buscamob", "bestiario", "inventario", "additem"];
+    static EPHEMERAL_COMMANDS = ["ficha", "atualiza", "zsync", "buscamob", "bestiario", "inventario", "additem"];
     static CHALLENGE_TO_ATTRIBUTE_MAP = {
         "athletics": "STR",
         "acrobatics": "DEX",
@@ -66,14 +66,16 @@ class Constants {
     ];
     static stats = [ 
         { label: "🔴 HP atual", value: "currentHP" },
-        { label: "🔴 HP max", value: "maxHP" },
         { label: "🔴 HP temp", value: "tempHP" },
         { label: "🔵 FP atual", value: "currentFP" },
-        { label: "🔵 FP max", value: "maxFP" },
         { label: "🔵 FP temp", value: "tempFP" },
         { label: "🟣 SP atual", value: "currentSP" },
+        { label: "🟣 SP temp", value: "tempSP" }
+    ];
+    static sensibleStats = [ 
+        { label: "🔴 HP max", value: "maxHP" },
+        { label: "🔵 FP max", value: "maxFP" },
         { label: "🟣 SP max", value: "maxSP" },
-        { label: "🟣 SP temp", value: "tempSP" },
         { label: "🛡️ DEF", value: "baseDEF" }
     ];
     static skills = [

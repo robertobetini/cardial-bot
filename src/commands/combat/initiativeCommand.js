@@ -11,7 +11,7 @@ const Constants = require("../../constants");
 const { addMultipleUserOptions, getUsersFromInput } = require ("../helpers");
 
 const CACHE_LIFETIME = Constants.INTERACTION_COLLECTOR_LIFETIME_IN_HOURS * Constants.HOUR_IN_MILLIS;
-const combats_cache = new Cache(CACHE_LIFETIME);
+const combats_cache = new Cache("INITIATIVE_CACHE", CACHE_LIFETIME);
 
 const data = new Discord.SlashCommandBuilder()
     .setName("iniciativa")
@@ -26,12 +26,14 @@ const buildActionRows = (guildId, userId, combatId, blockButtons = false) => {
     const addMobButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:initiativeCommand:addMobModal:${combatId}`)
         .setLabel("Adicionar Mob")
+        .setEmoji("🧌")
         .setStyle(Discord.ButtonStyle.Success)
         .setDisabled(blockButtons);
     
     const setNextPlayerButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:initiativeCommand:setNextPlayer:${combatId}`)
         .setLabel("Próximo")
+        .setEmoji("➡️")
         .setStyle(Discord.ButtonStyle.Secondary)
         .setDisabled(blockButtons);
 

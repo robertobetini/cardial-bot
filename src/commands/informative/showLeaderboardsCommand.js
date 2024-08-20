@@ -9,18 +9,20 @@ const buildActionRow = (guildId, memberId, command, type) => {
     const previousButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:${command}:previousPage:${type}`)
         .setLabel("Anterior")
+        .setEmoji("⬅️")
         .setStyle(Discord.ButtonStyle.Secondary);
 
     const nextButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:${command}:nextPage:${type}`)
         .setLabel("Próximo")
+        .setEmoji("➡️")
         .setStyle(Discord.ButtonStyle.Secondary);
 
     return new Discord.ActionRowBuilder().addComponents(previousButton, nextButton);
 }
 
 const CACHE_LIFETIME = 5 * Constants.MINUTE_IN_MILLIS;
-const pages = new Cache(CACHE_LIFETIME);
+const pages = new Cache("LEADERBOARDS_PAGES_CACHE", CACHE_LIFETIME);
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()

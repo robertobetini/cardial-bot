@@ -41,14 +41,14 @@ class User {
     }
 
     levelUp() {
-        this.stats.maxHP += Constants.BASE_MAX_HP_PER_LEVEL + calculateAttributeMod(this.attributes.CON);
-        this.stats.currentHP += Constants.BASE_MAX_HP_PER_LEVEL + calculateAttributeMod(this.attributes.CON);
+        this.stats.HP.max += Constants.BASE_MAX_HP_PER_LEVEL + calculateAttributeMod(this.attributes.CON);
+        this.stats.HP.current += Constants.BASE_MAX_HP_PER_LEVEL + calculateAttributeMod(this.attributes.CON);
 
-        this.stats.maxFP += Constants.BASE_MAX_FP_PER_LEVEL;
-        this.stats.currentFP += Constants.BASE_MAX_FP_PER_LEVEL;
+        this.stats.FP.max += Constants.BASE_MAX_FP_PER_LEVEL;
+        this.stats.FP.current += Constants.BASE_MAX_FP_PER_LEVEL;
 
-        this.stats.maxSP += Constants.BASE_MAX_SP_PER_LEVEL;
-        this.stats.currentSP += Constants.BASE_MAX_SP_PER_LEVEL;
+        this.stats.SP.max += Constants.BASE_MAX_SP_PER_LEVEL;
+        this.stats.SP.current += Constants.BASE_MAX_SP_PER_LEVEL;
 
         this.attributes.availablePoints += Constants.ATTRIBUTE_PER_LEVEL;
     }

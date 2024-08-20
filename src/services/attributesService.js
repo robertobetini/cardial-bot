@@ -15,8 +15,8 @@ class AttributesService {
     
             const conModDiff = calculateAttributeMod(attributes.CON) - calculateAttributeMod(user.attributes.CON);
             if (conModDiff !== 0) {
-                user.stats.maxHP += conModDiff;
-                user.stats.currentHP += conModDiff;
+                user.stats.HP.max += conModDiff;
+                user.stats.HP.current += conModDiff;
                 StatsService.update(user.stats);
             }
         }

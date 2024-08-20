@@ -18,29 +18,45 @@ const { isValidUrl } = require("../../utils");
 
 const eventEmitter = require("../../events");
 
-const CACHE_LIFETIME = 16 * Constants.MINUTE_IN_MILLIS;
-const tempAttributes = new Cache(CACHE_LIFETIME);
-const originalInteractions = new Cache(CACHE_LIFETIME);
+const CACHE_LIFETIME = Constants.INTERACTION_COLLECTOR_LIFETIME_IN_HOURS * Constants.HOUR_IN_MILLIS;
+const tempAttributes = new Cache("USER_TEMP_ATTR_CACHE", CACHE_LIFETIME);
+const originalInteractions = new Cache("USER_SHEETS_ORIGINAL_INTERACTION_CACHE", CACHE_LIFETIME);
+
+const safeEditReply = async (interaction, reply) => {
+    const key = interaction.guild.id + interaction.member.id;
+
+    try {
+        return await originalInteractions.get(key)?.editReply(reply);
+    } catch (err) {
+        Logger.warn(`Sending new reply due to error when editing old interaction: ${err.message}`);
+        await createOriginalMessageCacheEntry(interaction);
+        return await interaction.editReply(reply);
+    }
+}
 
 const buildHomeActionRow = (guildId, memberId) => {
     const attributesButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:showUserStatusCommand:showAttributesRow`)
         .setLabel("Atributos")
+        .setEmoji("📊")
         .setStyle(Discord.ButtonStyle.Primary);
 
     const skillsButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:showUserStatusCommand:showSkillsRow`)
         .setLabel("Perícias")
+        .setEmoji("📝")
         .setStyle(Discord.ButtonStyle.Primary);
 
     const characterButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:showUserStatusCommand:showCharacterModal`)
         .setLabel("Personagem")
+        .setEmoji("👤")
         .setStyle(Discord.ButtonStyle.Primary);
 
     const inventoryButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${memberId}:inventoryCommand:extExecute:showUserStatusCommand`)
         .setLabel("Inventário")
+        .setEmoji("📦")
         .setStyle(Discord.ButtonStyle.Primary);
 
     return new Discord.ActionRowBuilder().addComponents(attributesButton, skillsButton, characterButton, inventoryButton);
@@ -66,24 +82,28 @@ const buildSelectedAttributeActionRows = (guildId, userId, selected, buttonAvail
     const cancelButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:clearTempAttributes`)
         .setLabel("Cancelar")
+        .setEmoji("✖️")
         .setStyle(Discord.ButtonStyle.Danger)
         .setDisabled(!buttonAvailability[0]);
 
     const decreaseButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:decreaseAttribute:${selected}`)
-        .setLabel("-")
+        // .setLabel("-")
+        .setEmoji("➖")
         .setStyle(Discord.ButtonStyle.Primary)
         .setDisabled(!buttonAvailability[1]);
 
     const increaseButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:increaseAttribute:${selected}`)
-        .setLabel("+")
+        // .setLabel("+")
+        .setEmoji("➕")
         .setStyle(Discord.ButtonStyle.Primary)
         .setDisabled(!buttonAvailability[2]);
 
     const confirmButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:saveTempAttributes`)
         .setLabel("Confirmar")
+        .setEmoji("✔️")
         .setStyle(Discord.ButtonStyle.Success)
         .setDisabled(!buttonAvailability[3]);
 
@@ -148,6 +168,7 @@ const buildSelectedSkillActionRows = (guildId, userId, selected) => {
     const updateButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:updateSkill:${selected}`)
         .setLabel("Atualizar")
+        .setEmoji("🔄")
         .setStyle(Discord.ButtonStyle.Success);
 
     actionRows[2] = actionRows[2].addComponents(updateButton);
@@ -191,6 +212,7 @@ const createGotoHomeButton = (guildId, userId) => {
     return new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:gotoHomeRow`)
         .setLabel("Voltar")
+        .setEmoji("⬅️")
         .setStyle(Discord.ButtonStyle.Secondary);
 }
 
@@ -279,7 +301,7 @@ module.exports = {
         const key = guildId + interaction.member.id;
         const actionRows = buildAttributesActionRows(guildId, memberId);
         
-        await originalInteractions.get(key)?.editReply({ components: actionRows });
+        await safeEditReply(interaction, { components: actionRows });
     },
     showCharacterModal: async (interaction, guildId, memberId) => {
         if (interaction.user.id != memberId) {
@@ -370,7 +392,7 @@ module.exports = {
         const updatedEmbed = EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttributes.get(key));
 
         try {
-            await originalInteractions.get(key)?.editReply({ embeds: [updatedEmbed] });
+            await safeEditReply(interaction, { embeds: [updatedEmbed] });
         } catch(err) {
             if (/URL_TYPE_INVALID_URL/.test(err.message)) {
                 user.imgUrl = oldImgUrl;
@@ -390,7 +412,7 @@ module.exports = {
         const actionRows = buildSkillsActionRow(guildId, memberId);
 
         const key = guildId + interaction.member.id;
-        await originalInteractions.get(key)?.editReply({
+        await safeEditReply(interaction, {
             embeds: [embed],
             components: actionRows 
         });
@@ -411,7 +433,7 @@ module.exports = {
         const actionRows = buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability);
         
         const key = guildId + interaction.member.id;
-        await originalInteractions.get(key)?.editReply({ components: actionRows });
+        await safeEditReply(interaction, { components: actionRows });
     },
     clearTempAttributes: async (interaction, guildId, memberId) => {
         await interaction.deferUpdate();
@@ -424,7 +446,7 @@ module.exports = {
 
         const updatedEmbed = EmbededResponseService.getUserStatus(guildId, interaction.member);
         const actionRows = buildAttributesActionRows(guildId, memberId);
-        await originalInteractions.get(key)?.editReply({ 
+        await safeEditReply(interaction, { 
             embeds: [updatedEmbed],
             components: actionRows 
         });
@@ -476,7 +498,7 @@ module.exports = {
 
         const updatedEmbed = EmbededResponseService.getUserStatus(guildId, interaction.member);
         const actionRows = buildAttributesActionRows(guildId, memberId);
-        await originalInteractions.get(key)?.editReply({ 
+        await safeEditReply(interaction, { 
             embeds: [updatedEmbed],
             components: actionRows 
         });
@@ -492,7 +514,7 @@ module.exports = {
         
         const tempAttribute = tempAttributes.get(key);
         const attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute, tempAttribute.currentAttributes);
-        await originalInteractions.get(key)?.editReply({ 
+        await safeEditReply(interaction, { 
             embeds: [ EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttribute) ],
             components: buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability)
         });
@@ -508,7 +530,7 @@ module.exports = {
 
         const tempAttribute = tempAttributes.get(key);
         const attributeButtonsAvailability = getAttributeButtonsAvailability(guildId, memberId, selectedAttribute, tempAttribute.currentAttributes);
-        await originalInteractions.get(key)?.editReply({ 
+        await safeEditReply(interaction, { 
             embeds: [ EmbededResponseService.getUserStatus(guildId, interaction.member, tempAttribute) ],
             components: buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability), 
         });
@@ -523,7 +545,7 @@ module.exports = {
         const actionRows = buildSelectedSkillActionRows(guildId, memberId, selectedSkill);
 
         const key = guildId + interaction.member.id;
-        await originalInteractions.get(key)?.editReply({ components: actionRows });
+        await safeEditReply(interaction, { components: actionRows });
     },
     updateSkill: async (interaction, guildId, memberId, selectedSkill) => {
         await interaction.deferUpdate();
@@ -538,7 +560,7 @@ module.exports = {
         const embed = EmbededResponseService.getUserSkills(guildId, interaction.user);
 
         const key = guildId + interaction.member.id;
-        await originalInteractions.get(key)?.editReply({ embeds: [embed] });
+        await safeEditReply(interaction, { embeds: [embed] });
     },
     updateSkillLevel: async (interaction, guildId, memberId) => {
         await interaction.deferUpdate();
@@ -558,8 +580,7 @@ module.exports = {
             selectedOption.default = true;
         }
         
-        const key = guildId + interaction.member.id;
-        await originalInteractions.get(key)?.editReply({ components: interaction.message.components });
+        await safeEditReply(interaction, { components: interaction.message.components });
     },
     gotoHomeRow: async (interaction, guildId, memberId) => {
         await interaction.deferUpdate();
@@ -571,7 +592,7 @@ module.exports = {
         const embed = EmbededResponseService.getUserStatus(guildId, member, tempAttribute);
         const actionRow = buildHomeActionRow(guildId, memberId);
         
-        await originalInteractions.get(originalInteractionKey)?.editReply({ 
+        await safeEditReply(interaction, { 
             embeds: [embed],
             components: [actionRow]
         });
@@ -600,5 +621,9 @@ module.exports = {
 // events
 eventEmitter.on("inventoryCommand_extExecute", async (guildId, userId) => {
     const key = guildId + userId;
-    await originalInteractions.get(key)?.deleteReply();
+    try {
+        await originalInteractions.get(key)?.deleteReply();
+    } catch {
+        return;
+    }
 });

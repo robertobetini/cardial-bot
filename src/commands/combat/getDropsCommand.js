@@ -19,7 +19,7 @@ const AUTOCOMPLETE_OPTION_BASE_NAME = "mob";
 const NOT_APPLICABLE_TOKEN = "N/A";
 const CACHE_LIFETIME = Constants.POLL_DURATION_IN_HOURS * Constants.HOUR_IN_MILLIS;
 const POLL_IDENTIFIER = "drop";
-const transients_cache = new Cache(CACHE_LIFETIME);
+const transients_cache = new Cache("DROPS_CACHE", CACHE_LIFETIME);
 
 const drop = async (interaction, monsterIds) => {
     RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
@@ -51,47 +51,60 @@ const drop = async (interaction, monsterIds) => {
         return;
     }
 
-    // poll creation handling
-    const pollNum = Math.ceil(distinctItems.length / Constants.ITEMS_PER_POLL);
     const pollItems = distinctItems.map(itemName => ({ text: `${itemName} [x${dropSummary[itemName]}]` }));
-    const threadChannel = await message.startThread({ name: "drops" });
-    const transients = transients_cache.set(threadChannel.id, []);
-    const promises = [];
+
+    await createPollInChannelDirectly(interaction, message, pollItems, targets);
+}
+
+const createPollInChannelDirectly = async (interaction, originalMessage, pollItems, targets) => {
+    const pollNum = Math.ceil(pollItems.length / Constants.ITEMS_PER_POLL);
+    const executionId = randomId(10);
+    const transients = transients_cache.set(executionId, [], async transients => {
+        for (const transient of transients) {
+            for (const pollItem of transient.pollItems) {
+                InventoryService.distributeLootEvenly(pollItem, transient.users.map(user => user.userId), transient.pollMessage.guildId);
+            }
+            await transient.pollMessage.delete();
+        }
+        
+        const transient = transients[0];
+        const embed = transient.originalMessage.embeds[0];
+        embed.data.author.name += " (Concluído)";
+        await transient.originalMessage.edit({ embeds: [embed], attachments: [], files: [] });
+    });
+
     for(let i = 0; i < pollNum; i++) {
+        const significantAnswers = pollItems.slice(Constants.ITEMS_PER_POLL * i, Constants.ITEMS_PER_POLL * (i + 1));
         const poll = {
             allowMultiselect: true,
             layoutType: Discord.PollLayoutType.Default,
             question: { text: "Selecione os itens que deseja" },
             duration: Constants.POLL_DURATION_IN_HOURS,
-            answers: pollItems
-                .slice(Constants.ITEMS_PER_POLL * i, Constants.ITEMS_PER_POLL * (i + 1))
-                .concat({ text: NOT_APPLICABLE_TOKEN })
+            answers: significantAnswers.concat({ text: NOT_APPLICABLE_TOKEN })
         };
 
         const pollId = randomId(10);
-        const promise = threadChannel.send({ 
-            content: `${POLL_IDENTIFIER}-${pollId}`,
+        const pollMessage = await interaction.channel.send({ 
+            content: `${POLL_IDENTIFIER}-${executionId}-${pollId}`,
             poll 
         });
-        promises.push(promise);
 
         transients.push({
             pollId,
-            users: targets.map(t => ({ key: interaction.guild.id + t.userId, confirmed: false })),
-            originalMessage: message,
-            threadChannel
+            users: targets.map(t => ({ userId: t.userId, key: interaction.guild.id + t.userId, confirmed: false })),
+            originalMessage,
+            pollMessage,
+            pollItems: significantAnswers.map(answer => answer.text)
         });
     }
-
-    await Promise.all(promises);
 }
 
-const computeVote = async (pollAnswer, pollId, isVoteRemove) => {
-    const threadChannel = pollAnswer.poll.message.channel;
-    const transients = transients_cache.get(threadChannel.id);
+const computeVote = async (pollAnswer, executionId, pollId, isVoteRemove) => {
+    const transients = transients_cache.get(executionId);
     if (!transients) {
         return;
     }
+
     const transientIndex = transients.findIndex(p => p.pollId === pollId);
     if (transientIndex < 0) {
         return;
@@ -142,7 +155,7 @@ const computeVote = async (pollAnswer, pollId, isVoteRemove) => {
         }
     }
 
-    // update loot message and delete transient and thread if there are no items remaining
+    // update loot message and delete transient and polls if there are no items remaining
     if (notDistributedItems.length > 0) {
         const poll = {
             allowMultiselect: true,
@@ -155,21 +168,22 @@ const computeVote = async (pollAnswer, pollId, isVoteRemove) => {
         };
 
         const newPollId = randomId(10);
+        await transient.originalMessage.channel.send("Um ou mais usuários estão sem slots disponíveis para receber os itens escolhidos... Uma nova enquete será feita.");
+        const pollMessage = await transient.originalMessage.channel.send({ 
+            content: `${POLL_IDENTIFIER}-${executionId}-${newPollId}`,
+            poll
+        });
         transients.push({ 
             pollId: newPollId,
             users: transient.users.map(u => ({ key: u.key, confirmed: false })),
             originalMessage: transient.originalMessage,
-            threadChannel: transient.threadChannel
-        });
-        await transient.threadChannel.send("Um ou mais usuários estão sem slots disponíveis para receber os itens escolhidos... Uma nova enquete será feita.");
-        await transient.threadChannel.send({ 
-            content: `${POLL_IDENTIFIER}-${newPollId}`,
-            poll
+            pollMessage
         });
 
-        transients_cache.set(threadChannel.id, transients);
+        transients_cache.set(executionId, transients);
     }
     
+    await transient.pollMessage.delete();
     transients.splice(transientIndex, 1);
     if (transients.length > 0) {
         return;
@@ -178,12 +192,9 @@ const computeVote = async (pollAnswer, pollId, isVoteRemove) => {
     const embed = transient.originalMessage.embeds[0];
     embed.data.author.name += " (Concluído)";
 
-    await Promise.all([
-        threadChannel.delete(),
-        transient.originalMessage.edit({ embeds: [embed], attachments: [], files: [] })
-    ]);
+    await transient.originalMessage.edit({ embeds: [embed], attachments: [], files: [] });
 
-    transients_cache.unset(threadChannel.id);
+    transients_cache.unset(executionId);
 }
 
 const data = new Discord.SlashCommandBuilder()

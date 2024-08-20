@@ -141,9 +141,9 @@ class EmbededResponseService {
         const maxLvlExp = expCalculator.getLevelExp(user.stats.lvl);
         const maxMasteryExp = masteryExpCalculator.getLevelExp(user.stats.mastery);
 
-        const hpView = EmbededResponseService.createStatusSummarizedView(user.stats.currentHP, user.stats.maxHP, user.stats.tempHP);
-        const fpView = EmbededResponseService.createStatusSummarizedView(user.stats.currentFP, user.stats.maxFP, user.stats.tempFP);
-        const spView = EmbededResponseService.createStatusSummarizedView(user.stats.currentSP, user.stats.maxSP, user.stats.tempSP);
+        const hpView = EmbededResponseService.createStatusSummarizedView(user.stats.HP.current, user.stats.HP.max, user.stats.HP.temp);
+        const fpView = EmbededResponseService.createStatusSummarizedView(user.stats.FP.current, user.stats.FP.max, user.stats.FP.temp);
+        const spView = EmbededResponseService.createStatusSummarizedView(user.stats.SP.current, user.stats.SP.max, user.stats.SP.temp);
         const expView = EmbededResponseService.createStatusSummarizedView(user.stats.exp, maxLvlExp, 0);
         const masteryExpView = EmbededResponseService.createStatusSummarizedView(user.stats.masteryExp, maxMasteryExp, 0);
 
@@ -155,7 +155,7 @@ class EmbededResponseService {
         const wisMod = calcMod(attributes.WIS);
         const chaMod = calcMod(attributes.CHA);
 
-        const sanityDescription = EmbededResponseService.getSanityDescription(user.stats.currentSP);
+        const sanityDescription = EmbededResponseService.getSanityDescription(user.stats.SP.current);
 
         const statsView1 = 
             `**🔴 HP:** ${hpView}\n` +
@@ -287,7 +287,7 @@ class EmbededResponseService {
     }
 
     static getInitiativeView(players, monsters) {
-        const nameSize = 14;
+        const nameSize = 10;
         let headerWhiteSpaces = "";
         for (let i = 0; i < nameSize - "Nome".length; i++) {
             headerWhiteSpaces += " ";
@@ -295,9 +295,9 @@ class EmbededResponseService {
 
         const response = 
             "```ansi\n" +
-            `  👤${Colors.BOLD}Nome` + headerWhiteSpaces + " 🔵FP    " + ` 🔴HP ${Colors.RESET}\n` +
+            ` 👤${Colors.BOLD}Nome` + headerWhiteSpaces + " 🔵FP    " + ` 🔴HP ${Colors.RESET}\n` +
             players.reduce((text, p) => text += EmbededResponseService.createInitiativeLine(p, false, nameSize), "") + 
-            "  ────────────────────────────────\n" + 
+            " ─────────────────────────────────\n" + 
             monsters.reduce((text, m) => text += EmbededResponseService.createInitiativeLine(m, true, nameSize), "") + 
             "\n```";
 
@@ -310,7 +310,7 @@ class EmbededResponseService {
 
     static createInitiativeLine(combatEntity, isEnemy = false, nameSize = 14, separator = " ") {
         let line = combatEntity.selected ? Colors.GREEN : "";
-        line += combatEntity.selected ? "> " : "  ";
+        line += combatEntity.selected ? ">" : " ";
 
         if (isEnemy) {
             return line + (combatEntity.playerName ?? combatEntity.name) + "\n";
@@ -324,8 +324,8 @@ class EmbededResponseService {
             line += " ";
         }
 
-        const fpView = EmbededResponseService.createInitiativeStatView(combatEntity.stats.currentFP, combatEntity.stats.maxFP, combatEntity.stats.tempFP, Colors.BLUE, 2);
-        const hpView = EmbededResponseService.createInitiativeStatView(combatEntity.stats.currentHP, combatEntity.stats.maxHP, combatEntity.stats.tempHP, Colors.RED, 3);
+        const fpView = EmbededResponseService.createInitiativeStatView(combatEntity.stats.FP.current, combatEntity.stats.FP.max, combatEntity.stats.FP.temp, Colors.BLUE, 2);
+        const hpView = EmbededResponseService.createInitiativeStatView(combatEntity.stats.HP.current, combatEntity.stats.HP.max, combatEntity.stats.HP.temp, Colors.RED, 3);
 
         return `${line} ${separator} ${combatEntity.selected ? Colors.RESET : ""}${fpView} ${separator} ${hpView}\n`;
     }
@@ -336,14 +336,15 @@ class EmbededResponseService {
             firstWhiteSpaces += " ";
         }
 
-        const totalValue = maxValue + tempValue;
+        const totalValue = maxValue;
 
         let secondWhiteSpaces = "";
         for (let i = 0; i < truncateStatLen - totalValue.toString().length; i++) {
             secondWhiteSpaces += " ";
         }
         
-        return firstWhiteSpaces + ansiColor + currentValue + "/" + totalValue + Colors.RESET + secondWhiteSpaces;
+        const tempParticle = tempValue > 0 ? `(${tempValue})` : secondWhiteSpaces;
+        return firstWhiteSpaces + ansiColor + currentValue + "/" + totalValue + tempParticle + Colors.RESET;
     }
 
     static getItemView(item) {
@@ -354,7 +355,11 @@ class EmbededResponseService {
 
             detailsText += `${Constants.TRANSLATION[key]}: `;
             if (value instanceof(Array)) {
-                detailsText += value.join(", ");
+                if (value.length === 1) {
+                    detailsText += value[0];
+                } else {
+                    detailsText += "\n  " + value.map(text => "> " + text).join("\n  ");
+                }
             } else if (typeof(value) === "string") {
                 detailsText += value;
             } else if (typeof(value) === "number") {
@@ -369,6 +374,7 @@ class EmbededResponseService {
                 name: "> Info",
                 value: 
                     "```\n" +
+                    `Nível: ${item.level ? item.level : 1}\n` +
                     `Categoria: ${Constants.TRANSLATION[item.type]}\n` +
                     `Tier:  ${item.tier}\n` +
                     `Preço: ${item.price ? item.price + " 💰" : "-"}\n` +
@@ -487,7 +493,6 @@ class EmbededResponseService {
             }
             content += "\n";
         }
-        // content = content || "\nNada :(";
         description += content + "\n```";
 
         const fields = [];
@@ -529,7 +534,7 @@ class EmbededResponseService {
     }
 
     static createStatusSummarizedView(currentValue, maxValue, tempValue) {
-        let view = `${currentValue}/${maxValue + tempValue}`;
+        let view = `${currentValue}/${maxValue}`;
         view += tempValue > 0 ? ` (+${tempValue}) ` : "";
 
         return view;

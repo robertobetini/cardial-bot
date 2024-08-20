@@ -25,9 +25,9 @@ class StatsDAO extends Sqlite3DAO {
         db.prepare(query).run(
             userId, guildId, 
             stats.totalExp, stats.totalMasteryExp, stats.gold, 
-            stats.currentHP, stats.maxHP, stats.tempHP, 
-            stats.currentFP, stats.maxFP, stats.tempFP, 
-            stats.currentSP, stats.maxSP, stats.tempSP, 
+            stats.HP.current, stats.HP.max, stats.HP.temp, 
+            stats.FP.current, stats.FP.max, stats.FP.temp, 
+            stats.SP.current, stats.SP.max, stats.SP.temp, 
             stats.baseDEF, stats.baseInitiative
         );
     }
@@ -43,9 +43,9 @@ class StatsDAO extends Sqlite3DAO {
 
         const res = db.prepare(query).run( 
             stats.totalExp, stats.totalMasteryExp, stats.gold, 
-            stats.currentHP, stats.maxHP, stats.tempHP, 
-            stats.currentFP, stats.maxFP, stats.tempFP, 
-            stats.currentSP, stats.maxSP, stats.tempSP, 
+            stats.HP.current, stats.HP.max, stats.HP.temp, 
+            stats.FP.current, stats.FP.max, stats.FP.temp, 
+            stats.SP.current, stats.SP.max, stats.SP.temp, 
             stats.baseDEF, stats.baseInitiative,
             userId, guildId
         );

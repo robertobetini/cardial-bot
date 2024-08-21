@@ -88,14 +88,12 @@ const buildSelectedAttributeActionRows = (guildId, userId, selected, buttonAvail
 
     const decreaseButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:decreaseAttribute:${selected}`)
-        // .setLabel("-")
         .setEmoji("➖")
         .setStyle(Discord.ButtonStyle.Primary)
         .setDisabled(!buttonAvailability[1]);
 
     const increaseButton = new Discord.ButtonBuilder()
         .setCustomId(`${guildId}:${userId}:showUserStatusCommand:increaseAttribute:${selected}`)
-        // .setLabel("+")
         .setEmoji("➕")
         .setStyle(Discord.ButtonStyle.Primary)
         .setDisabled(!buttonAvailability[2]);
@@ -298,7 +296,6 @@ module.exports = {
             return;
         }
 
-        const key = guildId + interaction.member.id;
         const actionRows = buildAttributesActionRows(guildId, memberId);
         
         await safeEditReply(interaction, { components: actionRows });
@@ -411,7 +408,6 @@ module.exports = {
         const embed = EmbededResponseService.getUserSkills(guildId, memberId);
         const actionRows = buildSkillsActionRow(guildId, memberId);
 
-        const key = guildId + interaction.member.id;
         await safeEditReply(interaction, {
             embeds: [embed],
             components: actionRows 
@@ -432,7 +428,6 @@ module.exports = {
         }
         const actionRows = buildSelectedAttributeActionRows(guildId, memberId, selectedAttribute, attributeButtonsAvailability);
         
-        const key = guildId + interaction.member.id;
         await safeEditReply(interaction, { components: actionRows });
     },
     clearTempAttributes: async (interaction, guildId, memberId) => {
@@ -544,7 +539,6 @@ module.exports = {
         const selectedSkill = interaction.values[0];
         const actionRows = buildSelectedSkillActionRows(guildId, memberId, selectedSkill);
 
-        const key = guildId + interaction.member.id;
         await safeEditReply(interaction, { components: actionRows });
     },
     updateSkill: async (interaction, guildId, memberId, selectedSkill) => {
@@ -559,7 +553,6 @@ module.exports = {
         SkillsService.updateSingleSkill(memberId, guildId, selectedSkill, newSkillLevel);
         const embed = EmbededResponseService.getUserSkills(guildId, interaction.user);
 
-        const key = guildId + interaction.member.id;
         await safeEditReply(interaction, { embeds: [embed] });
     },
     updateSkillLevel: async (interaction, guildId, memberId) => {

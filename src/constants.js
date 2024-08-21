@@ -143,7 +143,7 @@ class Constants {
         "itemType": "Tipo de item",
         "runes": "Runas",
         "unique": "Único",
-        "dexDebuff": "Desvantagem",
+        "dexDebuff": "Destreza",
         "acessory": "Acessório",
         "acessoryType": "Tipo de acessório",
         "slots": "Slots",

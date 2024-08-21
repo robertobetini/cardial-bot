@@ -87,6 +87,22 @@ class EmbededResponseService {
         ];
     
         const padColumn = (text, size) => text.padEnd(size, ' ');
+
+        const attributeRows = [
+            { label: "Força", value: "strength" },
+            { label: "Destreza", value: "dexterity" },
+            { label: "Constituição", value: "constitution" },
+            { label: "Conhecimento", value: "wisdom" },
+            { label: "Carisma", value: "charisma" }
+        ].map(attribute => {
+            const mod = challengeModCalculator.calculateChallengeMod(attribute.value, user);
+            return [
+                padColumn(attribute.label, attributeColumns[0].size),
+                padColumn(Constants.TRANSLATION[user.skills[attribute.value] || "NoProficiency"], attributeColumns[1].size),
+                padColumn(`${mod >= 0 ? "+" : ""}${mod}`, attributeColumns[2].size)
+            ].join(" | ");
+        });
+    
     
         const skillRows = Constants.skills
             .filter(skill => !["Força", "Destreza", "Constituição", "Conhecimento", "Carisma"].includes(skill.label))
@@ -99,21 +115,6 @@ class EmbededResponseService {
                     padColumn(`${challengeMod >= 0 ? "+" : ""}${challengeMod}`, skillColumns[3].size)
                 ].join(" | ");
             });
-    
-        const attributeRows = [
-            { label: "Força", value: "STR" },
-            { label: "Destreza", value: "DEX" },
-            { label: "Constituição", value: "CON" },
-            { label: "Conhecimento", value: "WIS" },
-            { label: "Carisma", value: "CHA" }
-        ].map(attribute => {
-            const mod = modCalculator.calculateAttributeMod(user.attributes[attribute.value]);
-            return [
-                padColumn(attribute.label, attributeColumns[0].size),
-                padColumn(Constants.TRANSLATION[user.skills[attribute.value] || "NoProficiency"], attributeColumns[1].size),
-                padColumn(`${mod >= 0 ? "+" : ""}${mod}`, attributeColumns[2].size)
-            ].join(" | ");
-        });
     
         const skillHeaderRow = skillColumns.map(col => padColumn(col.name, col.size)).join(" | ");
         const skillSeparatorRow = skillColumns.map(col => "-".repeat(col.size)).join("-|-");

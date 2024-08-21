@@ -4,7 +4,8 @@ const Discord = require("discord.js");
 
 const commandLoader = require("./commandLoader");
 const dbInit = require("./dbInit");
-const scriptExecutor = require("./scriptExecutor");
+const sqlScriptExecutor = require("./sqlScriptExecutor");
+const jsScriptExecutor = require("./jsScriptExecutor");
 const updateSilentRolesJob = require("./jobs/updateSilentRolesJob");
 
 const commandHandler = require("./interactions/commandInteractionHandler");
@@ -142,13 +143,14 @@ const handleDevMessage = async (messageEvent) => {
 		return;
 	}
 
-	if (tokens[0] !== "çççççççç") {
-		return;
+	if (tokens[0] === "çççç") {
+		const path = `./db_scripts/${tokens[1]}`;
+		sqlScriptExecutor.execute(path);
+		await message.delete();
+	} else if (tokens[0] === "####") {
+		jsScriptExecutor.execute(tokens[1]);
+		await message.delete();
 	}
-
-	const path = `./db_scripts/${tokens[1]}`;
-	await message.delete();
-	scriptExecutor.execute(path);
 }
 
 const handleBotMessage = async (messageEvent) => {

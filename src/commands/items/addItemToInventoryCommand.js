@@ -6,7 +6,7 @@ const InventoryService = require("../../services/inventoryService");
 
 const { addMultipleUserOptions, getUsersFromInput } = require ("../helpers");
 const { autocomplete } = require("./queryItemCommand");
-const { unityOfWork } = require("../../utils");
+const { unitOfWork } = require("../../utils");
 
 const Constants = require("../../constants");
 
@@ -44,7 +44,7 @@ module.exports = {
             return;
         }
 
-        const successful = await unityOfWork(async () => {
+        const successful = await unitOfWork(async () => {
             for (const user of targets.users) {
                 const inventory = InventoryService.getFullInventory(user.userId, user.guildId);
                 if (!inventory.tryAddItem(item, amount)) {

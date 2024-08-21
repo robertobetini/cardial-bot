@@ -1,5 +1,6 @@
 const crypto = require("node:crypto");
 const URL = require("url").URL;
+const Logger = require("./logger");
 
 const { calculateAttributeMod } = require("./calculators/modCalculator");
 
@@ -97,17 +98,24 @@ module.exports = {
     setCombatOrder,
     loadMonsterIdToNameMap,
     clearMonsterIdToNameMap,
-    unityOfWork: (func) => {
+    unitOfWork: async (func) => {
         const Sqlite3DAO = require("./DAOs/sqlite3DAO");
-        const execute = Sqlite3DAO.db.transaction(async () => {
-            try {
-                return await func();
-            } catch (err) {
-                if (!Sqlite3DAO.db.inTransaction) {
-                    throw err;
-                }
+        
+        Sqlite3DAO.db.exec("BEGIN");
+        Logger.debug("Starting transaction");
+        try {
+            const result = await func();
+            Sqlite3DAO.db.exec("COMMIT");
+            Logger.debug("Transaction commited sucessfully");
+            return result;
+        } catch (err) {                
+            Logger.error("Received and error inside a transaction");
+            if (Sqlite3DAO.db.inTransaction) {
+                Sqlite3DAO.db.exec("ROLLBACK");
+                Logger.debug("Rolling back transaction");
             }
-        });
-        return execute();
+
+            throw err;
+        }
     }
 };

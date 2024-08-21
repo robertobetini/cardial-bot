@@ -9,7 +9,7 @@ const MonsterDrop = require("../models/monsterDrop");
 
 const Logger = require("../logger");
 const { SilentError } = require("../errors/silentError");
-const { isValidUrl, hashText, unityOfWork } = require("../utils");
+const { isValidUrl, hashText, unitOfWork } = require("../utils");
 
 const DROPS_SHEETS = [ "Mobs-Planices Desoladas" ];
 const BESTIARY_SHEETS = [ 
@@ -23,7 +23,7 @@ const FETCH_SHEET_URL_TEMPLATE = `https://sheets.googleapis.com/v4/spreadsheets/
 
 class MonsterSyncService {
     static async sync() {
-        await unityOfWork(MonsterSyncService.execute);
+        await unitOfWork(MonsterSyncService.execute);
     }
 
     static async execute() {

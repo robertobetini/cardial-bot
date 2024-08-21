@@ -8,7 +8,7 @@ const Item = require("../models/item");
 
 const Logger = require("../logger");
 const { SilentError } = require("../errors/silentError");
-const { isValidUrl, unityOfWork } = require("../utils");
+const { isValidUrl, unitOfWork } = require("../utils");
 
 const NOT_APPLICABLE_TOKEN = "-";
 const SHEETS = ["Armas", "Escudos", "Armaduras", "Acessórios","Itens Únicos", "Consumíveis", "Outros"];
@@ -17,21 +17,23 @@ const FETCH_SHEET_URL_TEMPLATE = `https://sheets.googleapis.com/v4/spreadsheets/
 class ItemSyncService {
 
     static async sync() {
-        await unityOfWork(ItemSyncService.execute);
+        const bkpName = await InventoryService.createBackup();
+        Logger.info(`Created backup: ${bkpName}`);
+        
+        const itemIds = await unitOfWork(ItemSyncService.execute);
+
+        Logger.info("Applying backup for player inventory");
+        await InventoryService.applyBackup(bkpName, itemIds);
     }
 
     static async execute() {
         Logger.info("Clearing items");
-        
-        const bkpName = await InventoryService.createBackup();
-        Logger.info(`Created backup: ${bkpName}`);
-
         InventoryService.deleteAll();
         MonsterDropsService.deleteAll();
         ItemService.deleteAll();
 
-        Logger.info("Inserting default GOLD item");
         const goldItem = new Item("gold", "GOLD", null, NOT_APPLICABLE_TOKEN, NOT_APPLICABLE_TOKEN, 1, NOT_APPLICABLE_TOKEN, null, null, null, "{}");
+        Logger.info("Inserting default GOLD item");
         ItemService.batchUpsert([goldItem]);
 
         Logger.info("Fetching and updating items");
@@ -71,7 +73,8 @@ class ItemSyncService {
         }
 
         await Promise.all(promises);
-        InventoryService.applyBackup(bkpName, itemIds);
+
+        return itemIds;
     }
 
     static parseItems(sheet, data) {

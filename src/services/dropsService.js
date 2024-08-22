@@ -63,7 +63,8 @@ class DropsService {
         for (const inventoryItem of playerInventory.items) {
             summary[inventoryItem.item.id] = {
                 name: inventoryItem.item.name, 
-                count: inventoryItem.count
+                count: inventoryItem.count,
+                emoji: inventoryItem.item.emoji
             };
         }
 
@@ -72,7 +73,11 @@ class DropsService {
             throw new Error("GOLD item not found");
         }
 
-        summary[Constants.GOLD_ITEM_ID] = { name: goldItem.name, count: user.stats.gold };
+        summary[Constants.GOLD_ITEM_ID] = { 
+            name: goldItem.name, 
+            count: user.stats.gold,
+            emoji: goldItem.emoji
+        };
 
         return summary;
     }

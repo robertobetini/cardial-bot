@@ -4,12 +4,6 @@ const MonsterService = require("../../services/monsterService");
 const EmbededResponseService = require("../../services/embededResponseService");
 const RoleService = require("../../services/roleService");
 
-const Constants = require("../../constants");
-
-const CACHE_LIFETIME = 16 * Constants.MINUTE_IN_MILLIS;
-
-const originalInteractions = {};
-
 module.exports = {
     data: new Discord.SlashCommandBuilder()
         .setName("bestiario")
@@ -26,7 +20,6 @@ module.exports = {
         
         const guildId = interaction.guild.id;
         const userId = interaction.user.id;
-        const key = guildId + userId;
 
         const monsterId = interaction.options.getString("nome");
         const monster = MonsterService.get(monsterId, false);
@@ -37,9 +30,6 @@ module.exports = {
         
         const embed = EmbededResponseService.getMonsterView(monster);
 
-        originalInteractions[key] = interaction;
-        setTimeout(() => delete originalInteractions[key], CACHE_LIFETIME);
-
         const dropsButton = new Discord.ButtonBuilder()
             .setLabel("Drops")
             .setEmoji("📋")
@@ -47,7 +37,7 @@ module.exports = {
             .setCustomId(`${guildId}:${userId}:queryMonsterCommand:showDrops:${monsterId}`);
         const actionRow = new Discord.ActionRowBuilder().addComponents(dropsButton);
 
-        await interaction.editReply({
+        return await interaction.editReply({
             embeds: [embed],
             files: [EmbededResponseService.FOOTER_IMAGE],
             components: [actionRow]
@@ -65,7 +55,7 @@ module.exports = {
         );
     },
     showDrops: async (interaction, guildId, memberId, monsterId) => {
-        const key = guildId + memberId;
+        await interaction.deferUpdate();
 
         const monster = MonsterService.get(monsterId);
         const embed = EmbededResponseService.getMonsterDropsView(monster);
@@ -76,16 +66,13 @@ module.exports = {
             .setCustomId(`${guildId}:${memberId}:queryMonsterCommand:gotoHome:${monsterId}`);
         const actionRow = new Discord.ActionRowBuilder().addComponents(gotoHomeButton);
 
-        await Promise.all([
-            originalInteractions[key]?.editReply({
-                embeds: [embed],
-                components: [actionRow]
-            }),
-            interaction.deferUpdate()
-        ]);
+        await interaction.editReply({
+            embeds: [embed],
+            components: [actionRow]
+        });
     },
     gotoHome: async (interaction, guildId, memberId, monsterId) => {
-        const key = guildId + memberId;
+        await interaction.deferUpdate();
 
         const monster = MonsterService.get(monsterId, false);
         const embed = EmbededResponseService.getMonsterView(monster);
@@ -96,12 +83,9 @@ module.exports = {
             .setCustomId(`${guildId}:${memberId}:queryMonsterCommand:showDrops:${monsterId}`);
         const actionRow = new Discord.ActionRowBuilder().addComponents(dropsButton);
 
-        await Promise.all([
-            originalInteractions[key]?.editReply({
-                embeds: [embed],
-                components: [actionRow]
-            }),
-            interaction.deferUpdate()
-        ]);
+        await interaction.editReply({
+            embeds: [embed],
+            components: [actionRow]
+        });
     }
 }

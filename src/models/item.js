@@ -10,7 +10,7 @@ class Item {
         this.tier = tier;
         this.weight = weight;
         this.imgUrl = imgUrl;
-        this.emoji = emoji;
+        this.emoji = emoji !== "-" ? emoji : "";
         this.creator = "O Inventor";
         this.details = details;
     }

@@ -456,7 +456,7 @@ class EmbededResponseService {
         const fields = [];
         for (const drop of monster.drops) {
             fields.push({ 
-                name: "> " + drop.item.name, 
+                name: "> " + drop.item.name + ` ${drop.item.emoji}`, 
                 value:
                     `Quantidade: ${drop.quantity}\n` +
                     `Gold: ${drop.gold}\n` +
@@ -490,7 +490,7 @@ class EmbededResponseService {
             }
             for (const lootItem of lootItems.sort()) {
                 content += lootItem.item.id === Constants.GOLD_ITEM_ID ? `${Colors.YELLOW}\n  ${lootItem.gold} ` : `${Colors.GREEN}\n  `;
-                content += lootItem.item.name + Colors.RESET;
+                content += `${lootItem.item.name} ${lootItem.item.emoji}${Colors.RESET}`;
             }
             content += "\n";
         }
@@ -527,12 +527,12 @@ class EmbededResponseService {
         } else {
             for (const itemId of itemIds) {
                 if (itemId === Constants.GOLD_ITEM_ID) {
-                    content += `${Colors.YELLOW}\n  ${dropSummary[itemId]?.count} ${dropSummary[itemId]?.name}${Colors.RESET}`;
+                    content += `${Colors.YELLOW}\n  ${dropSummary[itemId]?.count} ${dropSummary[itemId]?.name} ${dropSummary[itemId]?.emoji}${Colors.RESET}`;
                     continue;
                 }
 
                 for (let i = 0; i < dropSummary[itemId]?.count; i++) {
-                    content += `${Colors.GREEN}\n  ${dropSummary[itemId]?.name}${Colors.RESET}`;
+                    content += `${Colors.GREEN}\n  ${dropSummary[itemId]?.name} ${dropSummary[itemId]?.emoji}${Colors.RESET}`;
                 }
             }
             content += "\n";
@@ -553,9 +553,9 @@ class EmbededResponseService {
         let description = "```ansi";
         let content = "";
         for (const inventoryItem of inventory.items) {
-            content += `\n${inventoryItem.item.name} [x${inventoryItem.count}]`
+            content += `\n${inventoryItem.item.name} [x${inventoryItem.count}] ${inventoryItem.item.emoji}`;
         }
-        content = content || "\nNada :(";
+        content ||= "\nNada :(";
         description += content + "\n```";
 
         return new Discord.EmbedBuilder()

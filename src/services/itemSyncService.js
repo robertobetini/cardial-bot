@@ -32,7 +32,7 @@ class ItemSyncService {
         DropsService.deleteAll();
         ItemService.deleteAll();
 
-        const goldItem = new Item("gold", "GOLD", null, NOT_APPLICABLE_TOKEN, NOT_APPLICABLE_TOKEN, 1, NOT_APPLICABLE_TOKEN, null, null, null, "{}");
+        const goldItem = new Item("gold", "GOLD", null, NOT_APPLICABLE_TOKEN, NOT_APPLICABLE_TOKEN, 1, NOT_APPLICABLE_TOKEN, null, null, "💰", "{}");
         Logger.info("Inserting default GOLD item");
         ItemService.batchUpsert([goldItem]);
 

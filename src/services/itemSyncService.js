@@ -1,7 +1,7 @@
 const https = require("https");
 
 const ItemService = require("./itemService");
-const MonsterDropsService = require("./monsterDropsService");
+const DropsService = require("./dropsService");
 const InventoryService = require("./inventoryService");
 
 const Item = require("../models/item");
@@ -29,7 +29,7 @@ class ItemSyncService {
     static async execute() {
         Logger.info("Clearing items");
         InventoryService.deleteAll();
-        MonsterDropsService.deleteAll();
+        DropsService.deleteAll();
         ItemService.deleteAll();
 
         const goldItem = new Item("gold", "GOLD", null, NOT_APPLICABLE_TOKEN, NOT_APPLICABLE_TOKEN, 1, NOT_APPLICABLE_TOKEN, null, null, null, "{}");

@@ -1,7 +1,7 @@
 const https = require("https");
 
 const MonsterService = require("./monsterService");
-const MonsterDropsService = require("./monsterDropsService");
+const DropsService = require("./dropsService");
 const ItemService = require("./itemService");
 
 const Monster = require("../models/monster");
@@ -28,7 +28,7 @@ class MonsterSyncService {
 
     static async execute() {
         Logger.info("Clearing monsters and drops");
-        MonsterDropsService.deleteAll();
+        DropsService.deleteAll();
         MonsterService.deleteAll();
 
         // make all requests asynchronously
@@ -56,7 +56,7 @@ class MonsterSyncService {
         for (const result of await Promise.all(dropsPromises)) {
             const [monsters, drops] = MonsterSyncService.parseMonsterDrops(result.data);
             MonsterService.batchUpdate(monsters);
-            MonsterDropsService.batchInsert(drops);
+            DropsService.batchInsert(drops);
         }
     }
 

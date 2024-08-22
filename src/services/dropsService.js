@@ -1,10 +1,12 @@
 const monsterDropsDAO = require("../DAOs/monsterDropsDAO");
 
 const DiceService = require("./diceService");
+const InventoryService = require("./inventoryService");
+const ItemService = require("./itemService");
 
 const Constants = require("../constants");
 
-class MonsterDropsService {
+class DropsService {
     static get(monsterId) {
         return monsterDropsDAO.get(monsterId);
     }
@@ -21,7 +23,7 @@ class MonsterDropsService {
         monsterDropsDAO.deleteAll();
     }
 
-    static generateDrops(monsters) {
+    static generateMonsterDrops(monsters) {
         const details = {};
         const summary = {};
 
@@ -53,6 +55,27 @@ class MonsterDropsService {
 
         return [details, summary];
     }
+
+    static dropPlayerItems(user) {
+        const summary = {};
+        const playerInventory = InventoryService.getFullInventory(user.userId, user.guildId);
+
+        for (const inventoryItem of playerInventory.items) {
+            summary[inventoryItem.item.id] = {
+                name: inventoryItem.item.name, 
+                count: inventoryItem.count
+            };
+        }
+
+        const goldItem = ItemService.getGoldItem();
+        if (!goldItem) {
+            throw new Error("GOLD item not found");
+        }
+
+        summary[Constants.GOLD_ITEM_ID] = { name: goldItem.name, count: user.stats.gold };
+
+        return summary;
+    }
 }
 
-module.exports = MonsterDropsService;
+module.exports = DropsService;

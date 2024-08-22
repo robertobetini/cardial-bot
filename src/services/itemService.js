@@ -1,8 +1,14 @@
 const itemsDAO = require("../DAOs/itemsDAO");
 
+const Constants = require("../constants");
+
 class ItemService {
     static get(itemId) {
         return itemsDAO.get(itemId);
+    }
+
+    static getGoldItem() {
+        return itemsDAO.get(Constants.GOLD_ITEM_ID);
     }
 
     static like(name, limit = 25, includeGold = false) {

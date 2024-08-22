@@ -2,7 +2,7 @@ const Discord = require("discord.js");
 
 const RoleService = require("../../services/roleService");
 const MonsterService = require("../../services/monsterService");
-const MonsterDropsService = require("../../services/monsterDropsService");
+const DropsService = require("../../services/dropsService");
 const EmbededResponseService = require("../../services/embededResponseService");
 const InventoryService = require("../../services/inventoryService");
 const ProgressionService = require("../../services/progressionService");
@@ -26,7 +26,7 @@ const drop = async (interaction, monsterIds) => {
     
     Logger.info(`Fetching monsters with ids: ${monsterIds}`);
     const monsters = monsterIds.map(monsterId => MonsterService.get(monsterId, true));
-    const [dropDetails, dropSummary] = MonsterDropsService.generateDrops(monsters);
+    const [dropDetails, dropSummary] = DropsService.generateMonsterDrops(monsters);
     const targets = getUsersFromInput(interaction, Constants.COMMAND_MAX_USERS).users;
 
     // Exp distribution
@@ -54,6 +54,26 @@ const drop = async (interaction, monsterIds) => {
     const pollItems = distinctItems.map(itemName => ({ text: `${itemName} [x${dropSummary[itemName]}]` }));
 
     await createPollInChannelDirectly(interaction, message, pollItems, targets);
+}
+
+const dropPlayerItems = async (interaction, user, killer) => {
+    RoleService.ensureMemberIsAdmOrOwner(interaction.guild, interaction.member);
+    
+    Logger.info(`Droping player ${user.displayName} items`);
+    const dropSummary = DropsService.dropPlayerItems(user);
+    const embed = EmbededResponseService.getPlayerLootView(dropSummary, user);
+    const message = await interaction.editReply({
+        embeds: [embed],
+        files: [EmbededResponseService.FOOTER_IMAGE]
+    });
+
+    const distinctItems = Object.keys(dropSummary);
+    if (distinctItems.length < 1 || !killer) {
+        return;
+    }
+
+    const pollItems = distinctItems.map(itemId => ({ text: `${dropSummary[itemId]?.name} [x${dropSummary[itemId]?.count}]` }));
+    await createPollInChannelDirectly(interaction, message, pollItems, [killer]);
 }
 
 const createPollInChannelDirectly = async (interaction, originalMessage, pollItems, targets) => {
@@ -228,5 +248,6 @@ module.exports = {
         await computeVote(pollAnswer, pollId, isVoteRemove);
     },
     drop,
+    dropPlayerItems,
     computeVote
 }

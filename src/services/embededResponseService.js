@@ -517,6 +517,38 @@ class EmbededResponseService {
             .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
     }
 
+    static getPlayerLootView(dropSummary, user) {
+        let description = "```ansi";
+        let content = `\n${user.playerName}`;
+        const itemIds = Object.keys(dropSummary);
+
+        if (itemIds.length < 1) {
+            content += `\n  ${Colors.GRAY}Nada :(${Colors.RESET}`;
+        } else {
+            for (const itemId of itemIds) {
+                if (itemId === Constants.GOLD_ITEM_ID) {
+                    content += `${Colors.YELLOW}\n  ${dropSummary[itemId]?.count} ${dropSummary[itemId]?.name}${Colors.RESET}`;
+                    continue;
+                }
+
+                for (let i = 0; i < dropSummary[itemId]?.count; i++) {
+                    content += `${Colors.GREEN}\n  ${dropSummary[itemId]?.name}${Colors.RESET}`;
+                }
+            }
+            content += "\n";
+            description += content + "\n```";
+        }
+
+        const fields = [];
+
+        return new Discord.EmbedBuilder()
+            .setColor(0xbbbbbb)
+            .setAuthor({ name: "Loot", iconURL: ImgUrls.LOOT })
+            .setDescription(description)
+            .setFields(fields)
+            .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
+    }
+
     static getInventoryView(inventory, user) {
         let description = "```ansi";
         let content = "";

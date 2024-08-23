@@ -62,11 +62,15 @@ const createInteractionCollector = (message, componentType, lifetime, collectHan
 	collectors[collectorId] = message
 		.createMessageComponentCollector({ componentType: componentType, time: lifetime })
 		.on('collect', async interaction => {
+			const timeLabel = `Interaction ${interaction.id} time`;
+			Logger.time(timeLabel);
 			try { 
 				const newMessage = await collectHandler(interaction);
 				updateInteractionCollectors(newMessage, componentType, lifetime, collectHandler, endHandler);
 			} catch (err) {
 				await  handleError(interaction, err);
+			} finally {
+				Logger.timeEnd(timeLabel);
 			}
 		})
 		.on('end', async collected => {
@@ -93,36 +97,60 @@ client.on("ready", () => {
 });
 
 client.on(Discord.Events.InteractionCreate, async interaction => {
+	const timeLabel = `Interaction ${interaction.id} time`;
+	let logTime = false;
+
 	try {
 		if (interaction.isButton()) {
 			return;
 		} else if (interaction.isModalSubmit()) {
+			logTime = true;
+			Logger.time(timeLabel);
 			await modalHandler.handleAsync(interaction);
 		} else if (interaction.isStringSelectMenu()) {
 			return;
 		} else if (interaction.isChatInputCommand()) {
+			logTime = true;
+			Logger.time(timeLabel);
 			const message = await commandHandler.handleAsync(interaction);
 			updateInteractionCollectors(message);
-		} else if (interaction.isAutocomplete()) {	
+		} else if (interaction.isAutocomplete()) {
+			logTime = true;
+			Logger.time(timeLabel);
 			await autocompleteHandler.handleAsync(interaction);
 		} else {
 			Logger.info(`Couldn't process interaction of type (${interaction.type})`);
 		}
 	} catch(err) {
+		logTime = true;
+		Logger.time(timeLabel);
 		await  handleError(interaction, err);
+	} finally {
+		if (logTime) {
+			Logger.timeEnd(timeLabel);
+		}
 	}
 });
 
 client.on(Discord.Events.MessagePollVoteAdd, async pollAnswer => {
+	const timeLabel = `Interaction (poll) ${pollAnswer.id} time`;
+	Logger.time(timeLabel);
 	await pollHandler.handleAsync(pollAnswer, false);
+	Logger.timeEnd(timeLabel);
 });
 
 client.on(Discord.Events.MessagePollVoteRemove, async pollAnswer => {
+	const timeLabel = `Interaction (poll) ${pollAnswer.id} time`;
+	Logger.time(timeLabel);
 	await pollHandler.handleAsync(pollAnswer, true);
+	Logger.timeEnd(timeLabel);
 });
 
 client.on(Discord.Events.Poll, async pollAnswer => {
+	const timeLabel = `Interaction (poll) ${pollAnswer.id} time`;
+	Logger.time(timeLabel);
 	await pollHandler.handleAsync(pollAnswer, true);
+	Logger.timeEnd(timeLabel);
 });
 
 client.on(Discord.Events.MessageCreate, async messageEvent => {

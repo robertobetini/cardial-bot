@@ -11,11 +11,24 @@ class ItemsDAO extends Sqlite3DAO {
         return Item.fromDTO(item);
     }
 
-    like(name, limit = 25, includeGold = false) {
+    getItemTypes() {
+        const db = this.getConnection();
+        const query = "SELECT DISTINCT type FROM ITEMS;";
+        const types = db.prepare(query).all();
+
+        return types
+            .map(result => result.type)
+            .filter(type => type !== "-");
+    }
+
+    like(name, limit = 25, includeGold = false, itemType = null) {
         const db = this.getConnection();
         let query = "SELECT rowid, * FROM ITEMS WHERE "
         if (!includeGold) {
             query += "queryName != 'GOLD' AND "
+        }
+        if (itemType) {
+            query += `type = '${itemType}' AND `;    
         }
         query += "queryName LIKE ? LIMIT " + limit.toString();
         const items = db.prepare(query).all("%" + name.toUpperCase() + "%");

@@ -11,8 +11,12 @@ class ItemService {
         return itemsDAO.get(Constants.GOLD_ITEM_ID);
     }
 
-    static like(name, limit = 25, includeGold = false) {
-        return itemsDAO.like(name, limit, includeGold);
+    static getItemTypes() {
+        return itemsDAO.getItemTypes();
+    }
+
+    static like(name, limit = 25, includeGold = false, itemType = null) {
+        return itemsDAO.like(name, limit, includeGold, itemType);
     }
 
     static batchUpsert(items) {

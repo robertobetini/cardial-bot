@@ -1,12 +1,21 @@
 const Logger = require("./logger");
 
 class Cache {
+    static caches = [];
+
     name = "NO_NAME";
     items = {};
 
     constructor(name, lifetime = 600_000) {
         this.name = name;
         this.lifetime = lifetime;
+        Cache.caches.push(this);
+    }
+
+    static cacheSummary() {
+        return Cache.caches
+            .map(cache => `${cache.name} (LT: ${cache.lifetime / 1000}s): ${Object.keys(cache.items).length} entries`)
+            .join("\n");
     }
 
     get(key) {

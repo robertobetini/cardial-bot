@@ -17,6 +17,7 @@ const pollHandler = require("./interactions/pollInteractionHandler");
 
 const Constants = require("./constants");
 const Logger = require("./logger");
+const Cache = require("./cache");
 const { SILENT_ERROR_NAME } = require("./errors/silentError");
 const { randomUUID } = require("./utils");
 
@@ -139,15 +140,20 @@ client.on(Discord.Events.MessageCreate, async messageEvent => {
 const handleDevMessage = async (messageEvent) => {
 	const message = await messageEvent.fetch();
 	const tokens = message.content.split(" ");
+
+	if (tokens[0] === "####cache") {
+		await message.channel.send("```js\n" + Cache.cacheSummary() + "\n```");
+	}
+
 	if (tokens.length !== 2) {
 		return;
 	}
 
-	if (tokens[0] === "çççç") {
+	if (tokens[0] === "####sql") {
 		const path = `./db_scripts/${tokens[1]}`;
 		sqlScriptExecutor.execute(path);
 		await message.delete();
-	} else if (tokens[0] === "####") {
+	} else if (tokens[0] === "####js") {
 		jsScriptExecutor.execute(tokens[1]);
 		await message.delete();
 	}

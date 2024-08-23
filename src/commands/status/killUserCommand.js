@@ -7,6 +7,7 @@ const InventoryService = require("../../services/inventoryService");
 const User = require("../../models/user");
 
 const { dropPlayerItems } = require("../../commands/combat/getDropsCommand");
+const { unitOfWork } = require("../../utils");
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -32,7 +33,7 @@ module.exports = {
         const guildId = interaction.guild.id;
 
         if (target.id === killer?.id) {
-            await interaction.editReply("...?");
+            await interaction.editReply("Tu marcou duas vezes a mesma pessoa, parça.. Faz direito!");
             return;
         }
 
@@ -41,27 +42,29 @@ module.exports = {
             throw new Error("Apenas jogadores com ficha completa podem morrer!");
         }
 
-        if (killer) {
-            const killerUser = UserService.get(guildId, killer.id, true);
-            if (!killerUser?.attributes?.firstAttributionDone) {
-                throw new Error("Assassino possui ficha incompleta!");
-            }
-
-            await dropPlayerItems(interaction, targetUser, killerUser);
-        }
-
-        const user = new User(target.id, guildId, target.username, target.displayAvatarURL());
-        UserService.upsert(user, true);
-        InventoryService.clear(target.id, guildId);
-        
-        const member = await interaction.guild.members.fetch(target.id);
-        try {
-            await member.setNickname(user.playerName);
-        } catch { }
-
         await interaction.editReply({
             content: `Jogador ${Discord.userMention(target.id)} foi d&scon&#t@dº...`,
             files: [ { attachment: "assets/death.gif" } ]
+        });
+
+        await unitOfWork(async () => {
+            if (killer) {
+                const killerUser = UserService.get(guildId, killer.id, true);
+                if (!killerUser?.attributes?.firstAttributionDone) {
+                    throw new Error("Assassino possui ficha incompleta!");
+                }
+    
+                await dropPlayerItems(interaction, targetUser, killerUser);
+            }
+    
+            const user = new User(target.id, guildId, target.username, target.displayAvatarURL());
+            UserService.upsert(user, true);
+            InventoryService.clear(target.id, guildId);
+            
+            const member = await interaction.guild.members.fetch(target.id);
+            try {
+                await member.setNickname(user.playerName);
+            } catch { }
         });
     }
 };

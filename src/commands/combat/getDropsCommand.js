@@ -62,7 +62,7 @@ const dropPlayerItems = async (interaction, user, killer) => {
     Logger.info(`Droping player ${user.displayName} items`);
     const dropSummary = DropsService.dropPlayerItems(user);
     const embed = EmbededResponseService.getPlayerLootView(dropSummary, user);
-    const message = await interaction.editReply({
+    const message = await interaction.followUp({
         embeds: [embed],
         files: [EmbededResponseService.FOOTER_IMAGE]
     });

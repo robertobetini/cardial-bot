@@ -12,7 +12,7 @@ const eventEmitter = require("../../events");
 
 const CACHE_LIFETIME = 16 * Constants.MINUTE_IN_MILLIS;
 const NULL_SELECTION_TOKEN = "NULL_SELECTION";
-const originalInteractions = new Cache("INVENTORY_CACHE", CACHE_LIFETIME);
+const originalInteractions = new Cache("INVENTORY_ORIGINAL_INTERACTIONS_CACHE", CACHE_LIFETIME);
 
 const createSelectOptions = (optionList, selected) => {
     const options = [];

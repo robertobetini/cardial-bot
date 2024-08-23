@@ -130,6 +130,9 @@ class Stats {
             fullUserDTO.totalMasteryExp
         );
 
+        stats.baseDEF = fullUserDTO.baseDEF;
+        stats.baseInitiative = fullUserDTO.baseInitiative;
+
         stats.HP.set(fullUserDTO.currentHP, fullUserDTO.maxHP, fullUserDTO.tempHP);
         stats.FP.set(fullUserDTO.currentFP, fullUserDTO.maxFP, fullUserDTO.tempFP);
         stats.SP.set(fullUserDTO.currentSP, fullUserDTO.maxSP, fullUserDTO.tempSP);

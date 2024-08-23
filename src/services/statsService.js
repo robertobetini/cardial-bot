@@ -26,19 +26,12 @@ class StatsService {
         const currentStats = this.get(attributes.userId, attributes.guildId);
 
         const maxHP = Constants.BASE_HP + calculateAttributeMod(attributes.CON);
-        currentStats.maxHP = maxHP;
-        currentStats.currentHP = maxHP;
-        currentStats.tempHP = 0;
-
         const maxFP = Constants.BASE_FP;
-        currentStats.maxFP = maxFP;
-        currentStats.currentFP = maxFP;
-        currentStats.tempFP = 0;
-
         const maxSP = Constants.BASE_SP;
-        currentStats.maxSP = maxSP;
-        currentStats.currentSP = maxSP;
-        currentStats.tempSP = 0;
+
+        currentStats.HP.set(maxHP, maxHP, 0);
+        currentStats.FP.set(maxFP, maxFP, 0);
+        currentStats.FP.set(maxSP, maxSP, 0);
 
         currentStats.baseDEF = Constants.BASE_DEF;
         currentStats.baseInitiative = Constants.BASE_INITIATIVE;

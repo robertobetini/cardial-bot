@@ -6,7 +6,9 @@ const commandLoader = require("./commandLoader");
 const dbInit = require("./dbInit");
 const sqlScriptExecutor = require("./sqlScriptExecutor");
 const jsScriptExecutor = require("./jsScriptExecutor");
+
 const updateSilentRolesJob = require("./jobs/updateSilentRolesJob");
+const monitoringJob = require("./jobs/monitoringJob");
 
 const commandHandler = require("./interactions/commandInteractionHandler");
 const buttonHandler = require("./interactions/buttonInteractionHandler");
@@ -23,6 +25,7 @@ const { randomUUID } = require("./utils");
 
 const DEV_USER_ID = "189479395180675073";
 const UPDATE_SILENT_USERS_INTERVAL_TIME = Number(process.env.UPDATE_SILENT_USERS_INTERVAL_TIME) * Constants.MILLIS_IN_SECOND ?? 60000;
+const MONITORING_INTERVAL_TIME = Constants.MONITORING_INTERVAL_IN_SECONDS * Constants.MILLIS_IN_SECOND;
 
 const client = new Discord.Client({ intents: [ 
 	Discord.GatewayIntentBits.Guilds, 
@@ -93,7 +96,11 @@ const updateInteractionCollectors = (message) => {
 
 client.on("ready", () => {
 	Logger.info("Bot is ready.");
+
 	setInterval(async () => await updateSilentRolesJob.execute(), UPDATE_SILENT_USERS_INTERVAL_TIME);
+	if (Constants.PERFORMANCE_MONITOR_CHANNEL_ID) {
+		setInterval(async () => await monitoringJob.execute(client), MONITORING_INTERVAL_TIME);
+	}
 });
 
 client.on(Discord.Events.InteractionCreate, async interaction => {

@@ -1,4 +1,6 @@
 class Constants {
+    static PERFORMANCE_MONITOR_CHANNEL_ID = process.env.PERFORMANCE_MONITOR_CHANNEL_ID;
+    static BYTES_TO_MEGABYTES = 1024 * 1024;
     static MOBILE_LINE_SIZE = 33;
     static EMBED_FIELD_MAX_LENGTH = 1024;
     static PAGE_SIZE = parseInt(process.env.PAGE_SIZE);
@@ -7,6 +9,7 @@ class Constants {
     static HOUR_IN_MILLIS = 60 * (60 * 1000);
     static DAY_IN_MILLIS = 24 * (60 * 60 * 1000);
     static POLL_DURATION_IN_HOURS = parseInt(process.env.POLL_DURATION_IN_HOURS) || 2;
+    static MONITORING_INTERVAL_IN_SECONDS = parseInt(process.env.MONITORING_INTERVAL_IN_SECONDS) || 600;
     static INTERACTION_COLLECTOR_LIFETIME_IN_HOURS = parseInt(process.env.INTERACTION_COLLECTOR_LIFETIME_IN_HOURS);
     static BASE_SLOT_COUNT = parseInt(process.env.BASE_SLOT_COUNT);
     static ITEMS_PER_POLL = parseInt(process.env.ITEMS_PER_POLL);

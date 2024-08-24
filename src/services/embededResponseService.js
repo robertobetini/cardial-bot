@@ -566,6 +566,22 @@ class EmbededResponseService {
             .setFooter({ text: DEFAULT_FOOTER, iconURL: `attachment://${EmbededResponseService.FOOTER_IMAGE.name}` });
     }
 
+    static getPerformanceMonitorView(metrics) {
+        const { discordWsLatencyMs, discordApiLatencyMs, cpuPercentage, usedMemory, totalMemory, memoryPercentage } = metrics;
+        const usedMemoryInMB = usedMemory / Constants.BYTES_TO_MEGABYTES;
+        const totalMemoryInMB = totalMemory / Constants.BYTES_TO_MEGABYTES;
+
+        return new Discord.EmbedBuilder()
+            .setColor(0x0099ff)
+            .setTitle('Monitor de performance')
+            .addFields(
+                { name: '🏓 Latência WS', value: `${discordWsLatencyMs}ms`, inline: true },
+                { name: '🌐 Latência API', value: `${discordApiLatencyMs}ms`, inline: true },
+                { name: '💻 CPU', value: `${cpuPercentage.toFixed(2)}%`, inline: true },
+                { name: '🧠 RAM', value: `${usedMemoryInMB.toFixed(2)}/${totalMemoryInMB.toFixed(2)} MB (${memoryPercentage.toFixed(2)}%)`, inline: true }
+            )
+    }
+
     static createStatusSummarizedView(currentValue, maxValue, tempValue) {
         let view = `${currentValue}/${maxValue}`;
         view += tempValue > 0 ? ` (+${tempValue}) ` : "";

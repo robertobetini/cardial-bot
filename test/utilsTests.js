@@ -1,7 +1,7 @@
 const assert = require("assert");
 
 const { test } = require("./testHelper");
-const { orderByAttributeComparer, orderByInitiativeComparer, setCombatOrder } = require("../src/utils");
+const { orderByAttributeComparer, orderByInitiativeComparer, setCombatOrder, isValidUrl } = require("../src/utils");
 const { calculateAttributeMod } = require("../src/calculators/modCalculator");
 
 const Attributes = require("../src/models/attributes");
@@ -111,4 +111,64 @@ test(TESTING_MODULE, setCombatOrder,
                 }
             }
         })
+);
+
+test(TESTING_MODULE, isValidUrl,
+    () => 
+        it("should return false if url is null, undefined or empty string", () => {
+            const invalidUrls = [ null, undefined, "", " " ];
+            for (const invalidUrl of invalidUrls) {
+                const result = isValidUrl(invalidUrl);
+
+                assert.equal(result, false, invalidUrl);
+            }
+        }),
+    () => 
+        it("should return false if url is local path", () => {
+            const localPaths = [ "C:\\img.png", "C:\\Users\\Documents\\img.png", "~/img.png" ];
+            for (const path of localPaths) {
+                const result = isValidUrl(path);
+
+                assert.equal(result, false, path);
+            }
+        }),
+    () => 
+        it("should return false if url uses other protocols", () => {
+            const invalidUrls = [ "file:///img.png" ];
+            for (const invalidUrl of invalidUrls) {
+                const result = isValidUrl(invalidUrl);
+
+                assert.equal(result, false, invalidUrl);
+            }
+        }),
+    () => 
+        it("should return false if url is malformed http or https url", () => {
+            const httpAndHttpsUrls = [ 
+                "http:/www.test.com", 
+                "https:/www.test.com", 
+                // "http:///www.test.com", -> TODO: return false when theres is more than 2 '/'
+                // "https:///www.test.com" -> TODO: return false when theres is more than 2 '/'
+            ];
+            for (const url of httpAndHttpsUrls) {
+                const result = isValidUrl(url);
+
+                assert.equal(result, false, url);
+            }
+        }),
+    () => 
+        it("should return true if url is well formed http or https url", () => {
+            const httpAndHttpsUrls = [ 
+                "http://www.test.com", 
+                "https://www.test.com", 
+                "http://www.test.com/files/img.png", 
+                "https://www.test.com/files/img.png", 
+                "http://www.test.com/files/imgs?id=123",
+                "https://www.test.com/files/imgs?id=123"
+            ];
+            for (const url of httpAndHttpsUrls) {
+                const result = isValidUrl(url);
+
+                assert.equal(result, true, url);
+            }
+        }),
 );

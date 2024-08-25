@@ -1,4 +1,3 @@
-const userDAO = require("../DAOs/userDAO");
 const statsDAO = require("../DAOs/statsDAO");
 
 const Constants = require("../constants");
@@ -6,10 +5,6 @@ const Constants = require("../constants");
 const { calculateAttributeMod } = require("../calculators/modCalculator");
 
 class StatsService {
-    static getUserStats(userId, guildId) {
-        return userDAO.get(userId, guildId, false);
-    }
-
     static get(userId, guildId) {
         return statsDAO.get(userId, guildId);
     }

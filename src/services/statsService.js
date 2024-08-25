@@ -31,7 +31,7 @@ class StatsService {
 
         currentStats.HP.set(maxHP, maxHP, 0);
         currentStats.FP.set(maxFP, maxFP, 0);
-        currentStats.FP.set(maxSP, maxSP, 0);
+        currentStats.SP.set(maxSP, maxSP, 0);
 
         currentStats.baseDEF = Constants.BASE_DEF;
         currentStats.baseInitiative = Constants.BASE_INITIATIVE;

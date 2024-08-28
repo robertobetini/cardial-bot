@@ -20,7 +20,7 @@ const pollHandler = require("./interactions/pollInteractionHandler");
 const Constants = require("./constants");
 const Logger = require("./logger");
 const Cache = require("./cache");
-const { SILENT_ERROR_NAME } = require("./errors/silentError");
+const { SilentError } = require("./errors/silentError");
 const { randomUUID } = require("./utils");
 
 const DEV_USER_ID = "189479395180675073";
@@ -46,13 +46,15 @@ const handleError = async (interaction, err) => {
 	Logger.error(err);
 
 	let ephemeral = false;
-	switch(err.name) {
-		case SILENT_ERROR_NAME:
-			ephemeral = true;
-			break;
-		default:
-			ephemeral = false;
-			break;
+	if (err instanceof SilentError) {
+		ephemeral = true
+	} else if (err instanceof Discord.DiscordAPIError) {
+		if (err.message.includes("Unknown interaction")) {
+			Logger.warn("An interaction response exceeded time limit (3.0s)");
+			return;
+		}
+	} else {
+		ephemeral = false;
 	}
 
 	interaction.replied || interaction.deferred 

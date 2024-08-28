@@ -28,6 +28,8 @@ test(TESTING_MODULE, EDSLService.checkSyntax,
                 "target.fp.sub(-);",
                 "self.fp.sub(d20);",
                 "self.fp.sub(1D20);",
+                "self.hp.sub(1.5d20)",
+                "self.hp.sub(1d10.5)",
                 "self.fp.sub(5.);",
                 "hp.self.set(2);",
                 "target.hp.set(NO_PROF);",
@@ -85,6 +87,25 @@ test(TESTING_MODULE, EDSLService.checkSyntax,
                 const result = EDSLService.checkSyntax(goodCode);
 
                 assert.equal(result.success, true, goodCode);
+                assert(!result.error);
+            }
+        }),
+    () => 
+        it("should ignore all white spaces", () => {
+            const codesWithWhiteSpaces = [
+                "    self.hp.add(+1+1d6);",
+                "self.hp.add(+1+1d6);    ",
+                "self.hp.add(+1+1d6)    ;",
+                "\n\t\r self.hp.add(+1+1d6); \n\t\r",
+                " self . hp . add ( + 1 + 1 d 6  ) ; ",
+                "\nself\n.\nhp\n.\ndiv\n(\n+\n1\n+\n1\nd\n6\n)\n;\n",
+                " s e l f . h p . d i v ( + 1 + 1 d 6 ) ; ",
+            ];
+
+            for (const code of codesWithWhiteSpaces) {
+                const result = EDSLService.checkSyntax(code);
+
+                assert.equal(result.success, true, code);
                 assert(!result.error);
             }
         }),

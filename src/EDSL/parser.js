@@ -118,7 +118,6 @@ class EDSLParser {
     handleProficiencyValue(token) {
         const { command, lastToken, timeContext, currentOperation } = this.state; 
 
-        console.log(command.property, currentOperation.name);
         if (lastToken.type !== Token.OPEN_PARENTHESIS || timeContext || currentOperation.name !== "set" || !Token.SKILL_TOKEN_VALUES.includes(command.property)) {
             throw new UnexpectedTokenError(token);
         }

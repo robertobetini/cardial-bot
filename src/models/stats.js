@@ -91,10 +91,6 @@ class Stats {
 
         this.gold = newAmount;
     }
-
-    decreaseCurrentStat() {
-
-    }
     
     modifyStat(stat, amount) {
         let newValue = this[stat] + amount;

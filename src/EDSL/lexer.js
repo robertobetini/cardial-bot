@@ -2,7 +2,7 @@ const Token = require("./token");
 
 const TOKENS = [
     [Token.TARGET, /self|target/],
-    [Token.DICE_EXPRESSION, /(?:\+?|-?)(\d+)d(\d+)/],
+    [Token.DICE_EXPRESSION, /(\+|-)?(\d+)d(\d+)/],
     [Token.NUMBER, /(\+|-)?\d+(\.\d+)?/], // both integer and float
     [Token.DELIMITER, /\./],
     [Token.OPEN_PARENTHESIS, /\(/],

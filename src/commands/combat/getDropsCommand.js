@@ -84,7 +84,11 @@ const createPollInChannelDirectly = async (interaction, originalMessage, pollIte
             for (const pollItem of transient.pollItems) {
                 InventoryService.distributeLootEvenly(pollItem, transient.users.map(user => user.userId), transient.pollMessage.guildId);
             }
-            await transient.pollMessage.delete();
+            try {
+                await transient.pollMessage.delete();
+            } catch {
+                Logger.warn("Tried to delete non-existing poll message");
+            }
         }
         
         const transient = transients[0];

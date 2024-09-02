@@ -15,7 +15,6 @@ const SHEETS = ["Armas", "Escudos", "Armaduras", "Acessórios","Itens Únicos", 
 const FETCH_SHEET_URL_TEMPLATE = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID_ITEMS}/values/{SHEET_NAME}?key=${process.env.GOOGLE_API_KEY}`;
 
 class ItemSyncService {
-
     static async sync() {
         const bkpName = await InventoryService.createBackup();
         Logger.info(`Created backup: ${bkpName}`);

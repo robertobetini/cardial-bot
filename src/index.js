@@ -52,6 +52,9 @@ const handleError = async (interaction, err) => {
 		if (err.message.includes("Unknown interaction")) {
 			Logger.warn("An interaction response exceeded time limit (3.0s)");
 			return;
+		} else if (err.message.includes("Unknown Message")) {
+			Logger.warn("Tried to modify or delete an already deleted message");
+			return;
 		}
 	} else {
 		ephemeral = false;

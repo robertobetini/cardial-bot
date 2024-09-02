@@ -4,10 +4,11 @@ const InventoryItem = require("./inventoryItem");
 class Inventory {
     static BASE_SLOT_COUNT = Constants.BASE_SLOT_COUNT;
 
-    constructor(userId, guildId, inventoryItems) {
+    constructor(userId, guildId, inventoryItems, extraSlots = 0) {
         this.userId = userId;
         this.guildId = guildId;
         this.items = inventoryItems;
+        this.extraSlots = extraSlots || 0;
 
         if (!this.items) {
             this.items = [];
@@ -15,7 +16,7 @@ class Inventory {
     }
 
     getTotalSlots() {
-        return Inventory.BASE_SLOT_COUNT;
+        return Inventory.BASE_SLOT_COUNT + this.extraSlots;
     }
 
     getInventoryOccupiedSlots() {

@@ -26,6 +26,7 @@ class Stats {
 
         this.baseDEF = Constants.BASE_DEF;
         this.baseInitiative = Constants.BASE_INITIATIVE;
+        this.extraSlots = 0;
 
         this.updateExpAndLevel();
     }
@@ -128,6 +129,7 @@ class Stats {
 
         stats.baseDEF = fullUserDTO.baseDEF;
         stats.baseInitiative = fullUserDTO.baseInitiative;
+        stats.extraSlots = fullUserDTO.extraSlots;
 
         stats.HP.set(fullUserDTO.currentHP, fullUserDTO.maxHP, fullUserDTO.tempHP);
         stats.FP.set(fullUserDTO.currentFP, fullUserDTO.maxFP, fullUserDTO.tempFP);

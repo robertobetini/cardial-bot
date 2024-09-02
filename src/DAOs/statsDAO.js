@@ -19,8 +19,8 @@ class StatsDAO extends Sqlite3DAO {
 
     insert(userId, guildId, stats, transactionDb = null) {
         const db = transactionDb || this.getConnection();
-        const query = "INSERT INTO STATS (userId, guildId, totalExp, totalMasteryExp, gold, currentHP, maxHP, tempHP, currentFP, maxFP, tempFP, currentSP, maxSP, tempSP, baseDEF, baseInitiative) "
-         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        const query = "INSERT INTO STATS (userId, guildId, totalExp, totalMasteryExp, gold, currentHP, maxHP, tempHP, currentFP, maxFP, tempFP, currentSP, maxSP, tempSP, baseDEF, baseInitiative, extraSlots) "
+         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         db.prepare(query).run(
             userId, guildId, 
@@ -38,7 +38,7 @@ class StatsDAO extends Sqlite3DAO {
             + " currentHP = ?, maxHP = ?, tempHP = ?," 
             + " currentFP = ?, maxFP = ?, tempFP = ?," 
             + " currentSP = ?, maxSP = ?, tempSP = ?,"
-            + " baseDEF = ?, baseInitiative = ?"
+            + " baseDEF = ?, baseInitiative = ?, extraSlots = ?"
             + " WHERE userId = ? AND guildId = ?";
 
         const res = db.prepare(query).run( 
@@ -46,7 +46,7 @@ class StatsDAO extends Sqlite3DAO {
             stats.HP.current, stats.HP.max, stats.HP.temp, 
             stats.FP.current, stats.FP.max, stats.FP.temp, 
             stats.SP.current, stats.SP.max, stats.SP.temp, 
-            stats.baseDEF, stats.baseInitiative,
+            stats.baseDEF, stats.baseInitiative, stats.extraSlots,
             userId, guildId
         );
 

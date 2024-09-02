@@ -12,12 +12,15 @@ class InventoryDAO extends Sqlite3DAO {
 
     getFullInventory(userId, guildId) {
         const db = this.getConnection();
-        const query = "SELECT * FROM PLAYER_INVENTORY AS pi LEFT JOIN ITEMS as i ON i.id = pi.itemId WHERE pi.userId = ? AND pi.guildId = ?";
+        const query = "SELECT * FROM PLAYER_INVENTORY AS pi " + 
+            "LEFT JOIN ITEMS AS i ON i.id = pi.itemId " + 
+            "LEFT JOIN STATS AS s ON s.userId = pi.userId AND s.guildId = pi.guildId " +
+            "WHERE pi.userId = ? AND pi.guildId = ?";
         const inventoryItems = db.prepare(query).expand().all(userId, guildId);
 
         const inventoryItemsDTOs = inventoryItems.map(ii => InventoryItem.fromDTO(ii));
         
-        return new Inventory(userId, guildId, inventoryItemsDTOs);
+        return new Inventory(userId, guildId, inventoryItemsDTOs, inventoryItems[0]?.STATS?.extraSlots);
     }
 
     insert(userId, guildId, itemId, count, transactionDb = null) {

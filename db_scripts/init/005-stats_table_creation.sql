@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS STATS (
     currentSP INT, maxSP INT, tempSP INT,
     baseDEF INT,
     baseInitiative INT,
+    extraSlots INT,
 
     FOREIGN KEY (userId, guildId) REFERENCES USERS(userId, guildId)
 );

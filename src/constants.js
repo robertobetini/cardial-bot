@@ -79,7 +79,8 @@ class Constants {
         { label: "🔴 HP max", value: "maxHP" },
         { label: "🔵 FP max", value: "maxFP" },
         { label: "🟣 SP max", value: "maxSP" },
-        { label: "🛡️ DEF", value: "baseDEF" }
+        { label: "🛡️ DEF", value: "baseDEF" },
+        { label: "💼 Slots", value: "extraSlots" }
     ];
     static skills = [
         { label: "Acrobacia", value: "acrobatics" },

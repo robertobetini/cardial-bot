@@ -82,7 +82,7 @@ module.exports = {
         .addSubcommand(subcommand => 
             subcommand
                 .setName("status2")
-                .setDescription("Atualiza HP, FP e SP máximos e CA")
+                .setDescription("Atualiza HP, FP e SP máximos, CA e Slots extras")
                 .addUserOption(option =>
                     option
                         .setName("user")

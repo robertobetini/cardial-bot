@@ -3,6 +3,8 @@ const Sqlite3DAO = require("./sqlite3DAO");
 const InventoryItem = require("../models/inventoryItem");
 const Inventory = require("../models/inventory");
 
+const statsDAO = require("./statsDAO");
+
 class InventoryDAO extends Sqlite3DAO {
     get(userId, guildId, itemId) {
         const db = this.getConnection();
@@ -14,13 +16,14 @@ class InventoryDAO extends Sqlite3DAO {
         const db = this.getConnection();
         const query = "SELECT * FROM PLAYER_INVENTORY AS pi " + 
             "LEFT JOIN ITEMS AS i ON i.id = pi.itemId " + 
-            "LEFT JOIN STATS AS s ON s.userId = pi.userId AND s.guildId = pi.guildId " +
             "WHERE pi.userId = ? AND pi.guildId = ?";
         const inventoryItems = db.prepare(query).expand().all(userId, guildId);
 
         const inventoryItemsDTOs = inventoryItems.map(ii => InventoryItem.fromDTO(ii));
         
-        return new Inventory(userId, guildId, inventoryItemsDTOs, inventoryItems[0]?.STATS?.extraSlots);
+        const stats = statsDAO.get(userId, guildId);
+
+        return new Inventory(userId, guildId, inventoryItemsDTOs, stats?.extraSlots);
     }
 
     insert(userId, guildId, itemId, count, transactionDb = null) {

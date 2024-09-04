@@ -28,7 +28,7 @@ class StatsDAO extends Sqlite3DAO {
             stats.HP.current, stats.HP.max, stats.HP.temp, 
             stats.FP.current, stats.FP.max, stats.FP.temp, 
             stats.SP.current, stats.SP.max, stats.SP.temp, 
-            stats.baseDEF, stats.baseInitiative
+            stats.baseDEF, stats.baseInitiative, stats.extraSlots
         );
     }
 
